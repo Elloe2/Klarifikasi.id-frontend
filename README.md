@@ -1,16 +1,18 @@
 # Klarifikasi.id (Flutter)
 
-Aplikasi mobile Flutter untuk membantu klarifikasi berita/hoaks melalui integrasi Google Custom Search Engine dengan backend Laravel.
+Aplikasi mobile Flutter untuk membantu klasifikasi berita/hoaks melalui integrasi Google Custom Search Engine dengan backend Laravel.
 
 ## Struktur Proyek
 - `lib/`
-  - `main.dart`: entry app dengan tab untuk pencarian, riwayat, dan pengaturan.
-  - `models/`: representasi data (`SearchResult`, `SearchHistoryEntry`).
-  - `services/`: komunikasi REST ke backend Laravel.
-- `android/`, `ios/`: target platform utama aplikasi.
-- `web/`: build opsional untuk preview web (boleh diabaikan saat release Android).
-- Folder platform lain (`macos/`, `linux/`, `windows/`) dapat dihapus bila hanya fokus Android; saat ini dibiarkan agar tidak mengganggu build.
-- Backend Laravel terpisah berada di `../hoax-checker-backend/`.
+  - `main.dart`: titik masuk aplikasi berisi navigasi tab (Cari, Riwayat, Pengaturan) dan pengaturan tema.
+  - `config.dart`: menyimpan konstanta konfigurasi seperti `apiBaseUrl` dan endpoint REST.
+  - `models/`: tipe data sederhana yang merepresentasikan hasil pencarian dan entri riwayat.
+  - `services/`: lapisan API (`SearchApi`) untuk memanggil backend Laravel.
+- `android/`, `ios/`: berisi konfigurasi build Android & iOS.
+- `web/`: aset dan konfigurasi build Flutter Web (index.html, manifest, ikon).
+- `test/`: kumpulan widget/unit test (mis. `widget_test.dart`).
+- `analysis_options.yaml`: aturan linter proyek.
+- Backend Laravel terpisah berada di `../Klarifikasi.id-backend/`.
 
 ## Menjalankan Aplikasi
 ```bash

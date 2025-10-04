@@ -1,3 +1,4 @@
+/// Model utama untuk satu entri hasil pencarian yang dikirim backend.
 class SearchResult {
   const SearchResult({
     required this.title,
@@ -15,6 +16,7 @@ class SearchResult {
   final String formattedUrl;
   final String? thumbnail;
 
+  /// Factory helper untuk membuat `SearchResult` dari respons JSON backend.
   factory SearchResult.fromJson(Map<String, dynamic> json) {
     return SearchResult(
       title: json['title'] as String? ?? 'Tanpa judul',

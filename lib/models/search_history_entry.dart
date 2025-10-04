@@ -1,5 +1,6 @@
 import 'package:intl/intl.dart';
 
+/// Representasi satu catatan riwayat pencarian yang dikembalikan backend.
 class SearchHistoryEntry {
   const SearchHistoryEntry({
     required this.id,
@@ -19,6 +20,7 @@ class SearchHistoryEntry {
   final String? topThumbnail;
   final DateTime createdAt;
 
+  /// Factory helper untuk mengubah payload JSON menjadi instance model.
   factory SearchHistoryEntry.fromJson(Map<String, dynamic> json) {
     return SearchHistoryEntry(
       id: json['id'] as int,
@@ -32,6 +34,7 @@ class SearchHistoryEntry {
     );
   }
 
+  /// Menformat waktu pencarian menjadi string yang ramah pengguna.
   String get createdAtLabel {
     final formatter = DateFormat('dd MMM yyyy • HH:mm');
     return formatter.format(createdAt);

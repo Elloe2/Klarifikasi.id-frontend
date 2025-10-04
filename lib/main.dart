@@ -7,6 +7,8 @@ import 'models/search_history_entry.dart';
 import 'models/search_result.dart';
 import 'services/search_api.dart';
 
+/// Global notifier untuk menyimpan state tema (light/dark/system)
+/// agar dapat diakses dari `MainApp` dan halaman pengaturan.
 final ValueNotifier<ThemeMode> themeModeNotifier =
     ValueNotifier(ThemeMode.system);
 
@@ -14,11 +16,17 @@ void main() {
   runApp(const MainApp());
 }
 
+/// Widget root Klarifikasi.id yang menyalakan MaterialApp dan
+/// mem-broadcast perubahan tema aplikasi.
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
   @override
   Widget build(BuildContext context) {
+    /// Membuat instance MaterialApp yang akan digunakan sebagai
+    /// widget root aplikasi. ThemeMode diatur oleh
+    /// `themeModeNotifier` agar dapat diubah dari halaman
+    /// pengaturan.
     return ValueListenableBuilder<ThemeMode>(
       valueListenable: themeModeNotifier,
       builder: (context, mode, _) {
@@ -52,7 +60,10 @@ class HomeShell extends StatefulWidget {
 }
 
 class _HomeShellState extends State<HomeShell> {
+  /// Index tab saat ini (0: Cari, 1: Riwayat, 2: Pengaturan).
   int _currentIndex = 0;
+  /// Instance `SearchApi` dibagikan ke tab Cari & Riwayat agar
+  /// tidak membuat client baru berulang kali.
   final SearchApi _api = const SearchApi();
 
   @override
@@ -109,20 +120,29 @@ class SearchPage extends StatefulWidget {
 }
 
 class _SearchPageState extends State<SearchPage> {
+  /// Controller teks pencarian.
   final TextEditingController _controller = TextEditingController();
+  /// Fokus untuk memudahkan auto focus / keyboard.
   final FocusNode _queryFocus = FocusNode();
+  /// Daftar saran kata kunci singkat.
   final List<String> _suggestions = const [
     'hoax vaksin terbaru',
     'klarifikasi berita gempa',
     'fact check politik',
     'penipuan bantuan sosial',
   ];
+  /// Cooldown antar pencarian agar backend tidak dibanjiri request.
   final Duration _cooldown = const Duration(seconds: 5);
 
+  /// Hasil pencarian terkini yang ditampilkan.
   List<SearchResult> _results = const [];
+  /// Status loading untuk menampilkan indikator progress.
   bool _isLoading = false;
+  /// Pesan error bila request gagal/validasi tidak terpenuhi.
   String? _error;
+  /// Timestamp pencarian terakhir untuk menghitung cooldown.
   DateTime? _lastSearchTime;
+  /// Timer internal untuk menurunkan nilai cooldown setiap detik.
   Timer? _cooldownTimer;
 
   @override
@@ -133,6 +153,7 @@ class _SearchPageState extends State<SearchPage> {
     super.dispose();
   }
 
+  /// Menyalakan timer cooldown dan memperbarui UI setiap detik.
   void _startCooldownTimer() {
     _cooldownTimer?.cancel();
     _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
@@ -153,6 +174,7 @@ class _SearchPageState extends State<SearchPage> {
     });
   }
 
+  /// Mengembalikan sisa waktu cooldown bila masih berlaku.
   Duration? _checkCooldown() {
     if (_lastSearchTime == null) return null;
     final diff = DateTime.now().difference(_lastSearchTime!);
@@ -163,6 +185,7 @@ class _SearchPageState extends State<SearchPage> {
     return remaining;
   }
 
+  /// Memanggil API pencarian dan menampilkan hasil pada daftar.
   Future<void> _performSearch() async {
     final query = _controller.text.trim();
 
@@ -209,6 +232,7 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
+  /// Membuka tautan hasil pencarian melalui browser eksternal.
   Future<void> _openResult(String url) async {
     final uri = Uri.tryParse(url);
     if (uri == null) {
@@ -222,6 +246,7 @@ class _SearchPageState extends State<SearchPage> {
     }
   }
 
+  /// Helper untuk menampilkan snackbar singkat di layar.
   void _showSnackBar(String message) {
     if (!mounted) return;
     ScaffoldMessenger.of(context).showSnackBar(
@@ -331,6 +356,7 @@ class HistoryPage extends StatefulWidget {
 }
 
 class _HistoryPageState extends State<HistoryPage> {
+  /// Future yang memuat daftar riwayat dari backend.
   late Future<List<SearchHistoryEntry>> _futureHistory;
 
   @override
@@ -339,6 +365,7 @@ class _HistoryPageState extends State<HistoryPage> {
     _futureHistory = widget.api.fetchHistory();
   }
 
+  /// Menarik ulang data riwayat dari backend ketika pengguna melakukan refresh.
   Future<void> _refresh() async {
     setState(() {
       _futureHistory = widget.api.fetchHistory();
@@ -534,9 +561,13 @@ class _SearchCard extends StatelessWidget {
     required this.onSearch,
   });
 
+  /// Controller untuk field pencarian.
   final TextEditingController controller;
+  /// Focus node agar tombol keyboard bisa menggunakan action `search`.
   final FocusNode focusNode;
+  /// Menonaktifkan tombol jika request sedang berjalan.
   final bool isLoading;
+  /// Callback ketika tombol "Cari" ditekan atau submit keyboard.
   final VoidCallback onSearch;
 
   @override
@@ -594,7 +625,9 @@ class _SuggestionChips extends StatelessWidget {
     required this.onSelected,
   });
 
+  /// Daftar teks saran yang ditampilkan sebagai chip.
   final List<String> suggestions;
+  /// Callback ketika salah satu chip ditekan.
   final ValueChanged<String> onSelected;
 
   @override
@@ -630,6 +663,7 @@ class _SuggestionChips extends StatelessWidget {
 class _ErrorBanner extends StatelessWidget {
   const _ErrorBanner({required this.message});
 
+  /// Pesan error yang akan ditampilkan dalam banner.
   final String message;
 
   @override
@@ -715,7 +749,9 @@ class _ResultsList extends StatelessWidget {
     required this.onOpen,
   });
 
+  /// Hasil pencarian yang akan dirender sebagai list tile.
   final List<SearchResult> results;
+  /// Callback ketika pengguna memilih tombol "Buka sumber".
   final ValueChanged<String> onOpen;
 
   @override
@@ -742,7 +778,9 @@ class _ResultCard extends StatelessWidget {
     required this.onOpen,
   });
 
+  /// Satu entri hasil pencarian.
   final SearchResult result;
+  /// Callback untuk membuka tautan artikel.
   final ValueChanged<String> onOpen;
 
   @override
