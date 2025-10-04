@@ -1,37 +1,29 @@
-# flutter_application_laravel_1
+# Klarifikasi.id (Flutter)
 
-Aplikasi Flutter yang akan terintegrasi dengan backend Laravel 12.x untuk melakukan pencarian informasi (fact-check) melalui Google Custom Search Engine.
+Aplikasi mobile Flutter untuk membantu klarifikasi berita/hoaks melalui integrasi Google Custom Search Engine dengan backend Laravel.
 
 ## Struktur Proyek
-- `lib/`: kode Flutter utama.
-- `android/`, `ios/`, `web/`, dll.: folder platform bawaan Flutter.
-- Backend Laravel disiapkan sebagai proyek terpisah (mis. `hoax-checker-backend/`).
+- `lib/`
+  - `main.dart`: entry app dengan tab untuk pencarian, riwayat, dan pengaturan.
+  - `models/`: representasi data (`SearchResult`, `SearchHistoryEntry`).
+  - `services/`: komunikasi REST ke backend Laravel.
+- `android/`, `ios/`: target platform utama aplikasi.
+- `web/`: build opsional untuk preview web (boleh diabaikan saat release Android).
+- Folder platform lain (`macos/`, `linux/`, `windows/`) dapat dihapus bila hanya fokus Android; saat ini dibiarkan agar tidak mengganggu build.
+- Backend Laravel terpisah berada di `../hoax-checker-backend/`.
 
-## Konfigurasi Backend (Laravel 12.x)
-1. Buat project Laravel baru.
-2. Tambahkan pada file `.env`:
-   ```env
-   GOOGLE_CSE_KEY=your_google_cse_api_key
-   GOOGLE_CSE_CX=your_programmable_search_engine_cx
-   ```
-3. Daftarkan di `config/services.php`:
-   ```php
-   'google_cse' => [
-       'key' => env('GOOGLE_CSE_KEY'),
-       'cx'  => env('GOOGLE_CSE_CX'),
-   ],
-   ```
-4. Buat endpoint API (mis. `POST /api/search`) yang meneruskan query ke Google Custom Search.
-
-> **Catatan:** Jangan commit kunci API asli ke repository publik. Simpan hanya di `.env` atau secret manager.
-
-## Mendapatkan Google Custom Search Kredensial
-1. Aktifkan **Custom Search API** di Google Cloud Console dan buat **API Key**.
-2. Buat Programmable Search Engine dan salin **Search Engine ID (CX)**.
-3. Simpan keduanya sebagai variabel environment di backend Laravel.
-
-## Menjalankan Flutter App
+## Menjalankan Aplikasi
 ```bash
 flutter pub get
 flutter run
 ```
+Pilih device Android emulator/perangkat fisik saat diminta.
+
+## Backend Laravel (ringkas)
+- Endpoint `POST /api/search` meneruskan query ke Google Custom Search dan menyimpan riwayat.
+- Endpoint `GET /api/history` menampilkan histori pencarian pengguna.
+- Pastikan `.env` pada backend memuat `GOOGLE_CSE_KEY`, `GOOGLE_CSE_CX`, dan jalankan migrasi `php artisan migrate`.
+
+## Catatan
+- Jangan commit kredensial sensitif ke repo.
+- Untuk produksi, aktifkan kembali verifikasi SSL pada backend (`GOOGLE_CSE_VERIFY_SSL=true`).
