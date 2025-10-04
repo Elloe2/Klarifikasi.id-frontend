@@ -23,7 +23,3 @@ Pilih device Android emulator/perangkat fisik saat diminta.
 - Endpoint `POST /api/search` meneruskan query ke Google Custom Search dan menyimpan riwayat.
 - Endpoint `GET /api/history` menampilkan histori pencarian pengguna.
 - Pastikan `.env` pada backend memuat `GOOGLE_CSE_KEY`, `GOOGLE_CSE_CX`, dan jalankan migrasi `php artisan migrate`.
-
-## Catatan
-- Jangan commit kredensial sensitif ke repo.
-- Untuk produksi, aktifkan kembali verifikasi SSL pada backend (`GOOGLE_CSE_VERIFY_SSL=true`).
