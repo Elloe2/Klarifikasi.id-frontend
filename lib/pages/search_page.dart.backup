@@ -1,0 +1,1292 @@
+import 'dart:async';
+
+import 'package:collection/collection.dart';
+import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:url_launcher/url_launcher.dart';
+
+import '../models/search_result.dart';
+import '../services/search_api.dart';
+import '../theme/app_theme.dart';
+import '../widgets/error_banner.dart';
+
+class SearchPage extends StatefulWidget {
+  const SearchPage({super.key, required this.api});
+
+  final SearchApi api;
+
+  @override
+  State<SearchPage> createState() => _SearchPageState();
+}
+
+class _SearchPageState extends State<SearchPage> {
+  final TextEditingController _controller = TextEditingController();
+  final FocusNode _queryFocus = FocusNode();
+  final List<String> _suggestions = const [
+    'berita terbaru hari ini',
+    'kabar politik hari ini',
+    'hoax terbaru hari ini',
+    'informasi bencana alam hari ini',
+  ];
+  final Duration _cooldown = const Duration(seconds: 5);
+
+  List<SearchResult> _results = const [];
+  bool _isLoading = false;
+  String? _error;
+  DateTime? _lastSearchTime;
+  Timer? _cooldownTimer;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    _queryFocus.dispose();
+    _cooldownTimer?.cancel();
+    super.dispose();
+  }
+
+
+  void _startCooldownTimer() {
+    _cooldownTimer?.cancel();
+    _cooldownTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      final last = _lastSearchTime;
+      if (last == null) {
+        timer.cancel();
+        return;
+      }
+
+      final diff = DateTime.now().difference(last);
+      final remaining = _cooldown - diff;
+      if (remaining.isNegative) {
+        setState(() {});
+        timer.cancel();
+      } else {
+        setState(() {});
+      }
+    });
+  }
+
+  Duration? _checkCooldown() {
+    if (_lastSearchTime == null) return null;
+    final diff = DateTime.now().difference(_lastSearchTime!);
+    final remaining = _cooldown - diff;
+      return null;
+    }
+    return remaining;
+  }
+
+
+
+  Future<void> _openResult(String url) async {
+    final uri = Uri.tryParse(url);
+    if (uri == null) {
+      _showSnackBar('URL tidak valid.');
+      return;
+    }
+
+    final success = await launchUrl(uri, mode: LaunchMode.externalApplication);
+    if (!success) {
+      _showSnackBar('Tidak dapat membuka tautan.');
+    }
+  }
+
+  void _showSnackBar(String message) {
+    if (!mounted) return;
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  Future<void> _copyLink(String url) async {
+    await Clipboard.setData(ClipboardData(text: url));
+    _showSnackBar('Tautan sumber disalin ke clipboard.');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final onCooldown = _checkCooldown();
+
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      extendBody: true,
+      appBar: AppBar(
+        titleSpacing: 16,
+        title: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Klarifikasi.id',
+              style: theme.textTheme.titleLarge?.copyWith(
+                fontWeight: FontWeight.w700,
+              ),
+            ),
+            Text(
+              'Telusuri fakta dan bandingkan sumber terpercaya.',
+              style: theme.textTheme.labelMedium,
+            ),
+          ],
+        ),
+      ),
+      body: Container(
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
+        child: Align(
+          alignment: Alignment.topCenter,
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 920),
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  const SizedBox(height: 24),
+                  _SearchCard(
+                    controller: _controller,
+                    focusNode: _queryFocus,
+                    isLoading: _isLoading,
+                    cooldown: onCooldown,
+                    onSearch: (limit) => _performSearchWithLimit(limit),
+                  ),
+                  if (onCooldown != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 8),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Tunggu ${onCooldown.inSeconds} detik sebelum mencari lagi.',
+                            style: theme.textTheme.bodySmall,
+                          ),
+                          const SizedBox(height: 6),
+                          ClipRRect(
+                            borderRadius: BorderRadius.circular(8),
+                            child: LinearProgressIndicator(
+                              value: ((
+                                        _cooldown.inMilliseconds -
+                                        onCooldown.inMilliseconds) /
+                                    _cooldown.inMilliseconds)
+                                  .clamp(0.0, 1.0),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  const SizedBox(height: 20),
+                  _SuggestionPanel(
+                    suggestions: _suggestions,
+                    onTapSuggestion: (value) {
+                      _controller
+                        ..text = value
+                        ..selection =
+                            TextSelection.collapsed(offset: value.length);
+                      _performSearchWithLimit(20);
+                    },
+                  ),
+                  if (_error != null) ...[
+                    const SizedBox(height: 12),
+                    ErrorBanner(message: _error!),
+                  ],
+                  const SizedBox(height: 12),
+                  Expanded(
+                    child: AnimatedSwitcher(
+                      duration: const Duration(milliseconds: 250),
+                      child: _isLoading
+                          ? const _LoadingState()
+                          : _results.isEmpty
+                              ? const _EmptyState()
+                              : _ResultsList(
+                                  results: _results,
+                                  onOpen: _openResult,
+                                  onCopy: _copyLink,
+                                ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SuggestionPanel extends StatelessWidget {
+  const _SuggestionPanel({
+    required this.suggestions,
+    required this.onTapSuggestion,
+  });
+
+  final List<String> suggestions;
+  final ValueChanged<String> onTapSuggestion;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppTheme.cardGradient,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Colors.white.withValues(alpha: 0.1),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        child: _SuggestionChips(
+          suggestions: suggestions,
+          onSelected: onTapSuggestion,
+        ),
+      ),
+    );
+  }
+}
+
+class _SearchCard extends StatefulWidget {
+  const _SearchCard({
+    required this.controller,
+    required this.focusNode,
+    required this.isLoading,
+    required this.cooldown,
+    required this.onSearch,
+  });
+
+  final TextEditingController controller;
+  final FocusNode focusNode;
+  final bool isLoading;
+  final Duration? cooldown;
+  final ValueChanged<int> onSearch; // Changed to accept limit parameter
+
+  @override
+  State<_SearchCard> createState() => _SearchCardState();
+}
+
+class _SearchCardState extends State<_SearchCard> {
+  int _resultLimit = 20; // Default 20 hasil
+  bool _showLimitSelector = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final bool isDisabled = widget.isLoading || widget.cooldown != null;
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppTheme.cardGradient,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.08),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(22),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Masukkan kata kunci yang ingin diperiksa',
+              style: theme.textTheme.headlineSmall?.copyWith(
+                fontWeight: FontWeight.w700,
+                color: Colors.white,
+              ),
+            ),
+            const SizedBox(height: 6),
+            Text(
+              'Gunakan kata kunci spesifik agar kami dapat menemukan sumber terpercaya yang relevan.',
+              style: theme.textTheme.bodyMedium?.copyWith(
+                color: Colors.white.withValues(alpha: 0.68),
+                height: 1.5,
+              ),
+            ),
+            const SizedBox(height: 16),
+
+            // Result limit selector
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 200),
+              height: _showLimitSelector ? null : 0,
+              child: _showLimitSelector
+                  ? Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      margin: const EdgeInsets.only(bottom: 16),
+                      decoration: BoxDecoration(
+                        color: AppTheme.surfaceDark.withValues(alpha: 0.3),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.white.withValues(alpha: 0.1),
+                        ),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Jumlah hasil yang ditampilkan:',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: Colors.white,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          Row(
+                            children: [
+                              _LimitChip(
+                                label: '10',
+                                isSelected: _resultLimit == 10,
+                                onTap: () => setState(() => _resultLimit = 10),
+                              ),
+                              const SizedBox(width: 8),
+                              _LimitChip(
+                                label: '20',
+                                isSelected: _resultLimit == 20,
+                                onTap: () => setState(() => _resultLimit = 20),
+                              ),
+                              const SizedBox(width: 8),
+                              _LimitChip(
+                                label: '50',
+                                isSelected: _resultLimit == 50,
+                                onTap: () => setState(() => _resultLimit = 50),
+                              ),
+                              const SizedBox(width: 8),
+                              _LimitChip(
+                                label: '∞',
+                                isSelected: _resultLimit == 999,
+                                onTap: () => setState(() => _resultLimit = 999),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
+                    )
+                  : const SizedBox.shrink(),
+            ),
+
+            Row(
+              children: [
+                Expanded(
+                  child: TextField(
+                    controller: widget.controller,
+                    focusNode: widget.focusNode,
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    onSubmitted: (_) => _performSearch(),
+                    textInputAction: TextInputAction.search,
+                    decoration: InputDecoration(
+                      prefixIcon: const Icon(Icons.search, color: Colors.white54),
+                      hintText:
+                          "Masukkan klaim atau berita untuk diperiksa (contoh: 'klaim vaksin terbaru')",
+                      hintStyle: theme.textTheme.bodyMedium?.copyWith(
+                        color: Colors.white.withValues(alpha: 0.45),
+                        fontWeight: FontWeight.w400,
+                      ),
+                      filled: true,
+                      fillColor: AppTheme.surfaceDark,
+                      contentPadding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 16,
+                      ),
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.08),
+                        ),
+                      ),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide(
+                          color: Colors.white.withValues(alpha: 0.08),
+                        ),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(18),
+                        borderSide: BorderSide(
+                          color: AppTheme.primaryGradient.colors.first,
+                          width: 1.6,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                _SearchIconButton(
+                  isDisabled: isDisabled,
+                  isLoading: widget.isLoading,
+                  onPressed: _performSearch,
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 12),
+
+            // Toggle limit selector
+            InkWell(
+              onTap: () => setState(() => _showLimitSelector = !_showLimitSelector),
+              borderRadius: BorderRadius.circular(8),
+              child: Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      'Tampilkan ${_resultLimit == 999 ? "semua" : _resultLimit} hasil',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: AppTheme.tertiaryAccentColor,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: 4),
+                    Icon(
+                      _showLimitSelector ? Icons.expand_less : Icons.expand_more,
+                      size: 16,
+                      color: AppTheme.tertiaryAccentColor,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _performSearch() {
+    widget.onSearch(_resultLimit);
+  }
+}
+
+class _LimitChip extends StatelessWidget {
+  const _LimitChip({
+    required this.label,
+    required this.isSelected,
+    required this.onTap,
+  });
+
+  final String label;
+  final bool isSelected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+        decoration: BoxDecoration(
+          color: isSelected
+              ? AppTheme.primaryGradient.colors.first
+              : AppTheme.surfaceDark.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: isSelected
+                ? AppTheme.primaryGradient.colors.first
+                : Colors.white.withValues(alpha: 0.2),
+          ),
+        ),
+        child: Text(
+          label,
+class _SearchIconButton extends StatefulWidget {
+  const _SearchIconButton({
+{{ ... }}
+    required this.isDisabled,
+    required this.isLoading,
+    required this.onPressed,
+  });
+
+  final bool isDisabled;
+  final bool isLoading;
+  final VoidCallback? onPressed;
+
+  @override
+  State<_SearchIconButton> createState() => _SearchIconButtonState();
+}
+
+class _SearchIconButtonState extends State<_SearchIconButton>
+    with SingleTickerProviderStateMixin {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final gradientColors = widget.isDisabled
+        ? const [Color(0xFF2A353C), Color(0xFF303E46)]
+        : AppTheme.primaryGradient.colors
+            .map((color) => _hovered
+                ? Color.alphaBlend(
+                    Colors.white.withValues(alpha: 0.08),
+                    color,
+                  )
+                : color)
+            .toList();
+
+    return MouseRegion(
+      cursor:
+          widget.isDisabled ? SystemMouseCursors.forbidden : SystemMouseCursors.click,
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        width: 48,
+        height: 48,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            colors: gradientColors,
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+          borderRadius: BorderRadius.circular(14),
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(14),
+            splashColor: Colors.white.withValues(alpha: 0.12),
+            onTap: widget.isDisabled ? null : widget.onPressed,
+            child: Center(
+              child: widget.isLoading
+                  ? const SizedBox(
+                      width: 18,
+                      height: 18,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                      ),
+                    )
+                  : const Icon(Icons.search, size: 20, color: Colors.white),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _SuggestionChips extends StatelessWidget {
+  const _SuggestionChips({
+    required this.suggestions,
+    required this.onSelected,
+  });
+
+  final List<String> suggestions;
+  final ValueChanged<String> onSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Contoh pencarian',
+          style: theme.textTheme.titleSmall?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w700,
+            letterSpacing: 0.3,
+          ),
+        ),
+        const SizedBox(height: 12),
+        Wrap(
+          spacing: 18,
+          runSpacing: 14,
+          children: suggestions
+              .mapIndexed(
+                (index, text) => _AnimatedSuggestionChip(
+                  label: text,
+                  icon: _suggestionIcons[index % _suggestionIcons.length],
+                  background:
+                      _suggestionGradients[index % _suggestionGradients.length],
+                  onTap: () => onSelected(text),
+                ),
+              )
+              .toList(),
+        ),
+      ],
+    );
+  }
+}
+
+const List<IconData> _suggestionIcons = [
+  Icons.newspaper,
+  Icons.verified,
+  Icons.error_outline,
+  Icons.public,
+];
+
+const List<LinearGradient> _suggestionGradients = [
+  AppTheme.accentGradient,
+  AppTheme.secondaryGradient,
+  AppTheme.primaryGradient,
+  LinearGradient(
+    colors: [Color(0xFF2DD4BF), Color(0xFF1CB0F6)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  ),
+];
+
+class _AnimatedSuggestionChip extends StatefulWidget {
+  const _AnimatedSuggestionChip({
+    required this.label,
+    required this.icon,
+    required this.background,
+    required this.onTap,
+  });
+
+  final String label;
+  final IconData icon;
+  final LinearGradient background;
+  final VoidCallback onTap;
+
+  @override
+  State<_AnimatedSuggestionChip> createState() => _AnimatedSuggestionChipState();
+}
+
+class _AnimatedSuggestionChipState extends State<_AnimatedSuggestionChip>
+    with SingleTickerProviderStateMixin {
+  bool _hovered = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final gradient = widget.background;
+    final hoveredGradient = LinearGradient(
+      colors: gradient.colors
+          .map(
+            (color) => Color.alphaBlend(
+              Colors.black.withValues(alpha: 0.12),
+              color,
+            ),
+          )
+          .toList(),
+      begin: gradient.begin,
+      end: gradient.end,
+    );
+
+    return MouseRegion(
+      onEnter: (_) => setState(() => _hovered = true),
+      onExit: (_) => setState(() => _hovered = false),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        curve: Curves.easeOut,
+        decoration: BoxDecoration(
+          gradient: _hovered ? hoveredGradient : gradient,
+          borderRadius: BorderRadius.circular(22),
+        ),
+        child: InkWell(
+          borderRadius: BorderRadius.circular(22),
+          onTap: widget.onTap,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(widget.icon, size: 18, color: Colors.white),
+                const SizedBox(width: 8),
+                Text(
+                  widget.label,
+                  style: theme.textTheme.labelLarge?.copyWith(
+                    color: Colors.white,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.3,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _LoadingState extends StatelessWidget {
+  const _LoadingState();
+
+  @override
+  Widget build(BuildContext context) {
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 24),
+      child: Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: const [
+            CircularProgressIndicator(),
+            SizedBox(height: 16),
+            Text('Sedang menelusuri sumber terpercaya...'),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _EmptyState extends StatelessWidget {
+  const _EmptyState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 64),
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 420),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              // Animated Icon with pulse effect
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0.85, end: 1),
+                duration: const Duration(milliseconds: 1200),
+                curve: Curves.easeInOut,
+                builder: (context, value, child) {
+                  return Transform.scale(scale: value, child: child);
+                },
+                child: Container(
+                  width: 96,
+                  height: 96,
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.secondaryGradient,
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.travel_explore,
+                    size: 46,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Enhanced title with gradient text
+              ShaderMask(
+                shaderCallback: (bounds) => LinearGradient(
+                  colors: [
+                    Colors.white,
+                    Colors.white.withValues(alpha: 0.8),
+                  ],
+                ).createShader(bounds),
+                child: Text(
+                  'Mulai verifikasi klaimmu',
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w800,
+                    color: Colors.white,
+                    fontSize: 22,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              const SizedBox(height: 16),
+
+              // Enhanced description
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppTheme.surfaceDark.withValues(alpha: 0.5),
+                  borderRadius: BorderRadius.circular(16),
+                  border: Border.all(
+                    color: Colors.white.withValues(alpha: 0.1),
+                  ),
+                ),
+                child: Text(
+                  "Ketikkan klaim atau berita yang ingin diperiksa. Sistem kami akan mencari sumber terpercaya untuk memverifikasi kebenarannya.",
+                  style: theme.textTheme.bodyLarge?.copyWith(
+                    color: Colors.white.withValues(alpha: 0.85),
+                    height: 1.6,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+              ),
+
+              const SizedBox(height: 24),
+
+              // Statistics row
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  _StatItem(
+                    number: '10,000+',
+                    label: 'Klaim diverifikasi',
+                    icon: Icons.verified,
+                  ),
+                  const SizedBox(width: 32),
+                  _StatItem(
+                    number: '50+',
+                    label: 'Sumber terpercaya',
+                    icon: Icons.library_books,
+                  ),
+                ],
+              ),
+
+              const SizedBox(height: 32),
+
+              // Tips section
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    colors: [
+                      AppTheme.primaryGradient.colors.first.withValues(alpha: 0.1),
+                      AppTheme.accentGradient.colors.first.withValues(alpha: 0.05),
+                    ],
+                  ),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: AppTheme.primaryGradient.colors.first.withValues(alpha: 0.2),
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(Icons.lightbulb, color: AppTheme.tertiaryAccentColor, size: 20),
+                        const SizedBox(width: 8),
+                        Text(
+                          'Tips Verifikasi',
+                          style: theme.textTheme.titleSmall?.copyWith(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w700,
+                          ),
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 12),
+                    _TipItem(
+                      text: 'Periksa tanggal berita - klaim lama mungkin sudah terjawab',
+                    ),
+                    _TipItem(
+                      text: 'Bandingkan dengan sumber resmi pemerintah atau lembaga terpercaya',
+                    ),
+                    _TipItem(
+                      text: 'Waspadai judul clickbait yang provokatif',
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _StatItem extends StatelessWidget {
+  const _StatItem({
+    required this.number,
+    required this.label,
+    required this.icon,
+  });
+
+  final String number;
+  final String label;
+  final IconData icon;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Column(
+      children: [
+        Container(
+          padding: const EdgeInsets.all(12),
+          decoration: BoxDecoration(
+            gradient: AppTheme.accentGradient,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: Colors.white, size: 20),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          number,
+          style: theme.textTheme.titleLarge?.copyWith(
+            color: Colors.white,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        Text(
+          label,
+          style: theme.textTheme.bodySmall?.copyWith(
+            color: Colors.white.withValues(alpha: 0.7),
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ],
+    );
+  }
+}
+
+class _TipItem extends StatelessWidget {
+  const _TipItem({required this.text});
+
+  final String text;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 8),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            margin: const EdgeInsets.only(top: 2),
+            width: 6,
+            height: 6,
+            decoration: BoxDecoration(
+              color: AppTheme.tertiaryAccentColor,
+              shape: BoxShape.circle,
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              text,
+              style: theme.textTheme.bodySmall?.copyWith(
+                color: Colors.white.withValues(alpha: 0.8),
+                height: 1.4,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ResultsList extends StatelessWidget {
+  const _ResultsList({
+    required this.results,
+    required this.onOpen,
+    required this.onCopy,
+  });
+
+  final List<SearchResult> results;
+  final ValueChanged<String> onOpen;
+  final ValueChanged<String> onCopy;
+
+  @override
+  Widget build(BuildContext context) {
+    return ListView.separated(
+      key: ValueKey(results.length),
+      padding: const EdgeInsets.only(bottom: 8),
+      itemCount: results.length,
+      separatorBuilder: (_, __) => const SizedBox(height: 16),
+      itemBuilder: (context, index) {
+        final result = results[index];
+        return _AnimatedResultCard(
+          result: result,
+          onOpen: onOpen,
+          onCopy: onCopy,
+          index: index,
+        );
+      },
+    );
+  }
+}
+
+class _AnimatedResultCard extends StatefulWidget {
+  const _AnimatedResultCard({
+    required this.result,
+    required this.onOpen,
+    required this.onCopy,
+    required this.index,
+  });
+
+  final SearchResult result;
+  final ValueChanged<String> onOpen;
+  final ValueChanged<String> onCopy;
+  final int index;
+
+  @override
+  State<_AnimatedResultCard> createState() => _AnimatedResultCardState();
+}
+
+class _AnimatedResultCardState extends State<_AnimatedResultCard>
+    with TickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _slideAnimation;
+  late Animation<double> _fadeAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      duration: const Duration(milliseconds: 600),
+      vsync: this,
+    );
+
+    _slideAnimation = Tween<double>(
+      begin: 50.0,
+      end: 0.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeOutCubic,
+    ));
+
+    _fadeAnimation = Tween<double>(
+      begin: 0.0,
+      end: 1.0,
+    ).animate(CurvedAnimation(
+      parent: _controller,
+      curve: Curves.easeInOut,
+    ));
+
+    // Start animation after a staggered delay
+    Future.delayed(Duration(milliseconds: widget.index * 150), () {
+      if (mounted) {
+        _controller.forward();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _controller,
+      builder: (context, child) {
+        return Transform.translate(
+          offset: Offset(_slideAnimation.value, 0),
+          child: Opacity(
+            opacity: _fadeAnimation.value,
+            child: _ResultCard(
+              result: widget.result,
+              onOpen: widget.onOpen,
+              onCopy: widget.onCopy,
+            ),
+          ),
+        );
+      },
+    );
+  }
+}
+
+class _ResultCard extends StatelessWidget {
+  const _ResultCard({
+    required this.result,
+    required this.onOpen,
+    required this.onCopy,
+  });
+
+  final SearchResult result;
+  final ValueChanged<String> onOpen;
+  final ValueChanged<String> onCopy;
+
+  Color _getCredibilityColor(int score) {
+    if (score >= 80) return const Color(0xFF10B981); // Green for high credibility
+    if (score >= 60) return const Color(0xFFF59E0B); // Yellow for medium credibility
+    return const Color(0xFFEF4444); // Red for low credibility
+  }
+
+  IconData _getCredibilityIcon(int score) {
+    if (score >= 80) return Icons.verified;
+    if (score >= 60) return Icons.info;
+    return Icons.warning;
+  }
+
+  String _getRelativeTime(DateTime? date) {
+    if (date == null) return '';
+
+    final now = DateTime.now();
+    final difference = now.difference(date);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays} hari yang lalu';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} jam yang lalu';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} menit yang lalu';
+    } else {
+      return 'Baru saja';
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        gradient: AppTheme.cardGradient,
+        borderRadius: BorderRadius.circular(22),
+        border: Border.all(
+          color: theme.colorScheme.primary.withValues(alpha: 0.05),
+        ),
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: result.thumbnail != null
+                      ? Image.network(
+                          result.thumbnail!,
+                          width: 72,
+                          height: 72,
+                          fit: BoxFit.cover,
+                        )
+                      : Container(
+                          width: 72,
+                          height: 72,
+                          color: theme.colorScheme.primaryContainer,
+                          child: Icon(
+                            Icons.public,
+                            color: theme.colorScheme.onPrimaryContainer,
+                          ),
+                        ),
+                ),
+                const SizedBox(width: 16),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        result.title,
+                        style: theme.textTheme.titleLarge?.copyWith(
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          height: 1.35,
+                          color: Colors.white,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+
+                      // Credibility score badge
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        decoration: BoxDecoration(
+                          color: _getCredibilityColor(result.credibilityScore ?? 85).withValues(alpha: 0.2),
+                          borderRadius: BorderRadius.circular(12),
+                          border: Border.all(
+                            color: _getCredibilityColor(result.credibilityScore ?? 85).withValues(alpha: 0.5),
+                          ),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Icon(
+                              _getCredibilityIcon(result.credibilityScore ?? 85),
+                              size: 14,
+                              color: _getCredibilityColor(result.credibilityScore ?? 85),
+                            ),
+                            const SizedBox(width: 4),
+                            Text(
+                              '${result.credibilityScore ?? 85}% Terpercaya',
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: _getCredibilityColor(result.credibilityScore ?? 85),
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      const SizedBox(height: 12),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 12,
+                          vertical: 6,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppTheme.subduedGray,
+                          borderRadius: BorderRadius.circular(999),
+                        ),
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            const Icon(Icons.public, size: 16, color: Colors.white),
+                            const SizedBox(width: 6),
+                            Text(
+                              result.displayLink,
+                              style: theme.textTheme.labelSmall?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+
+                      // Relative timestamp
+                      if (_getRelativeTime(result.publishedDate).isNotEmpty)
+                        Padding(
+                          padding: const EdgeInsets.only(left: 8),
+                          child: Text(
+                            _getRelativeTime(result.publishedDate),
+                            style: theme.textTheme.labelSmall?.copyWith(
+                              color: Colors.white.withValues(alpha: 0.6),
+                              fontStyle: FontStyle.italic,
+                            ),
+                          ),
+                        ),
+                      const SizedBox(height: 12),
+                      Text(
+                        result.snippet,
+                        style: theme.textTheme.bodyMedium?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.72),
+                          height: 1.6,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+            Wrap(
+              spacing: 12,
+              runSpacing: 8,
+              children: [
+                FilledButton.tonal(
+                  onPressed:
+                      result.link.isEmpty ? null : () => onOpen(result.link),
+                  style: FilledButton.styleFrom(
+                    backgroundColor: AppTheme.primaryGradient.colors.first,
+                    foregroundColor: Colors.black,
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    minimumSize: const Size(120, 44),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: const [
+                      Icon(Icons.open_in_new, size: 18),
+                      SizedBox(width: 8),
+                      Text('Buka sumber'),
+                    ],
+                  ),
+                ),
+                OutlinedButton.icon(
+                  onPressed:
+                      result.link.isEmpty ? null : () => onCopy(result.link),
+                  style: OutlinedButton.styleFrom(
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    minimumSize: const Size(120, 44),
+                  ),
+                  icon: const Icon(Icons.copy, size: 18),
+                  label: const Text('Salin tautan'),
+                ),
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}

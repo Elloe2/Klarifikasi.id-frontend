@@ -7,14 +7,15 @@
 
 import 'package:flutter_test/flutter_test.dart';
 
-import 'package:klarifikasi_id/main.dart';
+import 'package:klarifikasi_id/app/app.dart';
 
 void main() {
   testWidgets('menampilkan beranda Klarifikasi.id', (tester) async {
     await tester.pumpWidget(const MainApp());
+    await tester.pump();
 
-    expect(find.text('Hoax Checker'), findsOneWidget);
-    expect(find.text('Telusuri & bandingkan informasi secara cepat'),
+    expect(find.text('Klarifikasi.id'), findsOneWidget);
+    expect(find.text('Telusuri fakta dan bandingkan sumber terpercaya.'),
         findsOneWidget);
   });
 }

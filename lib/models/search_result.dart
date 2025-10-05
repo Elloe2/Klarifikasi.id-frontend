@@ -7,6 +7,8 @@ class SearchResult {
     required this.displayLink,
     required this.formattedUrl,
     this.thumbnail,
+    this.credibilityScore,
+    this.publishedDate,
   });
 
   final String title;
@@ -15,6 +17,8 @@ class SearchResult {
   final String displayLink;
   final String formattedUrl;
   final String? thumbnail;
+  final int? credibilityScore;
+  final DateTime? publishedDate;
 
   /// Factory helper untuk membuat `SearchResult` dari respons JSON backend.
   factory SearchResult.fromJson(Map<String, dynamic> json) {
@@ -25,6 +29,10 @@ class SearchResult {
       displayLink: json['displayLink'] as String? ?? '',
       formattedUrl: json['formattedUrl'] as String? ?? '',
       thumbnail: json['thumbnail'] as String?,
+      credibilityScore: json['credibility_score'] as int?,
+      publishedDate: json['published_date'] != null
+          ? DateTime.tryParse(json['published_date'] as String)
+          : null,
     );
   }
 }
