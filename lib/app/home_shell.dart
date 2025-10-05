@@ -6,6 +6,7 @@ import '../pages/search_page.dart';
 import '../pages/settings_page.dart';
 import '../providers/auth_provider.dart';
 import '../services/search_api.dart';
+import '../widgets/loading_widgets.dart';
 
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
@@ -17,6 +18,24 @@ class HomeShell extends StatefulWidget {
 class _HomeShellState extends State<HomeShell> {
   int _currentIndex = 0;
   final SearchApi _api = const SearchApi();
+  bool _isDashboardLoading = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _initializeDashboard();
+  }
+
+  Future<void> _initializeDashboard() async {
+    // Simulate dashboard loading for better UX
+    await Future.delayed(const Duration(milliseconds: 1500));
+
+    if (mounted) {
+      setState(() {
+        _isDashboardLoading = false;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -24,10 +43,9 @@ class _HomeShellState extends State<HomeShell> {
       builder: (context, authProvider, child) {
         // Pastikan provider sudah initialized
         if (!authProvider.isInitialized) {
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+          return const LoadingScreen(
+            message: 'Memuat aplikasi...',
+            showProgress: true,
           );
         }
 
@@ -38,10 +56,17 @@ class _HomeShellState extends State<HomeShell> {
               Navigator.of(context).pushReplacementNamed('/login');
             }
           });
-          return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+          return const LoadingScreen(
+            message: 'Memverifikasi autentikasi...',
+            showProgress: true,
+          );
+        }
+
+        // Show loading screen when first entering dashboard
+        if (_isDashboardLoading) {
+          return const LoadingScreen(
+            message: 'Memuat dashboard...',
+            showProgress: true,
           );
         }
 

@@ -65,7 +65,7 @@ class _LoginPageState extends State<LoginPage> {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Login berhasil!')),
         );
-        // AuthProvider will handle navigation automatically
+        // AuthProvider akan handle navigation otomatis via listener
       }
     } catch (e) {
       if (mounted) {
@@ -79,22 +79,52 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleLoginError(String errorMessage) {
-    // Cek apakah error menunjukkan akun tidak ditemukan
-    if (errorMessage.toLowerCase().contains('invalid credentials') ||
-        errorMessage.toLowerCase().contains('user not found') ||
-        errorMessage.toLowerCase().contains('account not found') ||
-        errorMessage.toLowerCase().contains('email not found')) {
+    // Enhanced error detection untuk berbagai format error message
+    if (errorMessage.toLowerCase().contains('email atau password salah') ||
+        errorMessage.toLowerCase().contains('invalid credentials') ||
+        errorMessage.toLowerCase().contains('unauthorized') ||
+        errorMessage.toLowerCase().contains('401') ||
+        errorMessage.toLowerCase().contains('wrong credentials') ||
+        errorMessage.toLowerCase().contains('password') ||
+        errorMessage.toLowerCase().contains('credentials') ||
+        errorMessage.toLowerCase().contains('not found') ||
+        errorMessage.toLowerCase().contains('account')) {
 
-      _showAccountNotFoundDialog();
+      _showInvalidCredentialsDialog();
+    } else if (errorMessage.toLowerCase().contains('koneksi internet') ||
+               errorMessage.toLowerCase().contains('network error') ||
+               errorMessage.toLowerCase().contains('connection')) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Koneksi internet bermasalah. Silakan periksa koneksi Anda.'),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 4),
+        ),
+      );
+    } else if (errorMessage.toLowerCase().contains('timeout') ||
+               errorMessage.toLowerCase().contains('request timeout')) {
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Koneksi timeout. Silakan coba lagi.'),
+          backgroundColor: Colors.orange,
+          duration: const Duration(seconds: 4),
+        ),
+      );
     } else {
       // Error lainnya tetap menggunakan snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
+        SnackBar(
+          content: Text('Error: $errorMessage'),
+          backgroundColor: Colors.red,
+          duration: const Duration(seconds: 4),
+        ),
       );
     }
   }
 
-  void _showAccountNotFoundDialog() {
+  void _showInvalidCredentialsDialog() {
     showDialog(
       context: context,
       builder: (BuildContext context) {
@@ -106,13 +136,13 @@ class _LoginPageState extends State<LoginPage> {
           title: Row(
             children: [
               Icon(
-                Icons.person_add,
-                color: AppTheme.primarySeedColor,
+                Icons.error_outline,
+                color: Colors.redAccent,
                 size: 28,
               ),
               const SizedBox(width: 12),
               Text(
-                'Akun Tidak Ditemukan',
+                'Login Gagal',
                 style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: Colors.white,
                   fontWeight: FontWeight.w700,
@@ -125,7 +155,7 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                'Email yang Anda masukkan belum terdaftar di sistem kami.',
+                'Email atau password yang Anda masukkan salah.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.white70,
                   height: 1.5,
@@ -135,23 +165,23 @@ class _LoginPageState extends State<LoginPage> {
               Container(
                 padding: const EdgeInsets.all(12),
                 decoration: BoxDecoration(
-                  color: AppTheme.primarySeedColor.withValues(alpha: 0.1),
+                  color: Colors.redAccent.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                   border: Border.all(
-                    color: AppTheme.primarySeedColor.withValues(alpha: 0.3),
+                    color: Colors.redAccent.withValues(alpha: 0.3),
                   ),
                 ),
                 child: Text(
                   'Email: ${_emailController.text}',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppTheme.primarySeedColor,
+                    color: Colors.redAccent,
                     fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
               const SizedBox(height: 16),
               Text(
-                'Apakah Anda ingin membuat akun baru dengan email ini?',
+                'Pastikan email dan password sudah benar, atau daftar akun baru jika belum memiliki akun.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.white70,
                   height: 1.5,
@@ -163,7 +193,7 @@ class _LoginPageState extends State<LoginPage> {
             TextButton(
               onPressed: () => Navigator.of(context).pop(),
               child: Text(
-                'Batal',
+                'Coba Lagi',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                   color: Colors.white70,
                   fontWeight: FontWeight.w600,
@@ -184,7 +214,7 @@ class _LoginPageState extends State<LoginPage> {
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
               ),
               child: const Text(
-                'Buat Akun',
+                'Daftar Akun',
                 style: TextStyle(fontWeight: FontWeight.w600),
               ),
             ),
@@ -339,40 +369,6 @@ class _LoginPageState extends State<LoginPage> {
                                   color: AppTheme.primarySeedColor,
                                   fontWeight: FontWeight.w600,
                                 ),
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Demo Credentials (untuk testing)
-                      Container(
-                        padding: const EdgeInsets.all(16),
-                        decoration: BoxDecoration(
-                          color: AppTheme.surfaceDark.withValues(alpha: 0.3),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(
-                            color: Colors.white.withValues(alpha: 0.1),
-                          ),
-                        ),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              '💡 Untuk Testing:',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.white70,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                            const SizedBox(height: 8),
-                            Text(
-                              'Email: test@example.com\nPassword: password123',
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                color: Colors.white60,
-                                height: 1.4,
                               ),
                             ),
                           ],

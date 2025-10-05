@@ -39,16 +39,27 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
 
     try {
-      _currentUser = await _authService.login(
-        email: email,
-        password: password,
-      );
+      _currentUser = await _authService.login(email: email, password: password);
+      _isLoading = false;
       notifyListeners();
       return true;
     } catch (e) {
       _isLoading = false;
       notifyListeners();
-      return false;
+
+      // Re-throw dengan informasi error yang lebih spesifik
+      if (e.toString().toLowerCase().contains('invalid credentials') ||
+          e.toString().toLowerCase().contains('unauthorized') ||
+          e.toString().toLowerCase().contains('401')) {
+        throw Exception('Email atau password salah. Silakan periksa kembali kredensial Anda.');
+      } else if (e.toString().toLowerCase().contains('network') ||
+                 e.toString().toLowerCase().contains('connection')) {
+        throw Exception('Koneksi internet bermasalah. Silakan periksa koneksi Anda.');
+      } else if (e.toString().toLowerCase().contains('timeout')) {
+        throw Exception('Koneksi timeout. Silakan coba lagi.');
+      } else {
+        throw Exception(e.toString());
+      }
     }
   }
 

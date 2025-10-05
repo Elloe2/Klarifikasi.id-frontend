@@ -77,26 +77,47 @@ class AuthService {
     required String email,
     required String password,
   }) async {
-    final response = await http.post(
-      Uri.parse('$_baseUrl/auth/login'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'email': email,
-        'password': password,
-      }),
-    );
+    try {
+      final response = await http.post(
+        Uri.parse('$_baseUrl/auth/login'),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({
+          'email': email,
+          'password': password,
+        }),
+      );
 
-    if (response.statusCode == 200) {
-      final data = jsonDecode(response.body);
-      final token = data['token'];
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final token = data['token'];
 
-      // Save token
-      await _storage.write(key: 'auth_token', value: token);
+        // Save token
+        await _storage.write(key: 'auth_token', value: token);
 
-      return User.fromJson(data['user']);
-    } else {
-      final error = jsonDecode(response.body);
-      throw Exception(error['message'] ?? 'Login failed');
+        return User.fromJson(data['user']);
+      } else {
+        final errorData = jsonDecode(response.body);
+        final errorMessage = errorData['message'] ?? 'Login failed';
+
+        // Buat exception dengan informasi lebih spesifik berdasarkan status code
+        if (response.statusCode == 401) {
+          throw Exception('Invalid credentials');
+        } else if (response.statusCode == 422) {
+          throw Exception('Validation error: $errorMessage');
+        } else if (response.statusCode >= 500) {
+          throw Exception('Server error: $errorMessage');
+        } else {
+          throw Exception(errorMessage);
+        }
+      }
+    } catch (e) {
+      if (e.toString().contains('SocketException') || e.toString().contains('Network is unreachable')) {
+        throw Exception('Network error - please check your connection');
+      } else if (e.toString().contains('TimeoutException')) {
+        throw Exception('Request timeout - please try again');
+      } else {
+        throw Exception(e.toString());
+      }
     }
   }
 
