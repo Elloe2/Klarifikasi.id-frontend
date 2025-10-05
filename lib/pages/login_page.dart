@@ -79,47 +79,33 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _handleLoginError(String errorMessage) {
-    // Enhanced error detection untuk berbagai format error message
+    // Cek apakah error menunjukkan kredensial salah
     if (errorMessage.toLowerCase().contains('email atau password salah') ||
         errorMessage.toLowerCase().contains('invalid credentials') ||
-        errorMessage.toLowerCase().contains('unauthorized') ||
-        errorMessage.toLowerCase().contains('401') ||
-        errorMessage.toLowerCase().contains('wrong credentials') ||
-        errorMessage.toLowerCase().contains('password') ||
-        errorMessage.toLowerCase().contains('credentials') ||
-        errorMessage.toLowerCase().contains('not found') ||
-        errorMessage.toLowerCase().contains('account')) {
+        errorMessage.toLowerCase().contains('unauthorized')) {
 
       _showInvalidCredentialsDialog();
     } else if (errorMessage.toLowerCase().contains('koneksi internet') ||
-               errorMessage.toLowerCase().contains('network error') ||
-               errorMessage.toLowerCase().contains('connection')) {
+               errorMessage.toLowerCase().contains('network error')) {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Koneksi internet bermasalah. Silakan periksa koneksi Anda.'),
           backgroundColor: Colors.orange,
-          duration: const Duration(seconds: 4),
         ),
       );
-    } else if (errorMessage.toLowerCase().contains('timeout') ||
-               errorMessage.toLowerCase().contains('request timeout')) {
+    } else if (errorMessage.toLowerCase().contains('timeout')) {
 
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Koneksi timeout. Silakan coba lagi.'),
           backgroundColor: Colors.orange,
-          duration: const Duration(seconds: 4),
         ),
       );
     } else {
       // Error lainnya tetap menggunakan snackbar
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error: $errorMessage'),
-          backgroundColor: Colors.red,
-          duration: const Duration(seconds: 4),
-        ),
+        SnackBar(content: Text(errorMessage)),
       );
     }
   }
