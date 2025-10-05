@@ -9,7 +9,19 @@ Aplikasi web fact-checking yang dibangun dengan Flutter frontend dan Laravel bac
 - **User Authentication**: Sistem login/register dengan token-based authentication
 - **Responsive UI**: Design yang responsive untuk desktop dan mobile
 - **Rate Limiting**: Pembatasan pencarian untuk mencegah spam
-- **Indonesian Language**: Interface dalam bahasa Indonesia
+
+## 📁 Repository Structure
+
+Proyek ini terdiri dari dua repository terpisah:
+
+- **Backend**: [https://github.com/Elloe2/Klarifikasi.id-backend](https://github.com/Elloe2/Klarifikasi.id-backend)
+  - Laravel API server
+  - Database dan API endpoints
+
+## 🔗 Repository Links
+
+- **Frontend Repository**: https://github.com/Elloe2/Klarifikasi.id-frontend
+- **Backend Repository**: https://github.com/Elloe2/Klarifikasi.id-backend
 
 ## 🛠️ Tech Stack
 
@@ -31,7 +43,6 @@ Aplikasi web fact-checking yang dibangun dengan Flutter frontend dan Laravel bac
 
 - **Flutter SDK** (3.9.2+)
 - **PHP** (8.2+)
-- **Composer**
 - **MySQL**
 - **Google Custom Search API Key**
 
@@ -39,8 +50,8 @@ Aplikasi web fact-checking yang dibangun dengan Flutter frontend dan Laravel bac
 
 ### 1. Clone Repository
 ```bash
-git clone https://github.com/your-username/klarifikasi.id.git
-cd klarifikasi.id
+git clone https://github.com/Elloe2/Klarifikasi.id-frontend.git
+cd Klarifikasi.id-frontend
 ```
 
 ### 2. Backend Setup
