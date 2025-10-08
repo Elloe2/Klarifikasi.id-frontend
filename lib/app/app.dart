@@ -9,6 +9,7 @@
 /// - MultiProvider: Setup untuk state management (AuthProvider)
 /// - MaterialApp: Konfigurasi tema, routes, dan navigasi
 /// ============================================================================
+library;
 
 import 'package:flutter/material.dart'; // Flutter core widgets
 import 'package:provider/provider.dart'; // State management provider

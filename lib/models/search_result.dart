@@ -14,6 +14,7 @@
 /// - credibilityScore: Skor kredibilitas sumber (opsional)
 /// - publishedDate: Tanggal publikasi artikel (opsional)
 /// ============================================================================
+library;
 
 import 'dart:ui'; // For Color class
 

@@ -9,6 +9,7 @@
 /// - searchEndpoint: Endpoint untuk pencarian fact-checking
 /// - historyEndpoint: Endpoint untuk riwayat pencarian
 /// ============================================================================
+library;
 
 import 'package:flutter/foundation.dart'; // Untuk detection platform (Web/Mobile)
 

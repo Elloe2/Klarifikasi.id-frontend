@@ -16,6 +16,7 @@
 /// - Dark Blues: Professional, calm, dan trustworthy
 /// - Gradients: Modern, depth, dan visual appeal
 /// ============================================================================
+library;
 
 import 'package:flutter/material.dart'; // Flutter Material Design framework
 

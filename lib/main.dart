@@ -8,6 +8,7 @@
 /// - main(): Function entry point yang memanggil runApp()
 /// - MainApp: Root widget aplikasi dengan konfigurasi MaterialApp
 /// ============================================================================
+library;
 
 import 'package:flutter/material.dart'; // Flutter Material Design widgets
 

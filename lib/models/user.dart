@@ -14,6 +14,7 @@
 /// - educationDisplay: Format display pendidikan dalam bahasa Indonesia
 /// - institution: Nama institusi/sekolah/kampus
 /// ============================================================================
+library;
 
 /// === USER DATA MODEL ===
 /// Class imutable untuk menyimpan informasi pengguna.

@@ -17,6 +17,7 @@
 /// - Automatic token cleanup on errors
 /// - Request timeout protection
 /// ============================================================================
+library;
 
 import 'dart:convert'; // JSON encoding/decoding
 import 'package:http/http.dart' as http; // HTTP client untuk API calls
