@@ -33,9 +33,13 @@ class _LoginPageState extends State<LoginPage> {
 
   @override
   void dispose() {
-    // Remove listener
-    final authProvider = context.read<AuthProvider>();
-    authProvider.removeListener(_onAuthStateChanged);
+    // Remove listener safely
+    try {
+      final authProvider = context.read<AuthProvider>();
+      authProvider.removeListener(_onAuthStateChanged);
+    } catch (e) {
+      // Provider might be disposed already
+    }
 
     _emailController.dispose();
     _passwordController.dispose();
