@@ -163,55 +163,127 @@ flutter build appbundle --release
 
 ## 🌐 Deployment Guide
 
-### **Opsi 1: Railway + Netlify (FREE)**
+### **🎯 OPSI TERBAIK: 100% GRATIS - RENDER + NETLIFY + FIREBASE**
 
-#### **Backend Deployment (Railway)**
+#### **💎 Opsi 1: Render + Netlify (COMPLETELY FREE)**
 
-1. **Sign up** ke [Railway](https://railway.app)
-2. **Connect GitHub Repository**
-3. **Deploy Backend:**
+##### **Backend Deployment (Render - FREE)**
+
+1. **Sign up** ke [Render](https://render.com) - **100% Gratis**
+2. **Connect GitHub Repository**:
+   - Login dengan GitHub account
+   - Pilih repository `Klarifikasi.id-backend`
+   - Render akan auto-detect Laravel
+
+3. **Auto Deploy Setup**:
    ```bash
-   # Railway akan auto-detect Laravel dan setup
-   # Configure environment variables di Railway dashboard
+   # Render akan automatically:
+   # - Detect Laravel framework
+   # - Setup PostgreSQL database (FREE)
+   # - Configure environment variables
+   # - Deploy dengan 1 click
    ```
 
-4. **Environment Variables untuk Railway:**
+4. **Environment Variables untuk Render**:
    ```env
    APP_ENV=production
    APP_DEBUG=false
-   APP_URL=https://your-app.railway.app
+   APP_URL=https://your-app-name.onrender.com
 
-   DB_CONNECTION=mysql
-   DB_HOST=your-railway-db-host
-   DB_DATABASE=railway
+   DB_CONNECTION=pgsql
+   DB_HOST=your-render-db-host
+   DB_DATABASE=your-db-name
    DB_USERNAME=your-db-user
    DB_PASSWORD=your-db-password
 
-   GOOGLE_CSE_KEY=your-api-key
-   GOOGLE_CSE_CX=your-cx-id
+   GOOGLE_CSE_KEY=AIzaSyAFOdoaMwgurnjfnhGKn5GFy6_m2HKiGtA
+   GOOGLE_CSE_CX=6242f5825dedb4b59
    ```
 
-#### **Frontend Deployment (Netlify)**
+##### **Frontend Deployment (Netlify - FREE)**
 
-1. **Build Web Assets:**
+1. **Build Web Assets** (Sudah completed):
    ```bash
-   flutter build web --release
+   flutter build web --release ✅ DONE
    ```
 
-2. **Deploy ke Netlify:**
-   - Upload folder `build/web/` ke Netlify
-   - Configure redirect rules untuk SPA
+2. **Deploy ke Netlify**:
+   - Sign up ke [Netlify](https://netlify.com) - **FREE**
+   - Drag & drop folder `build/web/` ke Netlify
+   - Atau connect GitHub repository untuk auto-deploy
 
-3. **Update API Configuration:**
+3. **Configure Netlify**:
+   - **Build command**: `echo "Flutter app ready"`
+   - **Publish directory**: `build/web`
+   - **Redirect rules** untuk SPA:
+     ```
+     /*    /index.html   200
+     ```
+
+4. **Update API Configuration**:
    ```dart
    // lib/config.dart
    String get apiBaseUrl {
      if (kDebugMode) {
        return 'http://localhost:8000';
      }
-     return 'https://your-app.railway.app'; // Railway backend URL
+     return 'https://your-app-name.onrender.com'; // Render backend URL
    }
    ```
+
+#### **📱 Android Deployment (Firebase - FREE)**
+
+1. **Setup Firebase App Distribution**:
+   ```bash
+   # Install Firebase CLI
+   npm install -g firebase-tools
+
+   # Login dan setup project
+   firebase login
+   firebase init appdistribution
+   ```
+
+2. **Build dan Distribute APK**:
+   ```bash
+   # Build APK (sudah completed)
+   flutter build apk --release ✅ DONE
+
+   # Distribute untuk testing
+   firebase appdistribution:distribute build/app/outputs/apk/release/app-release.apk \
+     --app your-firebase-app-id \
+     --groups "beta-testers" \
+     --release-notes "Initial release - Fact-checking app for Indonesia"
+   ```
+
+3. **Share dengan Users**:
+   - Firebase akan generate download links
+   - Users bisa install APK langsung
+   - Perfect untuk beta testing tanpa Play Store
+
+#### **🌐 Domain Gratis**
+
+1. **Opsi Domain Free**:
+   - **Freenom**: Domain .tk, .ml, .ga, .cf (100% gratis)
+   - **Railway**: Subdomain gratis (your-app.railway.app)
+   - **Netlify**: Subdomain gratis (your-app.netlify.app)
+
+2. **Setup Custom Domain**:
+   ```bash
+   # Contoh dengan Freenom domain
+   # Update DNS records untuk point ke Render dan Netlify
+   # Configure SSL gratis di Netlify
+   ```
+
+#### **🎉 COMPLETE FREE STACK**
+
+**Final URLs:**
+- **Backend API**: `https://your-app.onrender.com`
+- **Frontend Web**: `https://your-app.netlify.app`
+- **Android App**: Firebase distribution links
+- **Database**: PostgreSQL gratis di Render
+- **Domain**: `https://klarifikasi.tk` (dari Freenom)
+
+**Total Cost**: **$0 - Completely Free! 🎊**
 
 ### **Opsi 2: Indonesian Hosting (Niagahoster)**
 
