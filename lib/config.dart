@@ -41,9 +41,9 @@ String get apiBaseUrl {
   }
 
   // === PRODUCTION ENVIRONMENT ===
-  // TODO: Ganti dengan domain production Anda
-  // Contoh: return 'https://api.klarifikasi.id';
-  return 'https://your-production-domain.com';
+  // TODO: Update dengan URL Render production setelah deployment berhasil
+  // Contoh: return 'https://klarifikasi-backend.onrender.com';
+  return 'https://your-render-app.onrender.com'; // Ganti dengan URL Render asli setelah deploy
 }
 
 /// === SEARCH ENDPOINT CONFIGURATION ===
