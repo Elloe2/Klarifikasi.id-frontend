@@ -11,6 +11,7 @@ import '../app/home_shell.dart';
 class MainApp extends StatelessWidget {
   const MainApp({super.key});
 
+  @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
