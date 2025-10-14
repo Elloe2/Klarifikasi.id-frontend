@@ -19,13 +19,21 @@ import 'package:flutter/foundation.dart'; // Untuk detection platform (Web/Mobil
 ///
 /// Returns:
 /// - Development: localhost:8000 untuk Web, 10.0.2.2:8000 untuk Android emulator
-/// - Production: Domain production yang dikonfigurasi
+/// - Production: Domain production dari environment variables
 ///
 /// Usage:
 /// ```dart
 /// final response = await http.get(Uri.parse('${apiBaseUrl}/api/search'));
 /// ```
 String get apiBaseUrl {
+  // === PRODUCTION ENVIRONMENT (Netlify) ===
+  // Gunakan environment variables yang di-set di Netlify
+  const String productionUrl = String.fromEnvironment('API_BASE_URL');
+
+  if (productionUrl.isNotEmpty && productionUrl != 'http://localhost') {
+    return productionUrl;
+  }
+
   // === DEVELOPMENT ENVIRONMENT ===
   if (kDebugMode) {
     // Platform detection untuk konfigurasi yang tepat
@@ -40,10 +48,50 @@ String get apiBaseUrl {
     }
   }
 
-  // === PRODUCTION ENVIRONMENT ===
+  // === FALLBACK PRODUCTION ===
   // TODO: Update dengan URL Render production setelah deployment berhasil
   // Contoh: return 'https://klarifikasi-backend.onrender.com';
   return 'https://your-render-app.onrender.com'; // Ganti dengan URL Render asli setelah deploy
+}
+
+/// === GOOGLE CSE API CONFIGURATION ===
+/// Getter function untuk Google Custom Search Engine API Key.
+/// Digunakan untuk search functionality dengan Google CSE.
+///
+/// Returns:
+/// - Production: API key dari environment variables (Netlify)
+/// - Development: API key dari environment variables atau default
+String get googleCseApiKey {
+  // === PRODUCTION ENVIRONMENT (Netlify) ===
+  const String productionKey = String.fromEnvironment('GOOGLE_CSE_API_KEY');
+
+  if (productionKey.isNotEmpty && productionKey != 'your-api-key') {
+    return productionKey;
+  }
+
+  // === FALLBACK ===
+  // TODO: Update dengan API key production setelah deployment berhasil
+  return 'AIzaSyAFOdoaMwgurnjfnhGKn5GFy6_m2HKiGtA'; // Ganti dengan API key production
+}
+
+/// === GOOGLE CSE CX CONFIGURATION ===
+/// Getter function untuk Google Custom Search Engine Context (CX).
+/// Digunakan untuk mengidentifikasi search engine yang digunakan.
+///
+/// Returns:
+/// - Production: CX dari environment variables (Netlify)
+/// - Development: CX dari environment variables atau default
+String get googleCseCx {
+  // === PRODUCTION ENVIRONMENT (Netlify) ===
+  const String productionCx = String.fromEnvironment('GOOGLE_CSE_CX');
+
+  if (productionCx.isNotEmpty && productionCx != 'your-cx-id') {
+    return productionCx;
+  }
+
+  // === FALLBACK ===
+  // TODO: Update dengan CX production setelah deployment berhasil
+  return '6242f5825dedb4b59'; // Ganti dengan CX production
 }
 
 /// === SEARCH ENDPOINT CONFIGURATION ===
