@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../app/home_shell.dart';
@@ -77,16 +78,14 @@ class _SplashScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.all(22),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.12),
-                  shape: BoxShape.circle,
-                  border: Border.all(color: Colors.white24),
-                ),
-                child: const Icon(
+              SvgPicture.asset(
+                'assets/logo/FIX_white.svg',
+                width: 200,
+                height: 200,
+                color: Colors.white,
+                placeholderBuilder: (context) => const Icon(
                   Icons.verified_user,
-                  size: 64,
+                  size: 200,
                   color: Colors.white,
                 ),
               ),

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 import '../services/auth_service.dart';
 import '../theme/app_theme.dart';
@@ -136,16 +137,14 @@ class _RegisterPageState extends State<RegisterPage> {
                       Center(
                         child: Column(
                           children: [
-                            Container(
-                              width: 80,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                gradient: AppTheme.primaryGradient,
-                                shape: BoxShape.circle,
-                              ),
-                              child: const Icon(
+                            SvgPicture.asset(
+                              'assets/logo/FIX_white.svg',
+                              width: 160,
+                              height: 160,
+                              color: Colors.white,
+                              placeholderBuilder: (context) => const Icon(
                                 Icons.person_add,
-                                size: 40,
+                                size: 160,
                                 color: Colors.white,
                               ),
                             ),
