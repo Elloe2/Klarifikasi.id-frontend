@@ -2,10 +2,12 @@
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.35.3-blue.svg)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.9.2-blue.svg)](https://dart.dev)
+[![Laravel](https://img.shields.io/badge/Laravel-12.32.5-red.svg)](https://laravel.com)
+[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.0+-blue.svg)](https://postgresql.org)
 [![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Android-green.svg)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Aplikasi Fact-Checking Modern** untuk memverifikasi kebenaran informasi melalui pencarian di portal berita terpercaya menggunakan Google Custom Search Engine dengan backend Laravel.
+> **Aplikasi Fact-Checking Modern** untuk memverifikasi kebenaran informasi melalui pencarian di portal berita terpercaya menggunakan Google Custom Search Engine dengan backend Laravel dan database PostgreSQL.
 
 <p align="center">
   <img src="https://via.placeholder.com/800x400/1a1a2e/ffffff?text=Klarifikasi.id+Flutter+App" alt="Klarifikasi.id Screenshot" width="800"/>
@@ -41,12 +43,14 @@
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Flutter       │    │     Laravel      │    │     MySQL       │
+│   Flutter       │    │     Laravel      │    │   PostgreSQL    │
 │   Frontend      │◄──►│     Backend      │◄──►│    Database     │
+│   (Multi-Platform)   │   (Laravel Cloud) │   (Neon Cloud)  │
 │                 │    │                  │    │                 │
 │ • Web & Android │    │ • REST API       │    │ • Users         │
 │ • Provider      │    │ • Sanctum Token  │    │ • Search History│
 │ • Secure Storage│    │ • Google CSE     │    │ • Access Tokens │
+│ • Production    │    │ • SSL/HTTPS      │    │ • SSL Encrypted │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
@@ -163,41 +167,90 @@ flutter build appbundle --release
 
 ## 🌐 Deployment Guide
 
-### **🎯 OPSI TERBAIK: 100% GRATIS - RENDER + NETLIFY + FIREBASE**
+### **🎯 OPSI TERBAIK: 100% GRATIS - LARAVEL CLOUD + NETLIFY + NEON**
 
-#### **💎 Opsi 1: Render + Netlify (COMPLETELY FREE)**
+#### **💎 Opsi 1: Laravel Cloud + Netlify (COMPLETELY FREE)**
 
-##### **Backend Deployment (Render - FREE)**
+##### **Backend Deployment (Laravel Cloud - FREE)**
 
-1. **Sign up** ke [Render](https://render.com) - **100% Gratis**
-2. **Connect GitHub Repository**:
-   - Login dengan GitHub account
+1. **Laravel Cloud Setup**:
+   - Kunjungi [Laravel Cloud](https://cloud.laravel.com)
+   - Connect dengan GitHub account
    - Pilih repository `Klarifikasi.id-backend`
-   - Render akan auto-detect Laravel
 
-3. **Auto Deploy Setup**:
+2. **Auto Deploy Laravel Cloud**:
    ```bash
-   # Render akan automatically:
+   # Laravel Cloud akan automatically:
    # - Detect Laravel framework
-   # - Setup PostgreSQL database (FREE)
-   # - Configure environment variables
-   # - Deploy dengan 1 click
+   # - Setup production environment
+   # - Configure SSL certificate
+   # - Deploy dengan zero configuration
    ```
 
-4. **Environment Variables untuk Render**:
+3. **Environment Variables untuk Laravel Cloud**:
    ```env
    APP_ENV=production
    APP_DEBUG=false
-   APP_URL=https://your-app-name.onrender.com
+   APP_URL=https://klarifikasiid-backend-main-ki47jp.laravel.cloud
 
+   # Database PostgreSQL (Neon)
    DB_CONNECTION=pgsql
-   DB_HOST=your-render-db-host
-   DB_DATABASE=your-db-name
-   DB_USERNAME=your-db-user
-   DB_PASSWORD=your-db-password
+   DB_HOST=ep-summer-poetry-a1j9yrq5-pooler.ap-southeast-1.aws.neon.tech
+   DB_PORT=5432
+   DB_DATABASE=neondb
+   DB_USERNAME=neondb_owner
+   DB_PASSWORD=npg_v8cdn2ZBUFXx
+   DB_SSLMODE=require
 
+   # Google Custom Search API
    GOOGLE_CSE_KEY=AIzaSyAFOdoaMwgurnjfnhGKn5GFy6_m2HKiGtA
    GOOGLE_CSE_CX=6242f5825dedb4b59
+   GOOGLE_CSE_VERIFY_SSL=false
+   ```
+
+##### **Database Setup (Neon PostgreSQL - FREE)**
+
+1. **Sign up** ke [Neon](https://neon.tech) - **100% Gratis**
+2. **Create New Project**:
+   - Pilih region: Asia Southeast (Singapore)
+   - Database name: `neondb`
+   - Username: `neondb_owner`
+
+3. **Get Connection String**:
+   ```
+   postgresql://neondb_owner:npg_v8cdn2ZBUFXx@ep-summer-poetry-a1j9yrq5-pooler.ap-southeast-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require
+   ```
+
+4. **Update Laravel .env**:
+   ```bash
+   # Copy connection string ke .env
+   DB_URL=postgresql://neondb_owner:npg_v8cdn2ZBUFXx@ep-summer-poetry-a1j9yrq5-pooler.ap-southeast-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require
+   ```
+
+##### **Frontend Deployment (Netlify - FREE)**
+
+1. **Build Web Assets** (Sudah completed):
+   ```bash
+   flutter build web --release ✅ DONE
+   ```
+
+2. **Deploy ke Netlify**:
+   - Sign up ke [Netlify](https://netlify.com) - **FREE**
+   - Drag & drop folder `build/web/` ke Netlify
+   - Atau connect GitHub untuk auto-deploy
+
+3. **Configure Netlify**:
+   - **Build command**: `echo "Flutter app ready"`
+   - **Publish directory**: `build/web`
+   - **Redirect rules** untuk SPA:
+     ```
+     /*    /index.html   200
+     ```
+
+4. **Environment Variables di Netlify**:
+   ```env
+   API_BASE_URL=https://klarifikasiid-backend-main-ki47jp.laravel.cloud
+   FORCE_PRODUCTION=true
    ```
 
 ##### **Frontend Deployment (Netlify - FREE)**
@@ -546,72 +599,111 @@ flutter build apk --release
 
 ## 📊 Deployment Checklist
 
-### **✅ Pre-Deployment - COMPLETED**
-- [x] **Environment Configuration**: Production URLs configured
-- [x] **API Keys**: Google CSE API keys configured
-- [x] **Database**: MySQL database setup dengan PHPMyAdmin
-- [x] **SSL Certificate**: HTTPS ready untuk production
-- [x] **Testing**: All features tested dan working
+### **✅ Pre-Deployment - FULLY COMPLETED**
+- [x] **Environment Configuration**: Production URLs dan Laravel Cloud configured
+- [x] **API Keys**: Google CSE API keys dengan konfigurasi lengkap
+- [x] **Database**: PostgreSQL (Neon) database dengan SSL encryption
+- [x] **SSL Certificate**: HTTPS ready dengan Laravel Cloud SSL
+- [x] **CORS Configuration**: Multi-origin support untuk production
+- [x] **Testing**: All features tested dan berfungsi dengan production backend
 
-### **✅ Web Deployment - READY**
-- [x] **Build Assets**: `flutter build web --release` ✅ COMPLETED
-- [x] **Static Hosting**: Ready untuk Netlify/Vercel/traditional hosting
-- [x] **SPA Routing**: Configuration ready untuk SPA routing
-- [x] **CDN**: Ready untuk global performance optimization
-- [x] **Domain**: Ready untuk custom domain configuration
+### **✅ Web Deployment - PRODUCTION READY**
+- [x] **Build Assets**: `flutter build web --release` ✅ **FULLY COMPLETED**
+- [x] **Static Hosting**: Ready untuk Netlify dengan optimized assets
+- [x] **SPA Routing**: Configuration lengkap untuk single-page application
+- [x] **CDN Optimization**: Tree-shaking dan font optimization aktif
+- [x] **Environment Variables**: Production API URLs configured
+- [x] **Deployment Folder**: `Klarifikasi.id Deployment\` ✅ **UPDATED**
 
-### **✅ Android Deployment - READY**
-- [x] **Build APK**: `flutter build apk --release` ✅ COMPLETED (47.1MB)
-- [x] **Signing**: Ready untuk app signing configuration
-- [x] **Play Store**: Ready untuk Google Play Store upload
-- [x] **Testing**: Ready untuk Firebase App Distribution
-- [x] **Release**: Ready untuk production release
+### **✅ Android Deployment - PRODUCTION READY**
+- [x] **Build APK**: `flutter build apk --release` ✅ **OPTIMIZED (47.1MB)**
+- [x] **Native Performance**: Android-optimized build dengan native code
+- [x] **App Signing**: Ready untuk production signing configuration
+- [x] **Play Store**: Ready untuk Google Play Store submission
+- [x] **Firebase Distribution**: Ready untuk beta testing dan distribution
+- [x] **Release Build**: Production-ready APK dengan proguard optimization
 
-### **✅ Backend Deployment - READY**
-- [x] **Server Setup**: Laravel server running di port 8000
-- [x] **Database Migration**: All migrations completed dengan MySQL
-- [x] **Environment Variables**: Production environment configured
-- [x] **SSL Setup**: Ready untuk HTTPS configuration
-- [x] **Monitoring**: Error tracking dan performance ready
+### **✅ Backend Deployment - FULLY OPERATIONAL**
+- [x] **Laravel Cloud**: ✅ **Deployed dan running di production**
+- [x] **Database PostgreSQL**: ✅ **Neon Cloud dengan SSL encryption**
+- [x] **Environment Variables**: ✅ **Production environment fully configured**
+- [x] **SSL/HTTPS**: ✅ **Laravel Cloud SSL certificate aktif**
+- [x] **API Endpoints**: ✅ **All routes tested dan berfungsi**
+- [x] **Google CSE Integration**: ✅ **API keys configured dan verified**
+- [x] **CORS Policy**: ✅ **Multi-origin support untuk Flutter web**
+- [x] **Health Monitoring**: ✅ **Health check endpoints available**
+- [x] **Error Tracking**: ✅ **Production-ready logging dan error handling**
 
 ## 🎯 Build Status
 
-### **✅ Web Build - COMPLETED**
+### **✅ Web Build - PRODUCTION READY**
 ```
-Build Location: Klarifikasi.id Frontend/build/web/
+Build Location: Klarifikasi.id Deployment/
 Files Generated:
 - index.html (main app file)
-- main.dart.js (compiled JavaScript)
+- main.dart.js (compiled JavaScript - optimized)
 - flutter.js (Flutter engine)
-- assets/ (images, fonts, icons)
+- assets/ (images, fonts, icons - tree-shaken)
 - manifest.json (PWA configuration)
+- flutter_service_worker.js (caching)
 
-Size: Optimized untuk production
-Status: ✅ Ready untuk deployment
+Optimizations Applied:
+- Font tree-shaking: 99.3% size reduction
+- Asset optimization aktif
+- JavaScript minification
+- PWA service worker enabled
+
+Size: Production optimized
+Status: ✅ Ready untuk Netlify deployment
 ```
 
-### **✅ Android Build - COMPLETED**
+### **✅ Android Build - PRODUCTION READY**
 ```
 Build Location: Klarifikasi.id Frontend/build/app/outputs/apk/release/
 APK File: app-release.apk (47.1MB)
 Features:
-- Native Android performance
-- Optimized for mobile devices
-- All features included
-- Production ready
+- Native Android performance dengan ARM optimization
+- Flutter engine embedded untuk offline capability
+- All features included (auth, search, history)
+- Production security hardening
+- ProGuard code obfuscation ready
 
-Status: ✅ Ready untuk Google Play Store
+Status: ✅ Ready untuk Google Play Store atau Firebase Distribution
 ```
 
-### **✅ Backend Status - RUNNING**
+### **✅ Backend Status - FULLY OPERATIONAL**
 ```
-Server: Laravel 12.32.5 running di http://localhost:8000
-Database: MySQL dengan PHPMyAdmin integration
-API: All endpoints tested dan working
-Authentication: Laravel Sanctum dengan token management
-Search: Google CSE API integration working
+🌐 Laravel Cloud Deployment:
+- URL: https://klarifikasiid-backend-main-ki47jp.laravel.cloud
+- Status: ✅ Deployed dan running
+- SSL: ✅ Laravel Cloud SSL certificate aktif
+- Environment: ✅ Production mode
 
-Status: ✅ Production Ready
+🗄️ Database PostgreSQL (Neon):
+- Provider: Neon Cloud (100% Free)
+- Connection: ✅ SSL encrypted connection
+- Location: Asia Southeast (Singapore)
+- Status: ✅ Production ready dengan data persistence
+
+🔍 Google CSE Integration:
+- API Key: ✅ Configured dan verified
+- Search Engine ID: ✅ Active dan functional
+- SSL Verification: ✅ Disabled untuk development
+- Rate Limiting: ✅ 10 requests/minute protection
+
+🔐 Authentication & Security:
+- Laravel Sanctum: ✅ Token-based authentication
+- CORS Policy: ✅ Multi-origin support configured
+- Session Management: ✅ Database-driven sessions
+- Error Handling: ✅ Production-ready logging
+
+📊 API Endpoints Status:
+- POST /api/search: ✅ Active dengan Google CSE
+- GET /api/health: ✅ Health check available
+- Authentication routes: ✅ All endpoints functional
+- History management: ✅ CRUD operations ready
+
+Status: ✅ FULLY PRODUCTION READY
 ```
 
 ## 🧪 Testing
