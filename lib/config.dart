@@ -26,6 +26,14 @@ import 'package:flutter/foundation.dart'; // Untuk detection platform (Web/Mobil
 /// final response = await http.get(Uri.parse('${apiBaseUrl}/api/search'));
 /// ```
 String get apiBaseUrl {
+  // === FORCE PRODUCTION MODE ===
+  // Check if we want to force production backend (untuk testing deployment)
+  const String forceProduction = String.fromEnvironment('FORCE_PRODUCTION');
+
+  if (forceProduction.isNotEmpty && forceProduction.toLowerCase() == 'true') {
+    return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
+  }
+
   // === PRODUCTION ENVIRONMENT (Netlify) ===
   // Gunakan environment variables yang di-set di Netlify
   const String productionUrl = String.fromEnvironment('API_BASE_URL');
@@ -49,9 +57,8 @@ String get apiBaseUrl {
   }
 
   // === FALLBACK PRODUCTION ===
-  // TODO: Update dengan URL Heroku Laravel backend setelah deployment berhasil
-  // Contoh: return 'https://klarifikasi-backend.herokuapp.com';
-  return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud//'; // Update dengan URL Heroku Laravel backend
+  // Laravel backend sudah di-deploy di Laravel Cloud
+  return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
 }
 
 /// === GOOGLE CSE API CONFIGURATION ===

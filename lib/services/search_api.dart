@@ -209,6 +209,10 @@ class SearchApi {
     }
 
     if (response.statusCode != 200) {
+      // Check if response is HTML instead of JSON
+      if (response.body.trim().startsWith('<')) {
+        throw Exception('Server returned HTML instead of JSON. Please check API configuration and CORS settings.');
+      }
       try {
         final Map<String, dynamic>? body =
             jsonDecode(response.body) as Map<String, dynamic>?;
@@ -221,6 +225,10 @@ class SearchApi {
 
     // Parse successful response
     try {
+      // Check if response is HTML instead of JSON
+      if (response.body.trim().startsWith('<')) {
+        throw Exception('Server returned HTML instead of JSON. Please check API configuration and CORS settings.');
+      }
       final Map<String, dynamic> body =
           jsonDecode(response.body) as Map<String, dynamic>;
       return onSuccess(body);
