@@ -49,9 +49,9 @@ String get apiBaseUrl {
   }
 
   // === FALLBACK PRODUCTION ===
-  // TODO: Update dengan URL Render production setelah deployment berhasil
-  // Contoh: return 'https://klarifikasi-backend.onrender.com';
-  return 'https://your-render-app.onrender.com'; // Ganti dengan URL Render asli setelah deploy
+  // TODO: Update dengan URL Heroku Laravel backend setelah deployment berhasil
+  // Contoh: return 'https://klarifikasi-backend.herokuapp.com';
+  return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud//'; // Update dengan URL Heroku Laravel backend
 }
 
 /// === GOOGLE CSE API CONFIGURATION ===
