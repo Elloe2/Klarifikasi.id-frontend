@@ -38,17 +38,22 @@
 - **Error Monitoring**: Comprehensive logging dan error tracking
 - **Scalable Architecture**: Clean code structure untuk easy maintenance
 
+## 🌐 Production URLs
+
+- Frontend (Cloudhebat): https://www.klarifikasi.rj22d.my.id/
+- Backend (Laravel Cloud): https://klarifikasiid-backend-main-ki47jp.laravel.cloud/
+
 ## 🏗️ Arsitektur Aplikasi
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
 │   Flutter       │    │     Laravel      │    │     MySQL       │
-│   Frontend      │◄──►│     Backend      │◄──►│    Database     │
+│   Frontend      │◄──►│     Bckend      │◄──►│    Database     │
 │                 │    │                  │    │                 │
 │ • Loading UI    │    │ • Auth API       │    │ • Users         │
 │ • Error Dialogs │    │ • Search API     │    │ • Search History│
 │ • Responsive    │    │ • Sanctum Token  │    │ • Access Tokens │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
+└─────────────────┘    └───────────a───────┘    └─────────────────┘
 ```
 
 ## 🛠️ Tech Stack
@@ -56,7 +61,7 @@
 ### **Frontend (Flutter)**
 - **Framework**: Flutter 3.9.2 🚀
 - **State Management**: Provider Pattern 📱
-- **HTTP Client**: Dio dengan retry logic 🔄
+- **HTTP Client**: http package dengan timeout & retry (custom) 🔄
 - **Storage**: Flutter Secure Storage 🔐
 - **UI Framework**: Material 3 dengan custom theming 🎨
 
@@ -129,11 +134,15 @@ php artisan serve --host=0.0.0.0 --port=8000
 # Install Flutter dependencies
 flutter pub get
 
-# Run web development server
-flutter run -d chrome --web-port 3000
+# Run web development server (arahkan ke backend produksi)
+flutter run -d chrome --web-port 3000 \
+  --dart-define=API_BASE_URL=https://klarifikasiid-backend-main-ki47jp.laravel.cloud \
+  --dart-define=FORCE_PRODUCTION=true
 
-# Atau build untuk production
-flutter build web --release
+# Build untuk production (Cloudhebat deploy)
+flutter build web --release \
+  --dart-define=API_BASE_URL=https://klarifikasiid-backend-main-ki47jp.laravel.cloud \
+  --dart-define=FORCE_PRODUCTION=true
 ```
 
 ### **4. Configure Google CSE API**
@@ -163,10 +172,10 @@ DB_DATABASE=klarifikasi_id
 DB_USERNAME=root
 DB_PASSWORD=your_password
 
-# Google Custom Search
-GOOGLE_CSE_KEY=AIzaSyAFOdoaMwgurnjfnhGKn5GFy6_m2HKiGtA
-GOOGLE_CSE_CX=6242f5825dedb4b59
-GOOGLE_CSE_VERIFY_SSL=false
+# Google Custom Search (gunakan ENV di server - jangan commit key)
+GOOGLE_CSE_KEY=your_api_key_here
+GOOGLE_CSE_CX=your_cx_id_here
+GOOGLE_CSE_VERIFY_SSL=true
 
 # Session & Cache
 SESSION_DRIVER=database
@@ -180,7 +189,7 @@ String get apiBaseUrl {
   if (kDebugMode) {
     return 'http://localhost:8000';
   }
-  return 'https://your-production-domain.com';
+  return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
 }
 ```
 
@@ -198,7 +207,7 @@ String get apiBaseUrl {
 ### **Search Routes**
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/api/search` | Perform fact-checking search | ✅ |
+| POST | `/api/search` | Perform fact-checking search | ❌ |
 | GET | `/api/history` | Get search history | ✅ |
 | DELETE | `/api/history` | Clear search history | ✅ |
 
@@ -247,15 +256,18 @@ sudo nginx -t
 sudo systemctl reload nginx
 ```
 
-### **Frontend Deployment (Flutter)**
+### **Frontend Deployment (Flutter Web - Cloudhebat)**
 
-**Netlify/Vercel:**
+**Cloudhebat (Static Hosting):**
 ```bash
-# Build Flutter web
-flutter build web --release
+# Build Flutter web (menyematkan API URL produksi)
+flutter build web --release \
+  --dart-define=API_BASE_URL=https://klarifikasiid-backend-main-ki47jp.laravel.cloud \
+  --dart-define=FORCE_PRODUCTION=true
 
-# Upload build/web/ ke Netlify
-# Configure SPA redirect rules
+# Upload isi folder build/web/ ke Cloudhebat
+# Pastikan semua route diarahkan ke index.html (SPA)
+# Jika update tidak muncul, lakukan hard refresh/clear site data (service worker cache)
 ```
 
 **Traditional Hosting:**
