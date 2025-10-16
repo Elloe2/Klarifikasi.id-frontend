@@ -24,8 +24,28 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  
+  # Font configuration untuk SpotifyMix
+  fonts:
+    - family: SpotifyMix
+      fonts:
+        - asset: assets/font/SpotifyMix-Regular.ttf
+        - asset: assets/font/SpotifyMix-Thin.ttf
+          weight: 100
+        - asset: assets/font/SpotifyMix-Light.ttf
+          weight: 300
+        - asset: assets/font/SpotifyMix-Medium.ttf
+          weight: 500
+        - asset: assets/font/SpotifyMix-Bold.ttf
+          weight: 700
+        - asset: assets/font/SpotifyMix-Extrabold.ttf
+          weight: 800
+        - asset: assets/font/SpotifyMix-Black.ttf
+          weight: 900
+  
   assets:
     - assets/icons/
     - assets/images/
     - assets/logo/
+    - assets/font/
 

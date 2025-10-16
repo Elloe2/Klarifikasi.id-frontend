@@ -109,7 +109,8 @@ class _SearchPageState extends State<SearchPage> {
 
     // Tinggi search card yang lebih akurat dengan semua padding dan spacing
     // Search card + app bar + top spacing + cooldown indicator = sekitar 250-300px
-    final searchCardHeight = 280.0; // Ditingkatkan dari 120px ke 280px untuk akurasi
+    final searchCardHeight =
+        280.0; // Ditingkatkan dari 120px ke 280px untuk akurasi
 
     // Update state untuk mengontrol visibility suggestion panel
     // Jika scroll offset < searchCardHeight, maka suggestion tetap visible
@@ -216,8 +217,8 @@ class _SearchPageState extends State<SearchPage> {
     // === MULAI PROSES PENCARIAN ===
     // Update state untuk menunjukkan loading state dan reset error
     setState(() {
-      _isLoading = true;      // Aktifkan loading indicator
-      _error = null;         // Reset error message
+      _isLoading = true; // Aktifkan loading indicator
+      _error = null; // Reset error message
       _lastSearchTime = DateTime.now(); // Record waktu pencarian
     });
 
@@ -233,8 +234,8 @@ class _SearchPageState extends State<SearchPage> {
       if (mounted) {
         // Update state dengan hasil pencarian
         setState(() {
-          _results = results;    // Set hasil pencarian
-          _isLoading = false;    // Matikan loading indicator
+          _results = results; // Set hasil pencarian
+          _isLoading = false; // Matikan loading indicator
         });
       }
     } catch (e) {
@@ -243,7 +244,7 @@ class _SearchPageState extends State<SearchPage> {
       if (mounted) {
         setState(() {
           _error = e.toString(); // Simpan error message
-          _isLoading = false;    // Matikan loading indicator
+          _isLoading = false; // Matikan loading indicator
         });
       }
     }
@@ -279,9 +280,9 @@ class _SearchPageState extends State<SearchPage> {
     if (!mounted) return;
 
     // Tampilkan snackbar menggunakan ScaffoldMessenger
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(message)),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
   }
 
   Future<void> _copyLink(String url) async {
@@ -313,21 +314,19 @@ class _SearchPageState extends State<SearchPage> {
       // Extend body untuk menggunakan full screen area
       extendBody: true,
 
-      // === APP BAR ===
-      // Header aplikasi dengan branding dan spacing yang tepat
+      // === SPOTIFY-STYLE APP BAR ===
+      // Clean header seperti Spotify
       appBar: AppBar(
-        titleSpacing: 16,
-        title: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Klarifikasi.id',
-              style: theme.textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-          ],
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        title: Text(
+          'Klarifikasi.id',
+          style: theme.textTheme.headlineSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            color: Colors.white,
+          ),
         ),
+        centerTitle: false,
       ),
 
       // === MAIN BODY ===
@@ -389,11 +388,11 @@ class _SearchPageState extends State<SearchPage> {
                             borderRadius: BorderRadius.circular(8),
                             child: LinearProgressIndicator(
                               // Calculate progress based on elapsed vs total cooldown time
-                              value: ((
-                                        _cooldown.inMilliseconds -
-                                        onCooldown.inMilliseconds) /
-                                    _cooldown.inMilliseconds)
-                                  .clamp(0.0, 1.0),
+                              value:
+                                  ((_cooldown.inMilliseconds -
+                                              onCooldown.inMilliseconds) /
+                                          _cooldown.inMilliseconds)
+                                      .clamp(0.0, 1.0),
                             ),
                           ),
                         ],
@@ -416,8 +415,9 @@ class _SearchPageState extends State<SearchPage> {
                         // Auto-fill search box dengan suggestion yang dipilih
                         _controller
                           ..text = value
-                          ..selection =
-                              TextSelection.collapsed(offset: value.length);
+                          ..selection = TextSelection.collapsed(
+                            offset: value.length,
+                          );
                         // Langsung lakukan pencarian
                         _performSearchWithLimit();
                       },
@@ -446,13 +446,13 @@ class _SearchPageState extends State<SearchPage> {
                           ? const _LoadingState()
                           // Empty state ketika belum ada hasil pencarian
                           : _results.isEmpty
-                              ? const _EmptyState()
-                              // Results list dengan semua hasil pencarian
-                              : _ResultsList(
-                                  results: _results,
-                                  onOpen: _openResult,
-                                  onCopy: _copyLink,
-                                ),
+                          ? const _EmptyState()
+                          // Results list dengan semua hasil pencarian
+                          : _ResultsList(
+                              results: _results,
+                              onOpen: _openResult,
+                              onCopy: _copyLink,
+                            ),
                     ),
                   ),
 
@@ -486,9 +486,7 @@ class _SuggestionPanel extends StatelessWidget {
       decoration: BoxDecoration(
         gradient: AppTheme.cardGradient,
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(
-          color: Colors.white.withValues(alpha: 0.1),
-        ),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
       ),
       child: Padding(
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
@@ -505,10 +503,7 @@ class _SuggestionPanel extends StatelessWidget {
 // Widget yang mengatur layout dan styling untuk multiple suggestion chips
 // Menggunakan Column layout dengan title dan Wrap untuk chips arrangement
 class _SuggestionChips extends StatelessWidget {
-  const _SuggestionChips({
-    required this.suggestions,
-    required this.onSelected,
-  });
+  const _SuggestionChips({required this.suggestions, required this.onSelected});
 
   final List<String> suggestions;
   final ValueChanged<String> onSelected;
@@ -537,7 +532,8 @@ class _SuggestionChips extends StatelessWidget {
                 (index, text) => _AnimatedSuggestionChip(
                   label: text,
                   icon: Icons.newspaper, // Simplified icon selection
-                  background: AppTheme.primaryGradient, // Simplified gradient selection
+                  background:
+                      AppTheme.primaryGradient, // Simplified gradient selection
                   onTap: () => onSelected(text),
                 ),
               )
@@ -565,7 +561,8 @@ class _AnimatedSuggestionChip extends StatefulWidget {
   final VoidCallback onTap;
 
   @override
-  State<_AnimatedSuggestionChip> createState() => _AnimatedSuggestionChipState();
+  State<_AnimatedSuggestionChip> createState() =>
+      _AnimatedSuggestionChipState();
 }
 
 // === ANIMATED SUGGESTION CHIP STATE ===
@@ -581,10 +578,8 @@ class _AnimatedSuggestionChipState extends State<_AnimatedSuggestionChip>
     final hoveredGradient = LinearGradient(
       colors: gradient.colors
           .map(
-            (color) => Color.alphaBlend(
-              Colors.black.withValues(alpha: 0.12),
-              color,
-            ),
+            (color) =>
+                Color.alphaBlend(Colors.black.withValues(alpha: 0.12), color),
           )
           .toList(),
       begin: gradient.begin,
@@ -732,7 +727,9 @@ class _SearchCardState extends State<_SearchCard> {
                             height: 20,
                             child: CircularProgressIndicator(
                               strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
                             ),
                           )
                         : const Icon(
@@ -847,10 +844,7 @@ class _EmptyState extends StatelessWidget {
               // Judul dengan efek gradient menggunakan ShaderMask
               ShaderMask(
                 shaderCallback: (bounds) => LinearGradient(
-                  colors: [
-                    Colors.white,
-                    Colors.white.withValues(alpha: 0.8),
-                  ],
+                  colors: [Colors.white, Colors.white.withValues(alpha: 0.8)],
                 ).createShader(bounds),
                 child: Text(
                   'Mulai verifikasi klaimmu',
@@ -868,7 +862,10 @@ class _EmptyState extends StatelessWidget {
               // === DESCRIPTIVE CONTAINER ===
               // Container dengan informasi cara penggunaan aplikasi
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 16,
+                  vertical: 12,
+                ),
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceDark.withValues(alpha: 0.5),
                   borderRadius: BorderRadius.circular(16),
@@ -916,13 +913,19 @@ class _EmptyState extends StatelessWidget {
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
                     colors: [
-                      AppTheme.primaryGradient.colors.first.withValues(alpha: 0.1),
-                      AppTheme.accentGradient.colors.first.withValues(alpha: 0.05),
+                      AppTheme.primaryGradient.colors.first.withValues(
+                        alpha: 0.1,
+                      ),
+                      AppTheme.accentGradient.colors.first.withValues(
+                        alpha: 0.05,
+                      ),
                     ],
                   ),
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: AppTheme.primaryGradient.colors.first.withValues(alpha: 0.2),
+                    color: AppTheme.primaryGradient.colors.first.withValues(
+                      alpha: 0.2,
+                    ),
                   ),
                 ),
                 child: Column(
@@ -930,7 +933,11 @@ class _EmptyState extends StatelessWidget {
                   children: [
                     Row(
                       children: [
-                        Icon(Icons.lightbulb, color: AppTheme.tertiaryAccentColor, size: 20),
+                        Icon(
+                          Icons.lightbulb,
+                          color: AppTheme.tertiaryAccentColor,
+                          size: 20,
+                        ),
                         const SizedBox(width: 8),
                         Text(
                           'Tips Verifikasi',
@@ -943,14 +950,14 @@ class _EmptyState extends StatelessWidget {
                     ),
                     const SizedBox(height: 12),
                     _TipItem(
-                      text: 'Periksa tanggal berita - klaim lama mungkin sudah terjawab',
+                      text:
+                          'Periksa tanggal berita - klaim lama mungkin sudah terjawab',
                     ),
                     _TipItem(
-                      text: 'Bandingkan dengan sumber resmi pemerintah atau lembaga terpercaya',
+                      text:
+                          'Bandingkan dengan sumber resmi pemerintah atau lembaga terpercaya',
                     ),
-                    _TipItem(
-                      text: 'Waspadai judul clickbait yang provokatif',
-                    ),
+                    _TipItem(text: 'Waspadai judul clickbait yang provokatif'),
                   ],
                 ),
               ),
@@ -1125,18 +1132,12 @@ class _AnimatedResultCardState extends State<_AnimatedResultCard>
     _slideAnimation = Tween<double>(
       begin: 50.0,
       end: 0.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeOutCubic,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic));
 
     _fadeAnimation = Tween<double>(
       begin: 0.0,
       end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _controller,
-      curve: Curves.easeInOut,
-    ));
+    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeInOut));
 
     // === STAGGERED ANIMATION ===
     // Setiap card muncul dengan delay berdasarkan index untuk efek waterfall
@@ -1267,7 +1268,8 @@ class _ResultCard extends StatelessWidget {
                           width: 72,
                           height: 72,
                           decoration: BoxDecoration(
-                            color: theme.colorScheme.primaryContainer.withValues(alpha: 0.3),
+                            color: theme.colorScheme.primaryContainer
+                                .withValues(alpha: 0.3),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
@@ -1326,7 +1328,11 @@ class _ResultCard extends StatelessWidget {
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
                                 children: [
-                                  const Icon(Icons.public, size: 16, color: Colors.white),
+                                  const Icon(
+                                    Icons.public,
+                                    size: 16,
+                                    color: Colors.white,
+                                  ),
                                   const SizedBox(width: 6),
                                   Text(
                                     result.displayLink,
@@ -1346,27 +1352,40 @@ class _ResultCard extends StatelessWidget {
                           // === CREDIBILITY BADGE ===
                           // Badge yang menunjukkan tingkat kredibilitas artikel
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 8,
+                              vertical: 4,
+                            ),
                             decoration: BoxDecoration(
-                              color: _getCredibilityColor(result.credibilityScore ?? 85).withValues(alpha: 0.2),
+                              color: _getCredibilityColor(
+                                result.credibilityScore ?? 85,
+                              ).withValues(alpha: 0.2),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: _getCredibilityColor(result.credibilityScore ?? 85).withValues(alpha: 0.5),
+                                color: _getCredibilityColor(
+                                  result.credibilityScore ?? 85,
+                                ).withValues(alpha: 0.5),
                               ),
                             ),
                             child: Row(
                               mainAxisSize: MainAxisSize.min,
                               children: [
                                 Icon(
-                                  _getCredibilityIcon(result.credibilityScore ?? 85),
+                                  _getCredibilityIcon(
+                                    result.credibilityScore ?? 85,
+                                  ),
                                   size: 14,
-                                  color: _getCredibilityColor(result.credibilityScore ?? 85),
+                                  color: _getCredibilityColor(
+                                    result.credibilityScore ?? 85,
+                                  ),
                                 ),
                                 const SizedBox(width: 4),
                                 Text(
                                   'Terpercaya',
                                   style: theme.textTheme.labelSmall?.copyWith(
-                                    color: _getCredibilityColor(result.credibilityScore ?? 85),
+                                    color: _getCredibilityColor(
+                                      result.credibilityScore ?? 85,
+                                    ),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -1419,12 +1438,16 @@ class _ResultCard extends StatelessWidget {
               children: [
                 // === PRIMARY ACTION: OPEN SOURCE ===
                 FilledButton.tonal(
-                  onPressed:
-                      result.link.isEmpty ? null : () => onOpen(result.link),
+                  onPressed: result.link.isEmpty
+                      ? null
+                      : () => onOpen(result.link),
                   style: FilledButton.styleFrom(
                     backgroundColor: AppTheme.primaryGradient.colors.first,
                     foregroundColor: Colors.black,
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
                     minimumSize: const Size(120, 44),
                   ),
                   child: Row(
@@ -1439,10 +1462,14 @@ class _ResultCard extends StatelessWidget {
 
                 // === SECONDARY ACTION: COPY LINK ===
                 OutlinedButton.icon(
-                  onPressed:
-                      result.link.isEmpty ? null : () => onCopy(result.link),
+                  onPressed: result.link.isEmpty
+                      ? null
+                      : () => onCopy(result.link),
                   style: OutlinedButton.styleFrom(
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 20,
+                      vertical: 14,
+                    ),
                     minimumSize: const Size(120, 44),
                   ),
                   icon: const Icon(Icons.copy, size: 18),

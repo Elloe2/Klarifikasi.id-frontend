@@ -294,38 +294,39 @@ class _RegisterPageState extends State<RegisterPage> {
                     children: [
                       const Spacer(flex: 1),
 
-                      // Header
+                      // Spotify-style Header
                       Center(
                         child: Column(
                           children: [
+                            // Clean logo tanpa container yang berlebihan
                             SvgPicture.asset(
                               'assets/logo/FIX_white.svg',
-                              width: 160,
-                              height: 160,
+                              width: 80,
+                              height: 80,
                               colorFilter: const ColorFilter.mode(
                                 Colors.white,
                                 BlendMode.srcIn,
                               ),
                               placeholderBuilder: (context) => const Icon(
                                 Icons.person_add,
-                                size: 160,
+                                size: 80,
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 60),
                             Text(
                               'Buat Akun Baru',
-                              style: Theme.of(context).textTheme.headlineMedium
+                              style: Theme.of(context).textTheme.headlineLarge
                                   ?.copyWith(
-                                    color: Colors.white,
                                     fontWeight: FontWeight.w700,
+                                    fontSize: 32,
                                   ),
+                              textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Bergabunglah untuk mulai verifikasi informasi',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: Colors.white70),
+                              style: Theme.of(context).textTheme.bodyMedium,
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -348,8 +349,6 @@ class _RegisterPageState extends State<RegisterPage> {
                         },
                       ),
 
-                      const SizedBox(height: 16),
-
                       _buildTextField(
                         controller: _emailController,
                         label: 'Email',
@@ -368,8 +367,6 @@ class _RegisterPageState extends State<RegisterPage> {
                           return null;
                         },
                       ),
-
-                      const SizedBox(height: 16),
 
                       _buildTextField(
                         controller: _passwordController,
@@ -398,8 +395,6 @@ class _RegisterPageState extends State<RegisterPage> {
                           return null;
                         },
                       ),
-
-                      const SizedBox(height: 16),
 
                       _buildTextField(
                         controller: _confirmPasswordController,
@@ -523,34 +518,21 @@ class _RegisterPageState extends State<RegisterPage> {
     bool obscureText = false,
     Widget? suffixIcon,
   }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon, color: Colors.white70),
-        suffixIcon: suffixIcon,
-        filled: true,
-        fillColor: AppTheme.surfaceDark.withValues(alpha: 0.5),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          prefixIcon: Icon(icon, color: AppTheme.primarySeedColor, size: 20),
+          suffixIcon: suffixIcon,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.primarySeedColor),
-        ),
-        labelStyle: const TextStyle(color: Colors.white70),
-        hintStyle: const TextStyle(color: Colors.white54),
+        style: Theme.of(context).textTheme.bodyLarge,
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        validator: validator,
       ),
-      style: const TextStyle(color: Colors.white),
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      validator: validator,
     );
   }
 

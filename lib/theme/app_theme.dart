@@ -39,60 +39,70 @@ class AppTheme {
   // Private constructor untuk singleton pattern
   AppTheme._();
 
-  // === CORE COLOR PALETTE ===
-  // Warna dasar yang digunakan sebagai foundation tema
-  static const Color backgroundDark = Color(0xFF141E24); // Background utama
-  static const Color surfaceDark = Color(0xFF1D2A31); // Surface untuk cards
-  static const Color outlineDark = Color(0xFF23323A); // Border dan outline
-  static const Color subduedGray = Color(0xFF37464E); // Text dan icon subtle
+  // === SPOTIFY-INSPIRED COLOR PALETTE ===
+  // Dark theme dengan subtle surfaces dan better contrast
+  static const Color backgroundDark = Color(
+    0xFF121212,
+  ); // Spotify's dark background
+  static const Color surfaceDark = Color(0xFF1E1E1E); // Card backgrounds
+  static const Color surfaceElevated = Color(0xFF2A2A2A); // Elevated surfaces
+  static const Color outlineDark = Color(0xFF3A3A3A); // Subtle borders
+  static const Color subduedGray = Color(
+    0xFFB3B3B3,
+  ); // Secondary text (Spotify's gray)
+  static const Color mutedGray = Color(0xFF535353); // Muted elements
 
-  // === BRAND COLOR PALETTE ===
-  // Warna brand dan aksen untuk identitas visual
-  static const Color primarySeedColor = Color(0xFF92D332); // Primary brand green
-  static const Color secondaryAccentColor = Color(0xFF467F9D); // Secondary blue
-  static const Color tertiaryAccentColor = Color(0xFF1B96D4); // Tertiary cyan
+  // === SPOTIFY-INSPIRED GREEN PALETTE ===
+  // Green yang lebih vibrant dan accessible seperti Spotify
+  static const Color primarySeedColor = Color(0xFF1DB954); // Spotify's green
+  static const Color primaryLight = Color(0xFF1ED760); // Lighter variant
+  static const Color primaryDark = Color(0xFF1AA34A); // Darker variant
+  static const Color secondaryAccentColor = Color(
+    0xFF1DB954,
+  ); // Consistent green
+  static const Color tertiaryAccentColor = Color(
+    0xFF1ED760,
+  ); // Light green accents
 
   // === GRADIENT DEFINITIONS ===
   // Pre-defined gradients untuk konsistensi visual di seluruh aplikasi
 
-  /// Primary brand gradient menggunakan warna hijau utama
+  /// Modern primary gradient dengan subtle depth
   /// Digunakan untuk: Primary buttons, highlights, success states
   static const LinearGradient primaryGradient = LinearGradient(
-    colors: [Color(0xFF92D332), Color(0xFF92D332)], // Solid green untuk simplicity
+    colors: [primarySeedColor, primaryDark],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  /// Secondary gradient dengan warna biru untuk aksen
-  /// Digunakan untuk: Secondary buttons, accents, info states
+  /// Modern secondary gradient untuk subtle accents
+  /// Digunakan untuk: Secondary buttons, info states, subtle highlights
   static const LinearGradient secondaryGradient = LinearGradient(
-    colors: [Color(0xFF467F9D), Color(0xFF467F9D)], // Solid blue untuk consistency
+    colors: [secondaryAccentColor, primaryDark],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  /// Accent gradient dengan warna cyan untuk tertiary actions
+  /// Modern accent gradient untuk special highlights
   /// Digunakan untuk: Links, tertiary buttons, special highlights
   static const LinearGradient accentGradient = LinearGradient(
-    colors: [Color(0xFF1B96D4), Color(0xFF1B96D4)], // Solid cyan untuk tertiary
+    colors: [tertiaryAccentColor, secondaryAccentColor],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
 
-  /// Background gradient untuk main app background
-  /// Menggunakan kombinasi backgroundDark colors untuk depth
+  /// Modern minimalist background gradient
   /// Digunakan untuk: Scaffold background, main screens
   static const LinearGradient backgroundGradient = LinearGradient(
-    colors: [Color(0xFF141E24), Color(0xFF1D2A31)], // Dark to darker transition
-    begin: Alignment.topLeft,
-    end: Alignment.bottomRight,
+    colors: [backgroundDark, surfaceDark],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
   );
 
-  /// Card gradient untuk container dan card backgrounds
-  /// Menggunakan surfaceDark untuk subtle depth
+  /// Modern card gradient dengan subtle elevation
   /// Digunakan untuk: Cards, containers, elevated surfaces
   static const LinearGradient cardGradient = LinearGradient(
-    colors: [surfaceDark, surfaceDark], // Solid surface color
+    colors: [surfaceElevated, surfaceDark],
     begin: Alignment.topLeft,
     end: Alignment.bottomRight,
   );
@@ -124,9 +134,19 @@ class AppTheme {
     end: Alignment.bottomRight,
   );
 
-  /// Card shadows untuk elevated surfaces
-  /// Kosong untuk flat design approach
-  static const List<BoxShadow> cardShadows = []; // Flat design tanpa shadows
+  /// Modern subtle shadows untuk depth tanpa overwhelming
+  static const List<BoxShadow> cardShadows = [
+    BoxShadow(
+      color: Color(0x1A000000), // Very subtle black shadow
+      blurRadius: 8,
+      offset: Offset(0, 2),
+    ),
+  ];
+
+  /// Modern elevation shadows untuk different levels
+  static const List<BoxShadow> elevatedShadows = [
+    BoxShadow(color: Color(0x1A000000), blurRadius: 12, offset: Offset(0, 4)),
+  ];
 
   // === THEME DATA CONSTRUCTION ===
 
@@ -159,15 +179,141 @@ class AppTheme {
       // === MATERIAL 3 SETUP ===
       useMaterial3: true, // Enable Material 3 design system
       colorScheme: lightScheme, // Custom color scheme
-
       // === BASIC CONFIGURATION ===
-      scaffoldBackgroundColor: surfaceDark, // Dark background untuk semua screens
+      scaffoldBackgroundColor:
+          backgroundDark, // Pure black untuk modern minimalist look
+      // === TYPOGRAPHY SYSTEM ===
+      // SpotifyMix font dengan hierarchy yang optimal
+      textTheme: TextTheme(
+        // Display styles untuk hero text dengan SpotifyMix
+        displayLarge: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 48,
+          fontWeight: FontWeight.w900,
+          letterSpacing: -1.5,
+          color: Colors.white,
+          height: 1.1,
+        ),
+        displayMedium: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 40,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -1.0,
+          color: Colors.white,
+          height: 1.2,
+        ),
+        displaySmall: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 32,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.5,
+          color: Colors.white,
+          height: 1.3,
+        ),
 
-      // === TYPOGRAPHY ===
-      // White text untuk semua text elements di dark theme
-      textTheme: ThemeData.dark().textTheme.apply(
-        bodyColor: Colors.white, // Body text color
-        displayColor: Colors.white, // Display text color
+        // Headline styles untuk section headers dengan SpotifyMix
+        headlineLarge: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 28,
+          fontWeight: FontWeight.w700,
+          letterSpacing: -0.25,
+          color: Colors.white,
+          height: 1.3,
+        ),
+        headlineMedium: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 24,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+          color: Colors.white,
+          height: 1.4,
+        ),
+        headlineSmall: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 20,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0,
+          color: Colors.white,
+          height: 1.4,
+        ),
+
+        // Title styles untuk card headers dengan SpotifyMix
+        titleLarge: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 18,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.15,
+          color: Colors.white,
+          height: 1.4,
+        ),
+        titleMedium: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.15,
+          color: Colors.white,
+          height: 1.5,
+        ),
+        titleSmall: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
+          color: Colors.white,
+          height: 1.5,
+        ),
+
+        // Body styles untuk content dengan SpotifyMix
+        bodyLarge: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 16,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0,
+          color: Colors.white,
+          height: 1.4,
+        ),
+        bodyMedium: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 14,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0,
+          color: subduedGray, // Spotify's secondary text color
+          height: 1.4,
+        ),
+        bodySmall: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 12,
+          fontWeight: FontWeight.w400,
+          letterSpacing: 0,
+          color: mutedGray, // Spotify's muted text color
+          height: 1.4,
+        ),
+
+        // Label styles untuk UI elements dengan SpotifyMix
+        labelLarge: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 14,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.1,
+          color: Colors.white,
+          height: 1.4,
+        ),
+        labelMedium: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 12,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.5,
+          color: Colors.white.withValues(alpha: 0.8),
+          height: 1.4,
+        ),
+        labelSmall: TextStyle(
+          fontFamily: 'SpotifyMix',
+          fontSize: 10,
+          fontWeight: FontWeight.w500,
+          letterSpacing: 0.5,
+          color: Colors.white.withValues(alpha: 0.7),
+          height: 1.4,
+        ),
       ),
 
       // === APP BAR THEME ===
@@ -178,83 +324,203 @@ class AppTheme {
         elevation: 0, // No shadow untuk flat design
       ),
 
-      // === BOTTOM NAVIGATION THEME ===
-      // Custom navigation bar dengan transparent background
+      // === SPOTIFY-INSPIRED NAVIGATION THEME ===
+      // Clean navigation bar seperti Spotify
       navigationBarTheme: NavigationBarThemeData(
-        backgroundColor: Colors.transparent, // Transparent background
-        indicatorColor: const Color(0x3358CC02), // Subtle green indicator
-        elevation: 0, // No elevation untuk flat design
-        height: 72, // Custom height untuk better UX
-        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow, // Always show labels
+        backgroundColor: backgroundDark, // Dark background seperti Spotify
+        indicatorColor: Colors.transparent, // No indicator untuk clean look
+        elevation: 0, // No elevation
+        height: 70, // Compact height seperti Spotify
+        labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
 
-        // Dynamic icon theming berdasarkan selection state
+        // Spotify-style icon theming
         iconTheme: WidgetStateProperty.resolveWith((states) {
-          final baseColor = Colors.white;
           return IconThemeData(
             color: states.contains(WidgetState.selected)
-                ? baseColor // Full white untuk selected
-                : baseColor.withValues(alpha: 0.65), // 65% opacity untuk unselected
+                ? Colors
+                      .white // White untuk selected (seperti Spotify)
+                : subduedGray, // Gray untuk unselected
+            size: 24,
           );
         }),
 
-        // Dynamic label theming berdasarkan selection state
+        // Spotify-style label theming
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
-          final baseStyle = const TextStyle(
-            fontWeight: FontWeight.w600, // Semi-bold untuk readability
-            color: Colors.white,
+          return TextStyle(
+            fontWeight: FontWeight.w400, // Regular weight seperti Spotify
+            fontSize: 11,
+            color: states.contains(WidgetState.selected)
+                ? Colors
+                      .white // White untuk selected
+                : subduedGray, // Gray untuk unselected
           );
-          return states.contains(WidgetState.selected)
-              ? baseStyle // Full white untuk selected
-              : baseStyle.copyWith(
-                  color: Colors.white.withValues(alpha: 0.65), // 65% opacity untuk unselected
-                );
         }),
       ),
 
       // === BUTTON THEMES ===
-      // Consistent button styling di seluruh aplikasi
+      // Modern button system dengan better interaction states
 
-      /// Filled button theme untuk primary actions
+      /// Primary filled button theme
       filledButtonTheme: FilledButtonThemeData(
-        style: FilledButton.styleFrom(
-          padding: const EdgeInsets.symmetric(vertical: 14), // Vertical padding
-          foregroundColor: Colors.white, // White text untuk contrast
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16), // Rounded corners
-          ),
-        ),
+        style:
+            FilledButton.styleFrom(
+              backgroundColor: primarySeedColor,
+              foregroundColor: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              elevation: 0,
+              shadowColor: Colors.transparent,
+              textStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
+              ),
+            ).copyWith(
+              overlayColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.pressed)) {
+                  return Colors.white.withValues(alpha: 0.1);
+                }
+                if (states.contains(WidgetState.hovered)) {
+                  return Colors.white.withValues(alpha: 0.05);
+                }
+                return Colors.transparent;
+              }),
+              backgroundColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.disabled)) {
+                  return primarySeedColor.withValues(alpha: 0.3);
+                }
+                return primarySeedColor;
+              }),
+            ),
       ),
 
-      /// Outlined button theme untuk secondary actions
+      /// Secondary outlined button theme
       outlinedButtonTheme: OutlinedButtonThemeData(
-        style: OutlinedButton.styleFrom(
-          foregroundColor: Colors.white, // White text
-          side: const BorderSide(color: Color(0xFF1CB0F6)), // Cyan border
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16), // Consistent corner radius
-          ),
-        ),
+        style:
+            OutlinedButton.styleFrom(
+              foregroundColor: primarySeedColor,
+              side: BorderSide(color: primarySeedColor, width: 1.5),
+              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 18),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(16),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
+              ),
+            ).copyWith(
+              overlayColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.pressed)) {
+                  return primarySeedColor.withValues(alpha: 0.1);
+                }
+                if (states.contains(WidgetState.hovered)) {
+                  return primarySeedColor.withValues(alpha: 0.05);
+                }
+                return Colors.transparent;
+              }),
+              side: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.disabled)) {
+                  return BorderSide(
+                    color: primarySeedColor.withValues(alpha: 0.3),
+                  );
+                }
+                return BorderSide(color: primarySeedColor, width: 1.5);
+              }),
+            ),
       ),
 
-      // === CHIP THEME ===
-      // Styling untuk chip components
-      chipTheme: ChipThemeData(
-        backgroundColor: subduedGray, // Subtle gray background
-        selectedColor: const Color(0xFF22313A), // Darker untuk selected state
-        disabledColor: const Color(0xFF10191E), // Very dark untuk disabled
-        labelStyle: const TextStyle(color: Colors.white), // White text
-        secondaryLabelStyle: const TextStyle(color: Colors.white), // White secondary text
+      /// Text button theme
+      textButtonTheme: TextButtonThemeData(
+        style:
+            TextButton.styleFrom(
+              foregroundColor: primarySeedColor,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(12),
+              ),
+              textStyle: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                letterSpacing: 0.1,
+              ),
+            ).copyWith(
+              overlayColor: WidgetStateProperty.resolveWith((states) {
+                if (states.contains(WidgetState.pressed)) {
+                  return primarySeedColor.withValues(alpha: 0.1);
+                }
+                if (states.contains(WidgetState.hovered)) {
+                  return primarySeedColor.withValues(alpha: 0.05);
+                }
+                return Colors.transparent;
+              }),
+            ),
+      ),
+
+      // === INPUT DECORATION THEME ===
+      // Modern input field styling
+      inputDecorationTheme: InputDecorationTheme(
+        filled: true,
+        fillColor: surfaceElevated,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 20,
+          vertical: 18,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide.none,
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: outlineDark, width: 1),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: primarySeedColor, width: 2),
+        ),
+        errorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(
+            color: Colors.red.withValues(alpha: 0.5),
+            width: 1,
+          ),
+        ),
+        focusedErrorBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.red, width: 2),
+        ),
+        labelStyle: TextStyle(
+          color: Colors.white.withValues(alpha: 0.8),
+          fontWeight: FontWeight.w500,
+          fontSize: 14,
+        ),
+        hintStyle: TextStyle(
+          color: Colors.white.withValues(alpha: 0.5),
+          fontWeight: FontWeight.w400,
+          fontSize: 14,
+        ),
+        errorStyle: TextStyle(
+          color: Colors.red,
+          fontWeight: FontWeight.w500,
+          fontSize: 12,
+        ),
       ),
 
       // === SNACKBAR THEME ===
-      // Notification styling dengan brand colors
-      snackBarTheme: const SnackBarThemeData(
-        backgroundColor: Color(0xFF92D332), // Primary green background
-        contentTextStyle: TextStyle(color: Color(0xFF10241A)), // Dark green text untuk contrast
+      // Modern notification styling
+      snackBarTheme: SnackBarThemeData(
+        backgroundColor: surfaceElevated, // Elevated surface background
+        contentTextStyle: const TextStyle(
+          color: Colors.white,
+          fontWeight: FontWeight.w500,
+        ),
         behavior: SnackBarBehavior.floating, // Floating style
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.all(Radius.circular(12)), // Rounded corners
+          borderRadius: BorderRadius.circular(12), // Modern rounded corners
         ),
+        actionTextColor: primarySeedColor, // Modern green untuk action
       ),
     );
   }

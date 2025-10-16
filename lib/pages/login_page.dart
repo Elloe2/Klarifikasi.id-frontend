@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
-import '../widgets/loading_button.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -216,14 +215,14 @@ class _LoginPageState extends State<LoginPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      resizeToAvoidBottomInset: false, // Prevent keyboard overlap
-      backgroundColor: Colors.black,
+      resizeToAvoidBottomInset: false,
+      backgroundColor: AppTheme.backgroundDark,
       body: Container(
         decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: SingleChildScrollView(
-            physics: const ClampingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
+            physics: const BouncingScrollPhysics(),
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
             child: ConstrainedBox(
               constraints: BoxConstraints(
                 minHeight:
@@ -237,47 +236,48 @@ class _LoginPageState extends State<LoginPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      const Spacer(flex: 2),
+                      const Spacer(flex: 1),
 
-                      // Header
+                      // Spotify-style Header
                       Center(
                         child: Column(
                           children: [
+                            // Clean logo tanpa container yang berlebihan
                             SvgPicture.asset(
                               'assets/logo/FIX_white.svg',
-                              width: 160,
-                              height: 160,
+                              width: 80,
+                              height: 80,
                               colorFilter: const ColorFilter.mode(
                                 Colors.white,
                                 BlendMode.srcIn,
                               ),
                               placeholderBuilder: (context) => const Icon(
-                                Icons.login,
-                                size: 160,
+                                Icons.verified_user,
+                                size: 80,
                                 color: Colors.white,
                               ),
                             ),
-                            const SizedBox(height: 24),
+                            const SizedBox(height: 60),
                             Text(
-                              'Selamat Datang Kembali',
-                              style: Theme.of(context).textTheme.headlineMedium
+                              'Selamat Datang',
+                              style: Theme.of(context).textTheme.headlineLarge
                                   ?.copyWith(
-                                    color: Colors.white,
                                     fontWeight: FontWeight.w700,
+                                    fontSize: 32,
                                   ),
+                              textAlign: TextAlign.center,
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Masuk untuk melanjutkan verifikasi informasi',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: Colors.white70),
+                              style: Theme.of(context).textTheme.bodyMedium,
                               textAlign: TextAlign.center,
                             ),
                           ],
                         ),
                       ),
 
-                      const SizedBox(height: 40),
+                      const SizedBox(height: 48),
 
                       // Form Fields
                       _buildTextField(
@@ -328,50 +328,73 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 32),
 
-                      // Login Button
+                      // Spotify-style Login Button
                       SizedBox(
                         width: double.infinity,
-                        height: 50,
-                        child: LoadingButton(
-                          isLoading: _isLoading,
-                          onPressed: _login,
-                          child: Text(
-                            'Masuk',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                        child: ElevatedButton(
+                          onPressed: _isLoading ? null : _login,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: AppTheme.primarySeedColor,
+                            foregroundColor:
+                                Colors.black, // Black text seperti Spotify
+                            padding: const EdgeInsets.symmetric(vertical: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(
+                                25,
+                              ), // More rounded seperti Spotify
+                            ),
+                            elevation: 0,
                           ),
+                          child: _isLoading
+                              ? const SizedBox(
+                                  width: 20,
+                                  height: 20,
+                                  child: CircularProgressIndicator(
+                                    strokeWidth: 2,
+                                    valueColor: AlwaysStoppedAnimation<Color>(
+                                      Colors.black,
+                                    ),
+                                  ),
+                                )
+                              : Text(
+                                  'Masuk',
+                                  style: Theme.of(context).textTheme.labelLarge
+                                      ?.copyWith(
+                                        color: Colors.black,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 16,
+                                      ),
+                                ),
                         ),
                       ),
 
                       const SizedBox(height: 24),
 
-                      // Register Link
+                      // Register Link dengan better styling
                       Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Belum punya akun? ',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: Colors.white70),
+                        child: TextButton(
+                          onPressed: () => Navigator.of(
+                            context,
+                          ).pushReplacementNamed('/register'),
+                          child: RichText(
+                            text: TextSpan(
+                              text: 'Belum punya akun? ',
+                              style: Theme.of(context).textTheme.bodyMedium,
+                              children: [
+                                TextSpan(
+                                  text: 'Daftar sekarang',
+                                  style: Theme.of(context).textTheme.bodyMedium
+                                      ?.copyWith(
+                                        color: AppTheme.primarySeedColor,
+                                        fontWeight: FontWeight.w600,
+                                        decoration: TextDecoration.underline,
+                                        decorationColor:
+                                            AppTheme.primarySeedColor,
+                                      ),
+                                ),
+                              ],
                             ),
-                            TextButton(
-                              onPressed: () => Navigator.of(
-                                context,
-                              ).pushReplacementNamed('/register'),
-                              child: Text(
-                                'Daftar',
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: AppTheme.primarySeedColor,
-                                      fontWeight: FontWeight.w600,
-                                    ),
-                              ),
-                            ),
-                          ],
+                          ),
                         ),
                       ),
 
@@ -397,34 +420,21 @@ class _LoginPageState extends State<LoginPage> {
     bool obscureText = false,
     Widget? suffixIcon,
   }) {
-    return TextFormField(
-      controller: controller,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon, color: Colors.white70),
-        suffixIcon: suffixIcon,
-        filled: true,
-        fillColor: AppTheme.surfaceDark.withValues(alpha: 0.5),
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide.none,
+    return Container(
+      margin: const EdgeInsets.only(bottom: 20),
+      child: TextFormField(
+        controller: controller,
+        decoration: InputDecoration(
+          labelText: label,
+          hintText: hint,
+          prefixIcon: Icon(icon, color: AppTheme.primarySeedColor, size: 20),
+          suffixIcon: suffixIcon,
         ),
-        enabledBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(color: AppTheme.primarySeedColor),
-        ),
-        labelStyle: const TextStyle(color: Colors.white70),
-        hintStyle: const TextStyle(color: Colors.white54),
+        style: Theme.of(context).textTheme.bodyLarge,
+        keyboardType: keyboardType,
+        obscureText: obscureText,
+        validator: validator,
       ),
-      style: const TextStyle(color: Colors.white),
-      keyboardType: keyboardType,
-      obscureText: obscureText,
-      validator: validator,
     );
   }
 }

@@ -5,6 +5,7 @@ import '../pages/history_page.dart';
 import '../pages/search_page.dart';
 import '../pages/settings_page.dart';
 import '../providers/auth_provider.dart';
+import '../theme/app_theme.dart';
 import '../services/search_api.dart';
 import '../widgets/loading_widgets.dart';
 
@@ -78,52 +79,42 @@ class _HomeShellState extends State<HomeShell> {
 
         return Scaffold(
           body: SafeArea(
-            child: IndexedStack(
-              index: _currentIndex,
-              children: pages,
-            ),
+            child: IndexedStack(index: _currentIndex, children: pages),
           ),
-          bottomNavigationBar: Padding(
-            padding: const EdgeInsets.fromLTRB(16, 0, 16, 24),
-            child: DecoratedBox(
-              decoration: BoxDecoration(
-                color: const Color(0xFF1F2C33),
-                borderRadius: BorderRadius.circular(26),
-                border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
-              ),
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(26),
-                child: NavigationBar(
-                  backgroundColor: Colors.transparent,
-                  indicatorColor: Colors.white.withValues(alpha: 0.22),
-                  labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-                  selectedIndex: _currentIndex,
-                  onDestinationSelected: (index) {
-                    if (mounted) {
-                      setState(() {
-                        _currentIndex = index;
-                      });
-                    }
-                  },
-                  destinations: const [
-                    NavigationDestination(
-                      icon: Icon(Icons.search_outlined),
-                      selectedIcon: Icon(Icons.search, color: Colors.white),
-                      label: 'Cari',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.history_outlined),
-                      selectedIcon: Icon(Icons.history, color: Colors.white),
-                      label: 'Riwayat',
-                    ),
-                    NavigationDestination(
-                      icon: Icon(Icons.settings_outlined),
-                      selectedIcon: Icon(Icons.settings, color: Colors.white),
-                      label: 'Pengaturan',
-                    ),
-                  ],
+          bottomNavigationBar: Container(
+            decoration: const BoxDecoration(
+              color: AppTheme.backgroundDark, // Spotify-style dark background
+            ),
+            child: NavigationBar(
+              backgroundColor: Colors.transparent,
+              indicatorColor:
+                  Colors.transparent, // No indicator seperti Spotify
+              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
+              selectedIndex: _currentIndex,
+              onDestinationSelected: (index) {
+                if (mounted) {
+                  setState(() {
+                    _currentIndex = index;
+                  });
+                }
+              },
+              destinations: const [
+                NavigationDestination(
+                  icon: Icon(Icons.search_outlined),
+                  selectedIcon: Icon(Icons.search),
+                  label: 'Cari',
                 ),
-              ),
+                NavigationDestination(
+                  icon: Icon(Icons.history_outlined),
+                  selectedIcon: Icon(Icons.history),
+                  label: 'Riwayat',
+                ),
+                NavigationDestination(
+                  icon: Icon(Icons.settings_outlined),
+                  selectedIcon: Icon(Icons.settings),
+                  label: 'Pengaturan',
+                ),
+              ],
             ),
           ),
         );
