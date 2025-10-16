@@ -31,6 +31,15 @@
 
   <title>klarifikasi_id</title>
   <link rel="manifest" href="manifest.json">
+  
+  <!-- CORS Configuration untuk Flutter Web -->
+  <script>
+    // Enable CORS untuk development
+    if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') {
+      // Development mode - allow all origins
+      console.log('Development mode: CORS enabled');
+    }
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>

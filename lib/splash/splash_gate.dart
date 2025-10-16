@@ -32,9 +32,8 @@ class _SplashGateState extends State<SplashGate> {
 
       if (!mounted) return;
 
-      // Check authentication status
-      final authProvider = context.read<AuthProvider>();
-      await authProvider.isLoggedIn();
+      // AuthProvider sudah auto-initialize di constructor
+      // Tidak perlu memanggil initialize() manual
 
       if (mounted) {
         setState(() {

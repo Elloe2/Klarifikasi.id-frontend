@@ -22,10 +22,29 @@ library;
 import 'dart:convert'; // JSON encoding/decoding
 import 'package:http/http.dart' as http; // HTTP client untuk API calls
 import 'package:flutter_secure_storage/flutter_secure_storage.dart'; // Secure token storage
+import 'package:flutter/foundation.dart'; // Platform detection
 
 // === CONFIGURATION & MODELS ===
 import '../config.dart'; // API configuration dan endpoints
 import '../models/user.dart'; // User model untuk data parsing
+
+// === CUSTOM HTTP CLIENT FOR WEB ===
+class _WebHttpClient extends http.BaseClient {
+  final http.Client _inner = http.Client();
+
+  @override
+  Future<http.StreamedResponse> send(http.BaseRequest request) {
+    // Untuk Flutter web, kita tidak bisa set CORS headers dari client
+    // CORS harus di-handle oleh server (Laravel Cloud)
+    // Kita hanya perlu memastikan request format yang benar
+
+    // Tambahkan headers yang diperlukan untuk web
+    request.headers['Content-Type'] = 'application/json';
+    request.headers['Accept'] = 'application/json';
+
+    return _inner.send(request);
+  }
+}
 
 /// === AUTHENTICATION SERVICE CLASS ===
 /// Service class utama untuk menangani semua operasi autentikasi.
@@ -46,10 +65,21 @@ import '../models/user.dart'; // User model untuk data parsing
 class AuthService {
   // === PRIVATE PROPERTIES ===
   String get _baseUrl => apiBaseUrl; // Base URL dari config.dart
-  final FlutterSecureStorage _storage = const FlutterSecureStorage(); // Secure storage instance
+  final FlutterSecureStorage _storage =
+      const FlutterSecureStorage(); // Secure storage instance
+
+  // === HTTP CLIENT GETTER ===
+  http.Client get _httpClient {
+    if (kIsWeb) {
+      return _WebHttpClient(); // Custom client untuk web dengan CORS
+    }
+    return http.Client(); // Default client untuk mobile/desktop
+  }
 
   // === TIMEOUT CONFIGURATION ===
-  static const Duration _requestTimeout = Duration(seconds: 10); // Timeout untuk HTTP requests
+  static const Duration _requestTimeout = Duration(
+    seconds: 10,
+  ); // Timeout untuk HTTP requests
   static const String _tokenKey = 'auth_token'; // Key untuk token storage
 
   /// === GET CURRENT USER PROFILE ===
@@ -78,18 +108,22 @@ class AuthService {
       if (token == null) return null; // Tidak ada token, user belum login
 
       // Request profile dengan Bearer token
-      final response = await http.get(
-        Uri.parse('$_baseUrl/api/auth/profile'),
-        headers: {
-          'Authorization': 'Bearer $token', // Bearer token authentication
-          'Content-Type': 'application/json',
-        },
-      ).timeout(_requestTimeout); // Timeout protection
+      final response = await _httpClient
+          .get(
+            Uri.parse('$_baseUrl/api/auth/profile'),
+            headers: {
+              'Authorization': 'Bearer $token', // Bearer token authentication
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(_requestTimeout); // Timeout protection
 
       if (response.statusCode == 200) {
         // Check if response is HTML instead of JSON
         if (response.body.trim().startsWith('<')) {
-          throw Exception('Server returned HTML instead of JSON. Please check API configuration.');
+          throw Exception(
+            'Server returned HTML instead of JSON. Please check API configuration.',
+          );
         }
         // Success: Parse user data dari response
         final data = jsonDecode(response.body);
@@ -159,20 +193,22 @@ class AuthService {
     String? institution,
   }) async {
     // HTTP POST request ke register endpoint
-    final response = await http.post(
-      Uri.parse('$_baseUrl/api/auth/register'),
-      headers: {'Content-Type': 'application/json'},
-      body: jsonEncode({
-        'name': name, // Nama lengkap pengguna
-        'email': email, // Email address unik
-        'password': password, // Password
-        'password_confirmation': password, // Konfirmasi password
-        // Optional fields dengan conditional inclusion
-        if (birthDate != null) 'birth_date': birthDate,
-        if (educationLevel != null) 'education_level': educationLevel,
-        if (institution != null) 'institution': institution,
-      }),
-    ).timeout(_requestTimeout);
+    final response = await _httpClient
+        .post(
+          Uri.parse('$_baseUrl/api/auth/register'),
+          headers: {'Content-Type': 'application/json'},
+          body: jsonEncode({
+            'name': name, // Nama lengkap pengguna
+            'email': email, // Email address unik
+            'password': password, // Password
+            'password_confirmation': password, // Konfirmasi password
+            // Optional fields dengan conditional inclusion
+            if (birthDate != null) 'birth_date': birthDate,
+            if (educationLevel != null) 'education_level': educationLevel,
+            if (institution != null) 'institution': institution,
+          }),
+        )
+        .timeout(_requestTimeout);
 
     if (response.statusCode == 201) {
       // Success: Parse response dan simpan token
@@ -231,20 +267,19 @@ class AuthService {
   ///   // Handle error di UI (show dialog, snackbar, etc)
   /// }
   /// ```
-  Future<User> login({
-    required String email,
-    required String password,
-  }) async {
+  Future<User> login({required String email, required String password}) async {
     try {
       // HTTP POST request ke login endpoint
-      final response = await http.post(
-        Uri.parse('$_baseUrl/api/auth/login'),
-        headers: {'Content-Type': 'application/json'},
-        body: jsonEncode({
-          'email': email, // Email pengguna
-          'password': password, // Password pengguna
-        }),
-      ).timeout(_requestTimeout);
+      final response = await _httpClient
+          .post(
+            Uri.parse('$_baseUrl/api/auth/login'),
+            headers: {'Content-Type': 'application/json'},
+            body: jsonEncode({
+              'email': email, // Email pengguna
+              'password': password, // Password pengguna
+            }),
+          )
+          .timeout(_requestTimeout);
 
       if (response.statusCode == 200) {
         // Success: Parse response dan simpan token
@@ -274,7 +309,8 @@ class AuthService {
       }
     } catch (e) {
       // Network error handling dengan user-friendly messages
-      if (e.toString().contains('SocketException') || e.toString().contains('Network is unreachable')) {
+      if (e.toString().contains('SocketException') ||
+          e.toString().contains('Network is unreachable')) {
         throw Exception('Network error - please check your connection');
       } else if (e.toString().contains('TimeoutException')) {
         throw Exception('Request timeout - please try again');
@@ -316,13 +352,15 @@ class AuthService {
     if (token != null) {
       try {
         // Kirim logout request ke backend dengan token
-        await http.post(
-          Uri.parse('$_baseUrl/api/auth/logout'),
-          headers: {
-            'Authorization': 'Bearer $token', // Bearer token untuk logout
-            'Content-Type': 'application/json',
-          },
-        ).timeout(_requestTimeout);
+        await _httpClient
+            .post(
+              Uri.parse('$_baseUrl/api/auth/logout'),
+              headers: {
+                'Authorization': 'Bearer $token', // Bearer token untuk logout
+                'Content-Type': 'application/json',
+              },
+            )
+            .timeout(_requestTimeout);
       } catch (e) {
         // Ignore errors during logout untuk memastikan process selalu selesai
         // Backend logout failure tidak boleh mencegah local cleanup
@@ -380,21 +418,23 @@ class AuthService {
     if (token == null) throw Exception('Not authenticated');
 
     // HTTP POST request ke profile update endpoint
-    final response = await http.post(
-      Uri.parse('$_baseUrl/api/auth/profile'),
-      headers: {
-        'Authorization': 'Bearer $token', // Bearer token authentication
-        'Content-Type': 'application/json',
-      },
-      body: jsonEncode({
-        // Conditional field inclusion - hanya kirim field yang diubah
-        if (name != null) 'name': name,
-        if (email != null) 'email': email,
-        if (birthDate != null) 'birth_date': birthDate,
-        if (educationLevel != null) 'education_level': educationLevel,
-        if (institution != null) 'institution': institution,
-      }),
-    ).timeout(_requestTimeout);
+    final response = await _httpClient
+        .post(
+          Uri.parse('$_baseUrl/api/auth/profile'),
+          headers: {
+            'Authorization': 'Bearer $token', // Bearer token authentication
+            'Content-Type': 'application/json',
+          },
+          body: jsonEncode({
+            // Conditional field inclusion - hanya kirim field yang diubah
+            if (name != null) 'name': name,
+            if (email != null) 'email': email,
+            if (birthDate != null) 'birth_date': birthDate,
+            if (educationLevel != null) 'education_level': educationLevel,
+            if (institution != null) 'institution': institution,
+          }),
+        )
+        .timeout(_requestTimeout);
 
     if (response.statusCode == 200) {
       // Success: Parse response dan return user data terbaru
@@ -436,13 +476,15 @@ class AuthService {
 
     try {
       // Validate token dengan request ke profile endpoint
-      final response = await http.get(
-        Uri.parse('$_baseUrl/api/auth/profile'),
-        headers: {
-          'Authorization': 'Bearer $token', // Bearer token authentication
-          'Content-Type': 'application/json',
-        },
-      ).timeout(_requestTimeout);
+      final response = await _httpClient
+          .get(
+            Uri.parse('$_baseUrl/api/auth/profile'),
+            headers: {
+              'Authorization': 'Bearer $token', // Bearer token authentication
+              'Content-Type': 'application/json',
+            },
+          )
+          .timeout(_requestTimeout);
 
       // Return true hanya jika status code 200 (success)
       return response.statusCode == 200;

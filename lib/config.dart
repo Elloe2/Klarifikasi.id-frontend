@@ -11,8 +11,7 @@
 /// ============================================================================
 library;
 
-// Import tidak diperlukan karena menggunakan hardcoded URL
-// import 'package:flutter/foundation.dart'; // Untuk detection platform (Web/Mobile)
+// Import tidak diperlukan karena menggunakan Laravel Cloud untuk semua environment
 
 /// === BASE URL CONFIGURATION ===
 /// Getter function yang mengembalikan base URL untuk API calls.
@@ -27,28 +26,9 @@ library;
 /// final response = await http.get(Uri.parse('${apiBaseUrl}/api/search'));
 /// ```
 String get apiBaseUrl {
-  // === FORCE LARAVEL CLOUD FOR TESTING ===
-  // Langsung menggunakan Laravel Cloud backend untuk testing
+  // === LARAVEL CLOUD BACKEND ===
+  // Gunakan Laravel Cloud untuk semua environment
   return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
-
-  // === DEVELOPMENT CODE (COMMENTED OUT) ===
-  // Uncomment untuk development dengan local backend
-  // const String forceProduction = String.fromEnvironment('FORCE_PRODUCTION');
-  // if (forceProduction.isNotEmpty && forceProduction.toLowerCase() == 'true') {
-  //   return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
-  // }
-  // const String productionUrl = String.fromEnvironment('API_BASE_URL');
-  // if (productionUrl.isNotEmpty && productionUrl != 'http://localhost') {
-  //   return productionUrl;
-  // }
-  // if (kDebugMode) {
-  //   if (kIsWeb) {
-  //     return 'http://localhost:8000';
-  //   } else {
-  //     return 'http://10.0.2.2:8000';
-  //   }
-  // }
-  // return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
 }
 
 /// === GOOGLE CSE API CONFIGURATION ===

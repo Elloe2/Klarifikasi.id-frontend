@@ -55,7 +55,7 @@ class MainApp extends StatelessWidget {
       /// Konfigurasi provider untuk state management.
       /// AuthProvider mengelola state autentikasi seluruh aplikasi.
       providers: [
-        // AuthProvider untuk production dengan Laravel Cloud backend
+        // AuthProvider untuk development dengan local Laravel backend
         ChangeNotifierProvider<AuthProvider>(
           create: (context) => AuthProvider(),
         ),
