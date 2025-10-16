@@ -55,12 +55,11 @@ class MainApp extends StatelessWidget {
       /// Konfigurasi provider untuk state management.
       /// AuthProvider mengelola state autentikasi seluruh aplikasi.
       providers: [
-        // AuthProvider untuk mengelola login state, user data, dan token
+        // AuthProvider untuk production dengan Laravel Cloud backend
         ChangeNotifierProvider<AuthProvider>(
           create: (context) => AuthProvider(),
-          // AuthProvider akan auto-initialize dan check token saat dibuat
         ),
-        // TODO: Tambahkan provider lain jika diperlukan
+        //
         // ChangeNotifierProvider<SearchProvider>(create: (_) => SearchProvider()),
       ],
 
@@ -70,11 +69,9 @@ class MainApp extends StatelessWidget {
         // === BASIC CONFIGURATION ===
         title: 'Klarifikasi.id', // App title untuk window bar
         debugShowCheckedModeBanner: false, // Hide debug banner di development
-
         // === THEME CONFIGURATION ===
         // Menggunakan custom dark theme dengan gradient design
         theme: AppTheme.light, // Custom theme dari app_theme.dart
-
         // === ROUTE CONFIGURATION ===
         // Definisi semua routes (halaman) dalam aplikasi
         routes: {
@@ -82,15 +79,25 @@ class MainApp extends StatelessWidget {
           '/': (context) => const SplashGate(), // Root route -> splash screen
           '/login': (context) => const LoginPage(), // Login page
           '/register': (context) => const RegisterPage(), // Registration page
-          '/home': (context) => const HomeShell(), // Main app shell dengan navigation
+          '/home': (context) =>
+              const HomeShell(), // Main app shell dengan navigation
         },
 
         // === INITIAL ROUTE ===
         // Halaman pertama yang ditampilkan saat app start
         initialRoute: '/', // Mulai dari splash screen
+        // === ERROR HANDLING ===
+        // Global error handling untuk uncaught exceptions
+        builder: (context, child) {
+          return MediaQuery(
+            data: MediaQuery.of(
+              context,
+            ).copyWith(textScaler: const TextScaler.linear(1.0)),
+            child: child!,
+          );
+        },
 
         // === ADDITIONAL CONFIGURATION ===
-        // TODO: Tambahkan konfigurasi lain jika diperlukan
         // locale: const Locale('id', 'ID'), // Indonesian localization
         // localizationsDelegates: [...], // Localization setup
         // supportedLocales: [Locale('id', 'ID')], // Supported locales

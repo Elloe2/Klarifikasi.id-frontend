@@ -26,18 +26,29 @@ class _SplashGateState extends State<SplashGate> {
   }
 
   Future<void> _initializeApp() async {
-    // Tunggu sebentar untuk splash screen
-    await Future.delayed(const Duration(seconds: 2));
+    try {
+      // Tunggu sebentar untuk splash screen
+      await Future.delayed(const Duration(seconds: 2));
 
-    if (!mounted) return;
+      if (!mounted) return;
 
-    // Check authentication status
-    final authProvider = context.read<AuthProvider>();
-    await authProvider.isLoggedIn();
+      // Check authentication status
+      final authProvider = context.read<AuthProvider>();
+      await authProvider.isLoggedIn();
 
-    setState(() {
-      _ready = true;
-    });
+      if (mounted) {
+        setState(() {
+          _ready = true;
+        });
+      }
+    } catch (e) {
+      // Jika ada error saat inisialisasi, tetap lanjutkan ke login
+      if (mounted) {
+        setState(() {
+          _ready = true;
+        });
+      }
+    }
   }
 
   @override
@@ -82,7 +93,10 @@ class _SplashScreen extends StatelessWidget {
                 'assets/logo/FIX_white.svg',
                 width: 200,
                 height: 200,
-                color: Colors.white,
+                colorFilter: const ColorFilter.mode(
+                  Colors.white,
+                  BlendMode.srcIn,
+                ),
                 placeholderBuilder: (context) => const Icon(
                   Icons.verified_user,
                   size: 200,

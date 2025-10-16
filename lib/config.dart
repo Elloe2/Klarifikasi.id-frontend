@@ -11,7 +11,8 @@
 /// ============================================================================
 library;
 
-import 'package:flutter/foundation.dart'; // Untuk detection platform (Web/Mobile)
+// Import tidak diperlukan karena menggunakan hardcoded URL
+// import 'package:flutter/foundation.dart'; // Untuk detection platform (Web/Mobile)
 
 /// === BASE URL CONFIGURATION ===
 /// Getter function yang mengembalikan base URL untuk API calls.
@@ -26,39 +27,28 @@ import 'package:flutter/foundation.dart'; // Untuk detection platform (Web/Mobil
 /// final response = await http.get(Uri.parse('${apiBaseUrl}/api/search'));
 /// ```
 String get apiBaseUrl {
-  // === FORCE PRODUCTION MODE ===
-  // Check if we want to force production backend (untuk testing deployment)
-  const String forceProduction = String.fromEnvironment('FORCE_PRODUCTION');
-
-  if (forceProduction.isNotEmpty && forceProduction.toLowerCase() == 'true') {
-    return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
-  }
-
-  // === PRODUCTION ENVIRONMENT (Netlify) ===
-  // Gunakan environment variables yang di-set di Netlify
-  const String productionUrl = String.fromEnvironment('API_BASE_URL');
-
-  if (productionUrl.isNotEmpty && productionUrl != 'http://localhost') {
-    return productionUrl;
-  }
-
-  // === DEVELOPMENT ENVIRONMENT ===
-  if (kDebugMode) {
-    // Platform detection untuk konfigurasi yang tepat
-    if (kIsWeb) {
-      // Flutter Web development - connect ke Laravel backend lokal
-      // Menggunakan localhost:8000 untuk komunikasi dengan Laravel server
-      return 'http://localhost:8000';
-    } else {
-      // Android emulator atau physical device
-      // Android emulator menggunakan 10.0.2.2 untuk mengakses localhost host machine
-      return 'http://10.0.2.2:8000';
-    }
-  }
-
-  // === FALLBACK PRODUCTION ===
-  // Laravel backend sudah di-deploy di Laravel Cloud
+  // === FORCE LARAVEL CLOUD FOR TESTING ===
+  // Langsung menggunakan Laravel Cloud backend untuk testing
   return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
+
+  // === DEVELOPMENT CODE (COMMENTED OUT) ===
+  // Uncomment untuk development dengan local backend
+  // const String forceProduction = String.fromEnvironment('FORCE_PRODUCTION');
+  // if (forceProduction.isNotEmpty && forceProduction.toLowerCase() == 'true') {
+  //   return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
+  // }
+  // const String productionUrl = String.fromEnvironment('API_BASE_URL');
+  // if (productionUrl.isNotEmpty && productionUrl != 'http://localhost') {
+  //   return productionUrl;
+  // }
+  // if (kDebugMode) {
+  //   if (kIsWeb) {
+  //     return 'http://localhost:8000';
+  //   } else {
+  //     return 'http://10.0.2.2:8000';
+  //   }
+  // }
+  // return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
 }
 
 /// === GOOGLE CSE API CONFIGURATION ===
@@ -66,10 +56,10 @@ String get apiBaseUrl {
 /// Digunakan untuk search functionality dengan Google CSE.
 ///
 /// Returns:
-/// - Production: API key dari environment variables (Netlify)
+/// - Production: API key dari environment variables (Cloudhebat)
 /// - Development: API key dari environment variables atau default
 String get googleCseApiKey {
-  // === PRODUCTION ENVIRONMENT (Netlify) ===
+  // === PRODUCTION ENVIRONMENT (Cloudhebat) ===
   const String productionKey = String.fromEnvironment('GOOGLE_CSE_API_KEY');
 
   if (productionKey.isNotEmpty && productionKey != 'your-api-key') {
@@ -77,7 +67,6 @@ String get googleCseApiKey {
   }
 
   // === FALLBACK ===
-  // TODO: Update dengan API key production setelah deployment berhasil
   return 'AIzaSyAFOdoaMwgurnjfnhGKn5GFy6_m2HKiGtA'; // Ganti dengan API key production
 }
 
@@ -86,10 +75,10 @@ String get googleCseApiKey {
 /// Digunakan untuk mengidentifikasi search engine yang digunakan.
 ///
 /// Returns:
-/// - Production: CX dari environment variables (Netlify)
+/// - Production: CX dari environment variables (Cloudhebat)
 /// - Development: CX dari environment variables atau default
 String get googleCseCx {
-  // === PRODUCTION ENVIRONMENT (Netlify) ===
+  // === PRODUCTION ENVIRONMENT (Cloudhebat) ===
   const String productionCx = String.fromEnvironment('GOOGLE_CSE_CX');
 
   if (productionCx.isNotEmpty && productionCx != 'your-cx-id') {
@@ -97,7 +86,6 @@ String get googleCseCx {
   }
 
   // === FALLBACK ===
-  // TODO: Update dengan CX production setelah deployment berhasil
   return '6242f5825dedb4b59'; // Ganti dengan CX production
 }
 

@@ -13,16 +13,13 @@ class SettingsPage extends StatefulWidget {
 }
 
 class _SettingsPageState extends State<SettingsPage> {
-
   @override
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         if (!authProvider.isInitialized) {
           return const Scaffold(
-            body: Center(
-              child: CircularProgressIndicator(),
-            ),
+            body: Center(child: CircularProgressIndicator()),
           );
         }
 
@@ -65,7 +62,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     const SizedBox(height: 16),
                     ElevatedButton(
-                      onPressed: () => Navigator.of(context).pushNamed('/login'),
+                      onPressed: () =>
+                          Navigator.of(context).pushNamed('/login'),
                       style: ElevatedButton.styleFrom(
                         backgroundColor: AppTheme.primarySeedColor,
                         foregroundColor: Colors.white,
@@ -159,7 +157,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
               // Gunakan context dari State untuk operasi UI
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
+                ScaffoldMessenger.of(this.context).showSnackBar(
                   const SnackBar(content: Text('Berhasil keluar')),
                 );
               }
@@ -215,14 +213,17 @@ class _ProfileCard extends StatelessWidget {
             ),
             Text(
               user.email,
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: Colors.white70,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
             ),
             if (user.age != null) ...[
               const SizedBox(height: 8),
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 4,
+                ),
                 decoration: BoxDecoration(
                   color: AppTheme.primarySeedColor.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(12),
@@ -240,17 +241,17 @@ class _ProfileCard extends StatelessWidget {
               const SizedBox(height: 4),
               Text(
                 user.educationDisplay!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white60,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.white60),
               ),
             ],
             if (user.institution != null) ...[
               Text(
                 user.institution!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Colors.white60,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: Colors.white60),
               ),
             ],
           ],
@@ -292,7 +293,9 @@ class _EditProfileCardState extends State<_EditProfileCard> {
     _nameController = TextEditingController(text: widget.user.name);
     _emailController = TextEditingController(text: widget.user.email);
     _birthDateController = TextEditingController(text: widget.user.birthDate);
-    _institutionController = TextEditingController(text: widget.user.institution);
+    _institutionController = TextEditingController(
+      text: widget.user.institution,
+    );
     _selectedEducation = widget.user.educationLevel;
   }
 
@@ -311,6 +314,40 @@ class _EditProfileCardState extends State<_EditProfileCard> {
       return;
     }
 
+    // Validasi form sebelum submit
+    if (_nameController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Nama tidak boleh kosong'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    if (_emailController.text.trim().isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Email tidak boleh kosong'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
+    // Validasi format email
+    if (!RegExp(
+      r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+    ).hasMatch(_emailController.text.trim())) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Format email tidak valid'),
+          backgroundColor: Colors.red,
+        ),
+      );
+      return;
+    }
+
     setState(() => _isLoading = true);
 
     try {
@@ -318,34 +355,67 @@ class _EditProfileCardState extends State<_EditProfileCard> {
       if (!mounted) return;
 
       final authProvider = context.read<AuthProvider>();
-      await authProvider.updateProfile(
+      final success = await authProvider.updateProfile(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
-        birthDate: _birthDateController.text.isNotEmpty ? _birthDateController.text : null,
+        birthDate: _birthDateController.text.isNotEmpty
+            ? _birthDateController.text
+            : null,
         educationLevel: _selectedEducation,
-        institution: _institutionController.text.isNotEmpty ? _institutionController.text : null,
+        institution: _institutionController.text.isNotEmpty
+            ? _institutionController.text
+            : null,
       );
 
       if (!mounted) return;
-      setState(() => _isEditing = false);
 
-      // Pastikan widget masih mounted sebelum menggunakan context
-      if (mounted) {
+      if (success) {
+        setState(() => _isEditing = false);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profil berhasil diperbarui')),
+          const SnackBar(
+            content: Text('Profil berhasil diperbarui'),
+            backgroundColor: Colors.green,
+          ),
         );
       }
     } catch (e) {
       // Pastikan widget masih mounted sebelum menggunakan context
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        _handleUpdateError(e.toString());
       }
     } finally {
       if (mounted) {
         setState(() => _isLoading = false);
       }
+    }
+  }
+
+  void _handleUpdateError(String errorMessage) {
+    if (errorMessage.toLowerCase().contains('email sudah digunakan') ||
+        errorMessage.toLowerCase().contains('email already exists')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Email sudah digunakan oleh pengguna lain'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } else if (errorMessage.toLowerCase().contains('koneksi internet') ||
+        errorMessage.toLowerCase().contains('network error')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Koneksi internet bermasalah. Silakan periksa koneksi Anda.',
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } else {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Gagal memperbarui profil: $errorMessage'),
+          backgroundColor: Colors.red,
+        ),
+      );
     }
   }
 
@@ -425,7 +495,8 @@ class _EditProfileCardState extends State<_EditProfileCard> {
             if (_selectedEducation != null) ...[
               const SizedBox(height: 12),
               _buildField(
-                label: 'Nama ${_educationOptions.firstWhere((e) => e['value'] == _selectedEducation)['label']}',
+                label:
+                    'Nama ${_educationOptions.firstWhere((e) => e['value'] == _selectedEducation)['label']}',
                 controller: _institutionController,
                 enabled: _isEditing,
                 icon: Icons.school,
@@ -461,9 +532,7 @@ class _EditProfileCardState extends State<_EditProfileCard> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -485,33 +554,39 @@ class _EditProfileCardState extends State<_EditProfileCard> {
         suffixIcon: _isEditing
             ? IconButton(
                 icon: const Icon(Icons.calendar_today, color: Colors.white70),
-                onPressed: _isEditing ? () async {
-                  if (!mounted) return;
+                onPressed: _isEditing
+                    ? () async {
+                        if (!mounted) return;
 
-                  final DateTime? picked = await showDatePicker(
-                    context: context,
-                    initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
-                    firstDate: DateTime(1900),
-                    lastDate: DateTime.now(),
-                    builder: (context, child) {
-                      return Theme(
-                        data: Theme.of(context).copyWith(
-                          colorScheme: ColorScheme.dark(
-                            primary: AppTheme.primarySeedColor,
-                            surface: AppTheme.surfaceDark,
+                        final DateTime? picked = await showDatePicker(
+                          context: context,
+                          initialDate: DateTime.now().subtract(
+                            const Duration(days: 365 * 18),
                           ),
-                        ),
-                        child: child!,
-                      );
-                    },
-                  );
+                          firstDate: DateTime(1900),
+                          lastDate: DateTime.now(),
+                          builder: (context, child) {
+                            return Theme(
+                              data: Theme.of(context).copyWith(
+                                colorScheme: ColorScheme.dark(
+                                  primary: AppTheme.primarySeedColor,
+                                  surface: AppTheme.surfaceDark,
+                                ),
+                              ),
+                              child: child!,
+                            );
+                          },
+                        );
 
-                  if (picked != null && mounted) {
-                    setState(() {
-                      _birthDateController.text = picked.toString().split(' ')[0];
-                    });
-                  }
-                } : null,
+                        if (picked != null && mounted) {
+                          setState(() {
+                            _birthDateController.text = picked.toString().split(
+                              ' ',
+                            )[0];
+                          });
+                        }
+                      }
+                    : null,
               )
             : null,
         filled: true,
@@ -524,9 +599,7 @@ class _EditProfileCardState extends State<_EditProfileCard> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
@@ -542,7 +615,9 @@ class _EditProfileCardState extends State<_EditProfileCard> {
 
               final DateTime? picked = await showDatePicker(
                 context: context,
-                initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)),
+                initialDate: DateTime.now().subtract(
+                  const Duration(days: 365 * 18),
+                ),
                 firstDate: DateTime(1900),
                 lastDate: DateTime.now(),
                 builder: (context, child) {
@@ -584,9 +659,7 @@ class _EditProfileCardState extends State<_EditProfileCard> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
         disabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),

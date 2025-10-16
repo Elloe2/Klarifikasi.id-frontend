@@ -67,9 +67,9 @@ class _LoginPageState extends State<LoginPage> {
       );
 
       if (success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Login berhasil!')),
-        );
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Login berhasil!')));
         // AuthProvider akan handle navigation otomatis via listener
       }
     } catch (e) {
@@ -88,19 +88,18 @@ class _LoginPageState extends State<LoginPage> {
     if (errorMessage.toLowerCase().contains('email atau password salah') ||
         errorMessage.toLowerCase().contains('invalid credentials') ||
         errorMessage.toLowerCase().contains('unauthorized')) {
-
       _showInvalidCredentialsDialog();
     } else if (errorMessage.toLowerCase().contains('koneksi internet') ||
-               errorMessage.toLowerCase().contains('network error')) {
-
+        errorMessage.toLowerCase().contains('network error')) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Koneksi internet bermasalah. Silakan periksa koneksi Anda.'),
+          content: Text(
+            'Koneksi internet bermasalah. Silakan periksa koneksi Anda.',
+          ),
           backgroundColor: Colors.orange,
         ),
       );
     } else if (errorMessage.toLowerCase().contains('timeout')) {
-
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Koneksi timeout. Silakan coba lagi.'),
@@ -109,9 +108,9 @@ class _LoginPageState extends State<LoginPage> {
       );
     } else {
       // Error lainnya tetap menggunakan snackbar
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(errorMessage)),
-      );
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
     }
   }
 
@@ -126,11 +125,7 @@ class _LoginPageState extends State<LoginPage> {
           ),
           title: Row(
             children: [
-              Icon(
-                Icons.error_outline,
-                color: Colors.redAccent,
-                size: 28,
-              ),
+              Icon(Icons.error_outline, color: Colors.redAccent, size: 28),
               const SizedBox(width: 12),
               Text(
                 'Login Gagal',
@@ -202,7 +197,10 @@ class _LoginPageState extends State<LoginPage> {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
-                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
               ),
               child: const Text(
                 'Daftar Akun',
@@ -221,16 +219,17 @@ class _LoginPageState extends State<LoginPage> {
       resizeToAvoidBottomInset: false, // Prevent keyboard overlap
       backgroundColor: Colors.black,
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+                minHeight:
+                    MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    MediaQuery.of(context).padding.bottom,
               ),
               child: IntrinsicHeight(
                 child: Form(
@@ -248,7 +247,10 @@ class _LoginPageState extends State<LoginPage> {
                               'assets/logo/FIX_white.svg',
                               width: 160,
                               height: 160,
-                              color: Colors.white,
+                              colorFilter: const ColorFilter.mode(
+                                Colors.white,
+                                BlendMode.srcIn,
+                              ),
                               placeholderBuilder: (context) => const Icon(
                                 Icons.login,
                                 size: 160,
@@ -258,17 +260,17 @@ class _LoginPageState extends State<LoginPage> {
                             const SizedBox(height: 24),
                             Text(
                               'Selamat Datang Kembali',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Masuk untuk melanjutkan verifikasi informasi',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.white70,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.white70),
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -288,7 +290,9 @@ class _LoginPageState extends State<LoginPage> {
                           if (value == null || value.isEmpty) {
                             return 'Email tidak boleh kosong';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                          if (!RegExp(
+                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                          ).hasMatch(value)) {
                             return 'Format email tidak valid';
                           }
                           return null;
@@ -305,10 +309,14 @@ class _LoginPageState extends State<LoginPage> {
                         obscureText: _obscurePassword,
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                             color: Colors.white70,
                           ),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -329,10 +337,11 @@ class _LoginPageState extends State<LoginPage> {
                           onPressed: _login,
                           child: Text(
                             'Masuk',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ),
                       ),
@@ -346,18 +355,20 @@ class _LoginPageState extends State<LoginPage> {
                           children: [
                             Text(
                               'Belum punya akun? ',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.white70,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.white70),
                             ),
                             TextButton(
-                              onPressed: () => Navigator.of(context).pushReplacementNamed('/register'),
+                              onPressed: () => Navigator.of(
+                                context,
+                              ).pushReplacementNamed('/register'),
                               child: Text(
                                 'Daftar',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppTheme.primarySeedColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: AppTheme.primarySeedColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ),
                           ],
@@ -401,15 +412,11 @@ class _LoginPageState extends State<LoginPage> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: AppTheme.primarySeedColor,
-          ),
+          borderSide: BorderSide(color: AppTheme.primarySeedColor),
         ),
         labelStyle: const TextStyle(color: Colors.white70),
         hintStyle: const TextStyle(color: Colors.white54),

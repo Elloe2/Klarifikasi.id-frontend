@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
+import 'package:provider/provider.dart';
 
-import '../services/auth_service.dart';
+import '../providers/auth_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/loading_button.dart';
 
@@ -14,7 +15,6 @@ class RegisterPage extends StatefulWidget {
 
 class _RegisterPageState extends State<RegisterPage> {
   final _formKey = GlobalKey<FormState>();
-  final _authService = AuthService();
 
   // Controllers
   final _nameController = TextEditingController();
@@ -38,7 +38,25 @@ class _RegisterPageState extends State<RegisterPage> {
   ];
 
   @override
+  void initState() {
+    super.initState();
+    // Listen for authentication state changes
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final authProvider = context.read<AuthProvider>();
+      authProvider.addListener(_onAuthStateChanged);
+    });
+  }
+
+  @override
   void dispose() {
+    // Remove listener safely
+    try {
+      final authProvider = context.read<AuthProvider>();
+      authProvider.removeListener(_onAuthStateChanged);
+    } catch (e) {
+      // Provider might be disposed already
+    }
+
     _nameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
@@ -48,10 +66,19 @@ class _RegisterPageState extends State<RegisterPage> {
     super.dispose();
   }
 
+  void _onAuthStateChanged() {
+    final authProvider = context.read<AuthProvider>();
+    if (authProvider.isAuthenticated && mounted) {
+      Navigator.of(context).pushReplacementNamed('/home');
+    }
+  }
+
   Future<void> _selectBirthDate() async {
     final DateTime? picked = await showDatePicker(
       context: context,
-      initialDate: DateTime.now().subtract(const Duration(days: 365 * 18)), // 18 tahun lalu
+      initialDate: DateTime.now().subtract(
+        const Duration(days: 365 * 18),
+      ), // 18 tahun lalu
       firstDate: DateTime(1900),
       lastDate: DateTime.now(),
       builder: (context, child) {
@@ -80,26 +107,29 @@ class _RegisterPageState extends State<RegisterPage> {
     setState(() => _isLoading = true);
 
     try {
-      await _authService.register(
+      final authProvider = context.read<AuthProvider>();
+      final success = await authProvider.register(
         name: _nameController.text.trim(),
         email: _emailController.text.trim(),
         password: _passwordController.text,
-        birthDate: _birthDateController.text.isNotEmpty ? _birthDateController.text : null,
+        birthDate: _birthDateController.text.isNotEmpty
+            ? _birthDateController.text
+            : null,
         educationLevel: _selectedEducation,
-        institution: _institutionController.text.isNotEmpty ? _institutionController.text : null,
+        institution: _institutionController.text.isNotEmpty
+            ? _institutionController.text
+            : null,
       );
 
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Registrasi berhasil!')),
-        );
-        Navigator.of(context).pushReplacementNamed('/login');
+      if (success && mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Registrasi berhasil!')));
+        // AuthProvider akan handle navigation otomatis via listener
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.toString())),
-        );
+        _handleRegisterError(e.toString());
       }
     } finally {
       if (mounted) {
@@ -108,22 +138,153 @@ class _RegisterPageState extends State<RegisterPage> {
     }
   }
 
+  void _handleRegisterError(String errorMessage) {
+    // Cek apakah error menunjukkan email sudah terdaftar
+    if (errorMessage.toLowerCase().contains('email sudah terdaftar') ||
+        errorMessage.toLowerCase().contains('email already exists') ||
+        errorMessage.toLowerCase().contains('duplicate entry')) {
+      _showEmailExistsDialog();
+    } else if (errorMessage.toLowerCase().contains('koneksi internet') ||
+        errorMessage.toLowerCase().contains('network error')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Koneksi internet bermasalah. Silakan periksa koneksi Anda.',
+          ),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } else if (errorMessage.toLowerCase().contains('timeout')) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Koneksi timeout. Silakan coba lagi.'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+    } else {
+      // Error lainnya tetap menggunakan snackbar
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(errorMessage)));
+    }
+  }
+
+  void _showEmailExistsDialog() {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: AppTheme.surfaceDark,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(20),
+          ),
+          title: Row(
+            children: [
+              Icon(Icons.email_outlined, color: Colors.orangeAccent, size: 28),
+              const SizedBox(width: 12),
+              Text(
+                'Email Sudah Terdaftar',
+                style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+            ],
+          ),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Email ${_emailController.text} sudah terdaftar di sistem.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white70,
+                  height: 1.5,
+                ),
+              ),
+              const SizedBox(height: 16),
+              Container(
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  color: Colors.orangeAccent.withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(
+                    color: Colors.orangeAccent.withValues(alpha: 0.3),
+                  ),
+                ),
+                child: Text(
+                  'Email: ${_emailController.text}',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: Colors.orangeAccent,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Silakan gunakan email lain atau masuk jika Anda sudah memiliki akun.',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white70,
+                  height: 1.5,
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text(
+                'Ganti Email',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                  color: Colors.white70,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.of(context).pop(); // Tutup dialog
+                Navigator.of(context).pushReplacementNamed('/login');
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.primarySeedColor,
+                foregroundColor: Colors.white,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 20,
+                  vertical: 12,
+                ),
+              ),
+              child: const Text(
+                'Masuk',
+                style: TextStyle(fontWeight: FontWeight.w600),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       resizeToAvoidBottomInset: false, // Prevent keyboard overlap
       backgroundColor: Colors.black,
       body: Container(
-        decoration: const BoxDecoration(
-          gradient: AppTheme.backgroundGradient,
-        ),
+        decoration: const BoxDecoration(gradient: AppTheme.backgroundGradient),
         child: SafeArea(
           child: SingleChildScrollView(
             physics: const ClampingScrollPhysics(),
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
             child: ConstrainedBox(
               constraints: BoxConstraints(
-                minHeight: MediaQuery.of(context).size.height - MediaQuery.of(context).padding.top - MediaQuery.of(context).padding.bottom,
+                minHeight:
+                    MediaQuery.of(context).size.height -
+                    MediaQuery.of(context).padding.top -
+                    MediaQuery.of(context).padding.bottom,
               ),
               child: IntrinsicHeight(
                 child: Form(
@@ -141,7 +302,10 @@ class _RegisterPageState extends State<RegisterPage> {
                               'assets/logo/FIX_white.svg',
                               width: 160,
                               height: 160,
-                              color: Colors.white,
+                              colorFilter: const ColorFilter.mode(
+                                Colors.white,
+                                BlendMode.srcIn,
+                              ),
                               placeholderBuilder: (context) => const Icon(
                                 Icons.person_add,
                                 size: 160,
@@ -151,17 +315,17 @@ class _RegisterPageState extends State<RegisterPage> {
                             const SizedBox(height: 24),
                             Text(
                               'Buat Akun Baru',
-                              style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w700,
-                              ),
+                              style: Theme.of(context).textTheme.headlineMedium
+                                  ?.copyWith(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w700,
+                                  ),
                             ),
                             const SizedBox(height: 8),
                             Text(
                               'Bergabunglah untuk mulai verifikasi informasi',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.white70,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.white70),
                               textAlign: TextAlign.center,
                             ),
                           ],
@@ -196,7 +360,9 @@ class _RegisterPageState extends State<RegisterPage> {
                           if (value == null || value.isEmpty) {
                             return 'Email tidak boleh kosong';
                           }
-                          if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
+                          if (!RegExp(
+                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                          ).hasMatch(value)) {
                             return 'Format email tidak valid';
                           }
                           return null;
@@ -213,10 +379,14 @@ class _RegisterPageState extends State<RegisterPage> {
                         obscureText: _obscurePassword,
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscurePassword ? Icons.visibility : Icons.visibility_off,
+                            _obscurePassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                             color: Colors.white70,
                           ),
-                          onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                          onPressed: () => setState(
+                            () => _obscurePassword = !_obscurePassword,
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -239,10 +409,15 @@ class _RegisterPageState extends State<RegisterPage> {
                         obscureText: _obscureConfirmPassword,
                         suffixIcon: IconButton(
                           icon: Icon(
-                            _obscureConfirmPassword ? Icons.visibility : Icons.visibility_off,
+                            _obscureConfirmPassword
+                                ? Icons.visibility
+                                : Icons.visibility_off,
                             color: Colors.white70,
                           ),
-                          onPressed: () => setState(() => _obscureConfirmPassword = !_obscureConfirmPassword),
+                          onPressed: () => setState(
+                            () => _obscureConfirmPassword =
+                                !_obscureConfirmPassword,
+                          ),
                         ),
                         validator: (value) {
                           if (value == null || value.isEmpty) {
@@ -269,8 +444,10 @@ class _RegisterPageState extends State<RegisterPage> {
                         const SizedBox(height: 16),
                         _buildTextField(
                           controller: _institutionController,
-                          label: 'Nama ${_educationOptions.firstWhere((e) => e['value'] == _selectedEducation)['label']}',
-                          hint: 'Masukkan nama ${_educationOptions.firstWhere((e) => e['value'] == _selectedEducation)['label'].toString().toLowerCase()}',
+                          label:
+                              'Nama ${_educationOptions.firstWhere((e) => e['value'] == _selectedEducation)['label']}',
+                          hint:
+                              'Masukkan nama ${_educationOptions.firstWhere((e) => e['value'] == _selectedEducation)['label'].toString().toLowerCase()}',
                           icon: Icons.school,
                         ),
                       ],
@@ -286,10 +463,11 @@ class _RegisterPageState extends State<RegisterPage> {
                           onPressed: _register,
                           child: Text(
                             'Daftar',
-                            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              color: Colors.white,
-                              fontWeight: FontWeight.w600,
-                            ),
+                            style: Theme.of(context).textTheme.titleMedium
+                                ?.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                ),
                           ),
                         ),
                       ),
@@ -303,18 +481,20 @@ class _RegisterPageState extends State<RegisterPage> {
                           children: [
                             Text(
                               'Sudah punya akun? ',
-                              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                color: Colors.white70,
-                              ),
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(color: Colors.white70),
                             ),
                             TextButton(
-                              onPressed: () => Navigator.of(context).pushReplacementNamed('/login'),
+                              onPressed: () => Navigator.of(
+                                context,
+                              ).pushReplacementNamed('/login'),
                               child: Text(
                                 'Masuk',
-                                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                  color: AppTheme.primarySeedColor,
-                                  fontWeight: FontWeight.w600,
-                                ),
+                                style: Theme.of(context).textTheme.bodyMedium
+                                    ?.copyWith(
+                                      color: AppTheme.primarySeedColor,
+                                      fontWeight: FontWeight.w600,
+                                    ),
                               ),
                             ),
                           ],
@@ -358,15 +538,11 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: AppTheme.primarySeedColor,
-          ),
+          borderSide: BorderSide(color: AppTheme.primarySeedColor),
         ),
         labelStyle: const TextStyle(color: Colors.white70),
         hintStyle: const TextStyle(color: Colors.white54),
@@ -397,15 +573,11 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: AppTheme.primarySeedColor,
-          ),
+          borderSide: BorderSide(color: AppTheme.primarySeedColor),
         ),
         labelStyle: const TextStyle(color: Colors.white70),
         hintStyle: const TextStyle(color: Colors.white54),
@@ -436,15 +608,11 @@ class _RegisterPageState extends State<RegisterPage> {
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: Colors.white.withValues(alpha: 0.1),
-          ),
+          borderSide: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: BorderSide(
-            color: AppTheme.primarySeedColor,
-          ),
+          borderSide: BorderSide(color: AppTheme.primarySeedColor),
         ),
         labelStyle: const TextStyle(color: Colors.white70),
         hintStyle: const TextStyle(color: Colors.white54),

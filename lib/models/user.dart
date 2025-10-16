@@ -81,16 +81,21 @@ class User {
   /// final user = User.fromJson(jsonResponse['user']);
   /// ```
   factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'] as int, // Cast ke int untuk type safety
-      name: json['name'] as String, // Cast ke String untuk type safety
-      email: json['email'] as String,
-      birthDate: json['birth_date'] as String?, // Nullable field
-      age: json['age'] as int?, // Nullable field
-      educationLevel: json['education_level'] as String?, // Nullable field
-      educationDisplay: json['education_display'] as String?, // Nullable field
-      institution: json['institution'] as String?, // Nullable field
-    );
+    try {
+      return User(
+        id: json['id'] as int, // Cast ke int untuk type safety
+        name: json['name'] as String, // Cast ke String untuk type safety
+        email: json['email'] as String,
+        birthDate: json['birth_date'] as String?, // Nullable field
+        age: json['age'] as int?, // Nullable field
+        educationLevel: json['education_level'] as String?, // Nullable field
+        educationDisplay:
+            json['education_display'] as String?, // Nullable field
+        institution: json['institution'] as String?, // Nullable field
+      );
+    } catch (e) {
+      throw FormatException('Failed to parse User from JSON: $e');
+    }
   }
 
   /// === TO JSON METHOD ===
@@ -158,7 +163,8 @@ class User {
       birthDate: birthDate ?? this.birthDate, // Nullable field
       age: age, // Age tidak diubah karena dihitung otomatis
       educationLevel: educationLevel ?? this.educationLevel, // Nullable field
-      educationDisplay: educationDisplay, // Display tidak diubah karena dihitung otomatis
+      educationDisplay:
+          educationDisplay, // Display tidak diubah karena dihitung otomatis
       institution: institution ?? this.institution, // Nullable field
     );
   }
@@ -183,9 +189,7 @@ class User {
 
   /// Check apakah user memiliki profil lengkap
   bool get hasCompleteProfile {
-    return birthDate != null &&
-           educationLevel != null &&
-           institution != null;
+    return birthDate != null && educationLevel != null && institution != null;
   }
 
   /// Get inisial nama untuk avatar
@@ -199,7 +203,6 @@ class User {
 
   /// Check apakah user sudah verified (jika ada field email_verified_at)
   bool get isVerified {
-    // TODO: Implementasi ketika ada email verification
     return true; // Sementara selalu true
   }
 }
