@@ -39,6 +39,11 @@
 - **Cross-Platform**: Satu codebase untuk semua platform
 - **Progressive Web App**: PWA-ready dengan service worker
 
+## 🌐 Production URLs
+
+- Frontend (Cloudhebat): https://www.klarifikasi.rj22d.my.id/
+- Backend (Laravel Cloud): https://klarifikasiid-backend-main-ki47jp.laravel.cloud/
+
 ## 🏗️ Arsitektur Aplikasi
 
 ```
@@ -60,7 +65,7 @@
 - **Framework**: Flutter 3.35.3 🚀
 - **Language**: Dart 3.9.2 ⚡
 - **State Management**: Provider Pattern 📱
-- **HTTP Client**: Dio dengan retry logic 🔄
+- **HTTP Client**: http package dengan timeout & retry (custom) 🔄
 - **Storage**: Flutter Secure Storage 🔐
 - **UI Framework**: Material 3 dengan custom theming 🎨
 
@@ -155,8 +160,10 @@ flutter run -d <device-id>
 #### **Production Build**
 
 ```bash
-# Build untuk Web Production
-flutter build web --release
+# Build untuk Web Production (Cloudhebat)
+flutter build web --release \
+  --dart-define=API_BASE_URL=https://klarifikasiid-backend-main-ki47jp.laravel.cloud \
+  --dart-define=FORCE_PRODUCTION=true
 
 # Build untuk Android APK
 flutter build apk --release
@@ -227,31 +234,19 @@ flutter build appbundle --release
    DB_URL=postgresql://neondb_owner:npg_v8cdn2ZBUFXx@ep-summer-poetry-a1j9yrq5-pooler.ap-southeast-1.aws.neon.tech/neondb?channel_binding=require&sslmode=require
    ```
 
-##### **Frontend Deployment (Netlify - FREE)**
+##### **Frontend Deployment (Cloudhebat - Production)**
 
-1. **Build Web Assets** (Sudah completed):
+1. **Build Web Assets** (menyematkan API URL produksi):
    ```bash
-   flutter build web --release ✅ DONE
+   flutter build web --release \
+     --dart-define=API_BASE_URL=https://klarifikasiid-backend-main-ki47jp.laravel.cloud \
+     --dart-define=FORCE_PRODUCTION=true
    ```
 
-2. **Deploy ke Netlify**:
-   - Sign up ke [Netlify](https://netlify.com) - **FREE**
-   - Drag & drop folder `build/web/` ke Netlify
-   - Atau connect GitHub untuk auto-deploy
-
-3. **Configure Netlify**:
-   - **Build command**: `echo "Flutter app ready"`
-   - **Publish directory**: `build/web`
-   - **Redirect rules** untuk SPA:
-     ```
-     /*    /index.html   200
-     ```
-
-4. **Environment Variables di Netlify**:
-   ```env
-   API_BASE_URL=https://klarifikasiid-backend-main-ki47jp.laravel.cloud
-   FORCE_PRODUCTION=true
-   ```
+2. **Deploy ke Cloudhebat**:
+   - Upload isi folder `build/web/`
+   - Aktifkan SPA routing (semua route → `index.html`)
+   - Jika versi lama masih muncul, lakukan hard refresh/clear site data (service worker)
 
 ##### **Frontend Deployment (Netlify - FREE)**
 
@@ -420,8 +415,8 @@ String get apiBaseUrl {
     // Development: Connect ke Laravel backend lokal
     return 'http://localhost:8000';
   }
-  // Production: Ganti dengan domain production
-  return 'https://api.klarifikasi.id';
+  // Production: Laravel Cloud backend URL
+  return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
 }
 ```
 
@@ -488,7 +483,7 @@ lib/
 ### **Search Endpoints**
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/api/search` | Perform fact-checking search | ✅ |
+| POST | `/api/search` | Perform fact-checking search | ❌ |
 | GET | `/api/history` | Get search history | ✅ |
 | DELETE | `/api/history` | Clear search history | ✅ |
 
