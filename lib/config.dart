@@ -86,7 +86,6 @@ String get googleCseCx {
 /// ```
 const String searchEndpoint = '/api/search';
 
-
 /// === ADDITIONAL ENDPOINTS ===
 /// Berikut adalah endpoint lainnya yang digunakan dalam aplikasi:
 ///

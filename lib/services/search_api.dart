@@ -29,8 +29,10 @@ class _WebHttpClient extends http.BaseClient {
   Future<http.StreamedResponse> send(http.BaseRequest request) {
     // Tambahkan headers tambahan untuk web
     request.headers['Access-Control-Allow-Origin'] = '*';
-    request.headers['Access-Control-Allow-Methods'] = 'GET, POST, DELETE, OPTIONS';
-    request.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization';
+    request.headers['Access-Control-Allow-Methods'] =
+        'GET, POST, DELETE, OPTIONS';
+    request.headers['Access-Control-Allow-Headers'] =
+        'Content-Type, Authorization';
 
     return _inner.send(request);
   }
@@ -85,7 +87,9 @@ class SearchApi {
 
         // Jika ini adalah status code 0 atau network error, retry
         if (attempt < _maxRetries && _isRetryableError(e)) {
-          await Future.delayed(Duration(seconds: attempt + 1)); // Exponential backoff
+          await Future.delayed(
+            Duration(seconds: attempt + 1),
+          ); // Exponential backoff
           continue;
         }
         break;
@@ -110,22 +114,19 @@ class SearchApi {
           )
           .timeout(_requestTimeout);
 
-      return await _handleResponse<List<SearchResult>>(
-        response,
-        (body) {
-          final results = body['results'] as List<dynamic>? ?? [];
-          return results
-              .map((dynamic item) =>
-                  SearchResult.fromJson(item as Map<String, dynamic>))
-              .toList();
-        },
-        'Terjadi kesalahan saat mengambil data pencarian.',
-      );
+      return await _handleResponse<List<SearchResult>>(response, (body) {
+        final results = body['results'] as List<dynamic>? ?? [];
+        return results
+            .map(
+              (dynamic item) =>
+                  SearchResult.fromJson(item as Map<String, dynamic>),
+            )
+            .toList();
+      }, 'Terjadi kesalahan saat mengambil data pencarian.');
     } finally {
       client.close();
     }
   }
-
 
   /// Helper method untuk handle HTTP response dengan error handling yang komprehensif
   Future<T> _handleResponse<T>(
@@ -135,12 +136,16 @@ class SearchApi {
   ) async {
     // Handle status code 0 dan network errors
     if (response.statusCode == 0) {
-      throw Exception('Network error: Tidak dapat terhubung ke server. Periksa koneksi internet atau konfigurasi CORS.');
+      throw Exception(
+        'Network error: Tidak dapat terhubung ke server. Periksa koneksi internet atau konfigurasi CORS.',
+      );
     }
 
     // Handle timeout dan connection errors
     if (response.statusCode >= 500) {
-      throw Exception('Server error: ${response.statusCode}. Silakan coba lagi nanti.');
+      throw Exception(
+        'Server error: ${response.statusCode}. Silakan coba lagi nanti.',
+      );
     }
 
     if (response.statusCode >= 400 && response.statusCode < 500) {
@@ -149,13 +154,17 @@ class SearchApi {
         await _storage.delete(key: 'auth_token');
         throw Exception('Sesi login telah berakhir. Silakan login kembali.');
       }
-      throw Exception('Client error: ${response.statusCode}. Periksa permintaan atau kredensial.');
+      throw Exception(
+        'Client error: ${response.statusCode}. Periksa permintaan atau kredensial.',
+      );
     }
 
     if (response.statusCode != 200) {
       // Check if response is HTML instead of JSON
       if (response.body.trim().startsWith('<')) {
-        throw Exception('Server returned HTML instead of JSON. Please check API configuration and CORS settings.');
+        throw Exception(
+          'Server returned HTML instead of JSON. Please check API configuration and CORS settings.',
+        );
       }
       try {
         final Map<String, dynamic>? body =
@@ -171,7 +180,9 @@ class SearchApi {
     try {
       // Check if response is HTML instead of JSON
       if (response.body.trim().startsWith('<')) {
-        throw Exception('Server returned HTML instead of JSON. Please check API configuration and CORS settings.');
+        throw Exception(
+          'Server returned HTML instead of JSON. Please check API configuration and CORS settings.',
+        );
       }
       final Map<String, dynamic> body =
           jsonDecode(response.body) as Map<String, dynamic>;
@@ -185,9 +196,9 @@ class SearchApi {
   bool _isRetryableError(Exception error) {
     final message = error.toString().toLowerCase();
     return message.contains('network') ||
-           message.contains('timeout') ||
-           message.contains('connection') ||
-           message.contains('cors') ||
-           message.contains('status code: 0');
+        message.contains('timeout') ||
+        message.contains('connection') ||
+        message.contains('cors') ||
+        message.contains('status code: 0');
   }
 }

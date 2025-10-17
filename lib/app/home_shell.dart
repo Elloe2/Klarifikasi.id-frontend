@@ -70,10 +70,7 @@ class _HomeShellState extends State<HomeShell> {
           );
         }
 
-        final pages = [
-          SearchPage(api: _api),
-          const SettingsPage(),
-        ];
+        final pages = [SearchPage(api: _api), const SettingsPage()];
 
         return Scaffold(
           body: SafeArea(
