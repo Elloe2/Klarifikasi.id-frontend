@@ -101,7 +101,7 @@ class SearchApi {
     throw lastException ?? Exception('Unknown error occurred');
   }
 
-  Future<List<SearchResult>> _executeSearch(String query, int limit) async {
+  Future<Map<String, dynamic>> _executeSearch(String query, int limit) async {
     final uri = Uri.parse('$apiBaseUrl$searchEndpoint');
     final client = ApiHttpClient.getClient();
     final headers = await _getHeaders();
@@ -118,7 +118,7 @@ class SearchApi {
       return await _handleResponse<Map<String, dynamic>>(response, (body) {
         final results = body['results'] as List<dynamic>? ?? [];
         final geminiAnalysis = body['gemini_analysis'] as Map<String, dynamic>?;
-        
+
         return {
           'results': results
               .map(
@@ -126,7 +126,7 @@ class SearchApi {
                     SearchResult.fromJson(item as Map<String, dynamic>),
               )
               .toList(),
-          'gemini_analysis': geminiAnalysis != null 
+          'gemini_analysis': geminiAnalysis != null
               ? GeminiAnalysis.fromJson(geminiAnalysis)
               : null,
         };
