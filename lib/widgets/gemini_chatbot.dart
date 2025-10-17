@@ -178,65 +178,9 @@ class GeminiChatbot extends StatelessWidget {
   }
 
   Widget _buildAnalysisResult(BuildContext context) {
-    final isFact = analysis!.isFact;
-    final confidence = analysis!.confidence;
-
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        // Verdict dengan badge
-        Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-              decoration: BoxDecoration(
-                color: isFact
-                    ? Colors.green.withValues(alpha: 0.2)
-                    : Colors.red.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(20),
-                border: Border.all(
-                  color: isFact ? Colors.green : Colors.red,
-                  width: 1,
-                ),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  Icon(
-                    isFact ? Icons.check_circle : Icons.cancel,
-                    color: isFact ? Colors.green : Colors.red,
-                    size: 16,
-                  ),
-                  const SizedBox(width: 6),
-                  Text(
-                    analysis!.verdict,
-                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: isFact ? Colors.green : Colors.red,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(width: 8),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: _getConfidenceColor(confidence).withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                'Confidence: $confidence',
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: _getConfidenceColor(confidence),
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 12),
-
         // Explanation
         Text(
           'Penjelasan:',
@@ -245,7 +189,7 @@ class GeminiChatbot extends StatelessWidget {
             fontWeight: FontWeight.w600,
           ),
         ),
-        const SizedBox(height: 4),
+        const SizedBox(height: 8),
         Text(
           analysis!.explanation,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -253,7 +197,7 @@ class GeminiChatbot extends StatelessWidget {
             height: 1.4,
           ),
         ),
-        const SizedBox(height: 12),
+        const SizedBox(height: 16),
 
         // Sources
         if (analysis!.sources.isNotEmpty) ...[
@@ -277,16 +221,4 @@ class GeminiChatbot extends StatelessWidget {
     );
   }
 
-  Color _getConfidenceColor(String confidence) {
-    switch (confidence.toLowerCase()) {
-      case 'tinggi':
-        return Colors.green;
-      case 'sedang':
-        return Colors.orange;
-      case 'rendah':
-        return Colors.red;
-      default:
-        return AppTheme.subduedGray;
-    }
-  }
 }
