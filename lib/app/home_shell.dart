@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../pages/history_page.dart';
 import '../pages/search_page.dart';
 import '../pages/settings_page.dart';
 import '../providers/auth_provider.dart';
@@ -73,7 +72,6 @@ class _HomeShellState extends State<HomeShell> {
 
         final pages = [
           SearchPage(api: _api),
-          HistoryPage(api: _api),
           const SettingsPage(),
         ];
 
@@ -103,11 +101,6 @@ class _HomeShellState extends State<HomeShell> {
                   icon: Icon(Icons.search_outlined),
                   selectedIcon: Icon(Icons.search),
                   label: 'Cari',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.history_outlined),
-                  selectedIcon: Icon(Icons.history),
-                  label: 'Riwayat',
                 ),
                 NavigationDestination(
                   icon: Icon(Icons.settings_outlined),

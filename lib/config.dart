@@ -7,7 +7,6 @@
 /// Struktur:
 /// - apiBaseUrl: Base URL untuk API calls (adaptive untuk dev/prod)
 /// - searchEndpoint: Endpoint untuk pencarian fact-checking
-/// - historyEndpoint: Endpoint untuk riwayat pencarian
 /// ============================================================================
 library;
 
@@ -87,23 +86,6 @@ String get googleCseCx {
 /// ```
 const String searchEndpoint = '/api/search';
 
-/// === HISTORY ENDPOINT CONFIGURATION ===
-/// Endpoint untuk mengambil riwayat pencarian pengguna.
-/// Menampilkan daftar pencarian sebelumnya dengan pagination.
-///
-/// Path: /api/history
-/// Method: GET
-/// Query Parameters: ?per_page=20
-/// Authentication: Required (Bearer token)
-///
-/// Usage:
-/// ```dart
-/// final response = await http.get(
-///   Uri.parse('$apiBaseUrl$historyEndpoint?per_page=50'),
-///   headers: {'Authorization': 'Bearer $token'},
-/// );
-/// ```
-const String historyEndpoint = '/api/history';
 
 /// === ADDITIONAL ENDPOINTS ===
 /// Berikut adalah endpoint lainnya yang digunakan dalam aplikasi:
@@ -117,8 +99,6 @@ const String historyEndpoint = '/api/history';
 ///
 /// Search Endpoints:
 /// - POST /api/search - Perform fact-checking search (auth required)
-/// - GET /api/history - Get search history (auth required)
-/// - DELETE /api/history - Clear search history (auth required)
 ///
 /// === SECURITY CONSIDERATIONS ===
 /// - Semua authenticated endpoints memerlukan Bearer token

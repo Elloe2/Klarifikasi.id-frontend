@@ -6,7 +6,6 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart' as http;
 
 import '../config.dart';
-import '../models/search_history_entry.dart';
 import '../models/search_result.dart';
 
 // === HTTP CLIENT CONFIGURATION ===
@@ -127,61 +126,6 @@ class SearchApi {
     }
   }
 
-  /// Mengambil daftar riwayat pencarian dengan error handling yang lebih baik.
-  Future<List<SearchHistoryEntry>> fetchHistory({int perPage = 50}) async {
-    final uri = Uri.parse(
-      '$apiBaseUrl$historyEndpoint?per_page=${perPage.clamp(1, 100)}',
-    );
-    final client = ApiHttpClient.getClient();
-    final headers = await _getHeaders();
-
-    try {
-      final response = await client
-          .get(
-            uri,
-            headers: headers,
-          )
-          .timeout(_requestTimeout);
-
-      return await _handleResponse<List<SearchHistoryEntry>>(
-        response,
-        (body) {
-          final data = body['data'] as List<dynamic>? ?? [];
-          return data
-              .map((dynamic item) =>
-                  SearchHistoryEntry.fromJson(item as Map<String, dynamic>))
-              .toList();
-        },
-        'Terjadi kesalahan saat memuat riwayat.',
-      );
-    } finally {
-      client.close();
-    }
-  }
-
-  /// Menghapus seluruh riwayat pencarian dengan error handling.
-  Future<void> clearHistory() async {
-    final uri = Uri.parse('$apiBaseUrl$historyEndpoint');
-    final client = ApiHttpClient.getClient();
-    final headers = await _getHeaders();
-
-    try {
-      final response = await client
-          .delete(
-            uri,
-            headers: headers,
-          )
-          .timeout(_requestTimeout);
-
-      await _handleResponse<void>(
-        response,
-        (_) {}, // No-op for successful deletion
-        'Terjadi kesalahan saat menghapus riwayat.',
-      );
-    } finally {
-      client.close();
-    }
-  }
 
   /// Helper method untuk handle HTTP response dengan error handling yang komprehensif
   Future<T> _handleResponse<T>(
