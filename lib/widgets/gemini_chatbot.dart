@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/gemini_analysis.dart';
 import '../theme/app_theme.dart';
+import 'gemini_logo.dart';
 
 /// Widget untuk menampilkan analisis Gemini AI
 class GeminiChatbot extends StatelessWidget {
@@ -29,18 +30,7 @@ class GeminiChatbot extends StatelessWidget {
             // Header dengan icon Gemini
             Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(8),
-                  decoration: BoxDecoration(
-                    gradient: AppTheme.primaryGradient,
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: const Icon(
-                    Icons.psychology,
-                    color: Colors.white,
-                    size: 20,
-                  ),
-                ),
+                const GeminiLogo(size: 32),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(

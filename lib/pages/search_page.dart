@@ -19,6 +19,7 @@ import '../services/search_api.dart';
 import '../theme/app_theme.dart';
 import '../widgets/error_banner.dart';
 import '../widgets/gemini_chatbot.dart';
+import '../widgets/gemini_logo.dart';
 
 // === WIDGET UTAMA: SEARCH PAGE ===
 // StatefulWidget yang menangani seluruh logika pencarian dan state management
@@ -451,18 +452,7 @@ class _SearchPageState extends State<SearchPage> {
                       child: ExpansionTile(
                         title: Row(
                           children: [
-                            Container(
-                              padding: const EdgeInsets.all(6),
-                              decoration: BoxDecoration(
-                                gradient: AppTheme.primaryGradient,
-                                borderRadius: BorderRadius.circular(8),
-                              ),
-                              child: const Icon(
-                                Icons.psychology,
-                                color: Colors.white,
-                                size: 16,
-                              ),
-                            ),
+                            const GeminiLogo(size: 24),
                             const SizedBox(width: 8),
                             Text(
                               'Analisis AI Gemini',
