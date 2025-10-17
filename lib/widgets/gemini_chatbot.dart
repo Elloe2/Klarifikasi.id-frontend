@@ -17,78 +17,75 @@ class GeminiChatbot extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Card(
-        elevation: 0,
-        color: AppTheme.surfaceElevated,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-        child: Padding(
-          padding: const EdgeInsets.all(16),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              // Header dengan icon Gemini
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      gradient: AppTheme.primaryGradient,
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: const Icon(
-                      Icons.psychology,
-                      color: Colors.white,
+    return Card(
+      elevation: 0,
+      color: AppTheme.surfaceElevated,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+      child: Padding(
+        padding: const EdgeInsets.all(16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Header dengan icon Gemini
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    gradient: AppTheme.primaryGradient,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.psychology,
+                    color: Colors.white,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'AI Fact-Checker',
+                        style: Theme.of(context).textTheme.titleMedium
+                            ?.copyWith(
+                              fontWeight: FontWeight.w600,
+                              color: Colors.white,
+                            ),
+                      ),
+                      Text(
+                        'Powered by Gemini AI',
+                        style: Theme.of(context).textTheme.bodySmall
+                            ?.copyWith(color: AppTheme.subduedGray),
+                      ),
+                    ],
+                  ),
+                ),
+                if (onRetry != null && analysis != null && !analysis!.success)
+                  IconButton(
+                    onPressed: onRetry,
+                    icon: const Icon(
+                      Icons.refresh,
+                      color: AppTheme.primarySeedColor,
                       size: 20,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'AI Fact-Checker',
-                          style: Theme.of(context).textTheme.titleMedium
-                              ?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
-                        ),
-                        Text(
-                          'Powered by Gemini AI',
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppTheme.subduedGray),
-                        ),
-                      ],
-                    ),
-                  ),
-                  if (onRetry != null && analysis != null && !analysis!.success)
-                    IconButton(
-                      onPressed: onRetry,
-                      icon: const Icon(
-                        Icons.refresh,
-                        color: AppTheme.primarySeedColor,
-                        size: 20,
-                      ),
-                    ),
-                ],
-              ),
-              const SizedBox(height: 16),
-
-              // Content berdasarkan status
-              if (isLoading) ...[
-                _buildLoadingState(context),
-              ] else if (analysis == null) ...[
-                _buildEmptyState(context),
-              ] else if (!analysis!.success) ...[
-                _buildErrorState(context),
-              ] else ...[
-                _buildAnalysisResult(context),
               ],
+            ),
+            const SizedBox(height: 16),
+
+            // Content berdasarkan status
+            if (isLoading) ...[
+              _buildLoadingState(context),
+            ] else if (analysis == null) ...[
+              _buildEmptyState(context),
+            ] else if (!analysis!.success) ...[
+              _buildErrorState(context),
+            ] else ...[
+              _buildAnalysisResult(context),
             ],
-          ),
+          ],
         ),
       ),
     );

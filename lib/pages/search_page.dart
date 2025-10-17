@@ -70,6 +70,8 @@ class _SearchPageState extends State<SearchPage> {
   bool _isLoading = false;
   // Gemini AI analysis result
   GeminiAnalysis? _geminiAnalysis;
+  // Boolean untuk mengontrol expand/collapse Gemini chatbot
+  bool _isGeminiExpanded = false;
   // String untuk menyimpan error message jika terjadi kesalahan
   String? _error;
   // Timestamp pencarian terakhir untuk rate limiting
@@ -244,6 +246,7 @@ class _SearchPageState extends State<SearchPage> {
               response['gemini_analysis']
                   as GeminiAnalysis?; // Set Gemini analysis
           _isLoading = false; // Matikan loading indicator
+          _isGeminiExpanded = true; // Auto-expand Gemini chatbot saat ada hasil
         });
       }
     } catch (e) {
@@ -443,13 +446,60 @@ class _SearchPageState extends State<SearchPage> {
                   // Tampilkan analisis AI Gemini jika ada hasil pencarian atau loading
                   if (_results.isNotEmpty || _isLoading) ...[
                     const SizedBox(height: 12),
-                    GeminiChatbot(
-                      analysis: _geminiAnalysis,
-                      isLoading: _isLoading,
-                      onRetry: () {
-                        // Retry search untuk mendapatkan Gemini analysis
-                        _performSearchWithLimit();
-                      },
+                    Container(
+                      margin: const EdgeInsets.symmetric(horizontal: 16),
+                      child: ExpansionTile(
+                        title: Row(
+                          children: [
+                            Container(
+                              padding: const EdgeInsets.all(6),
+                              decoration: BoxDecoration(
+                                gradient: AppTheme.primaryGradient,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: const Icon(
+                                Icons.psychology,
+                                color: Colors.white,
+                                size: 16,
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Text(
+                              'Analisis AI Gemini',
+                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
+                            ),
+                          ],
+                        ),
+                        subtitle: Text(
+                          _isLoading 
+                              ? 'Menganalisis klaim...' 
+                              : _geminiAnalysis != null 
+                                  ? 'Klik untuk melihat analisis' 
+                                  : 'Siap menganalisis',
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: AppTheme.subduedGray,
+                          ),
+                        ),
+                        initiallyExpanded: _isGeminiExpanded,
+                        onExpansionChanged: (expanded) {
+                          setState(() {
+                            _isGeminiExpanded = expanded;
+                          });
+                        },
+                        children: [
+                          GeminiChatbot(
+                            analysis: _geminiAnalysis,
+                            isLoading: _isLoading,
+                            onRetry: () {
+                              // Retry search untuk mendapatkan Gemini analysis
+                              _performSearchWithLimit();
+                            },
+                          ),
+                        ],
+                      ),
                     ),
                   ],
 
