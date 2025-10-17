@@ -1,9 +1,10 @@
-# 🌟 Klarifikasi.id
+# 🌟 Klarifikasi.id v2.0.0
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.9.2-blue.svg)](https://flutter.dev)
 [![Laravel](https://img.shields.io/badge/Laravel-12.0-red.svg)](https://laravel.com)
 [![PHP](https://img.shields.io/badge/PHP-8.2+-purple.svg)](https://php.net)
 [![MySQL](https://img.shields.io/badge/MySQL-8.0+-orange.svg)](https://mysql.com)
+[![Version](https://img.shields.io/badge/Version-2.0.0-green.svg)](https://github.com/Elloe2/Klarifikasi.id)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 > **Aplikasi web fact-checking modern** yang dibangun dengan Flutter frontend dan Laravel backend untuk membantu pengguna memverifikasi kebenaran informasi dan klaim secara real-time.
@@ -37,6 +38,22 @@
 - **SSL Support**: HTTPS-ready dengan security headers
 - **Error Monitoring**: Comprehensive logging dan error tracking
 - **Scalable Architecture**: Clean code structure untuk easy maintenance
+
+## 📋 Changelog
+
+### **v2.0.0** - Major Update (Current)
+- ✨ **Gemini AI Integration**: Added Google Gemini AI for intelligent fact-checking
+- 🎨 **Custom Gemini Logo**: Authentic Google Gemini branding with diamond shape
+- 🔄 **Collapsible UI**: Gemini chatbot now uses ExpansionTile for better UX
+- 🗑️ **Simplified Analysis**: Removed HOAX/FAKTA system, focus on explanations
+- 🎯 **Enhanced UX**: Better loading states and error handling
+- 🚀 **Performance**: Optimized API calls and response handling
+
+### **v1.0.0** - Initial Release
+- 🎉 **Core Features**: Search, authentication, and basic fact-checking
+- 🔐 **Security**: Laravel Sanctum authentication
+- 📱 **Responsive**: Mobile-first design with Flutter
+- 🎨 **Modern UI**: Spotify-inspired dark theme
 
 ## 🌐 Production URLs
 
