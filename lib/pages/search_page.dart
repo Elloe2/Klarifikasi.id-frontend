@@ -14,9 +14,11 @@ import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../models/search_result.dart';
+import '../models/gemini_analysis.dart';
 import '../services/search_api.dart';
 import '../theme/app_theme.dart';
 import '../widgets/error_banner.dart';
+import '../widgets/gemini_chatbot.dart';
 
 // === WIDGET UTAMA: SEARCH PAGE ===
 // StatefulWidget yang menangani seluruh logika pencarian dan state management
@@ -66,6 +68,8 @@ class _SearchPageState extends State<SearchPage> {
   List<SearchResult> _results = const [];
   // Boolean untuk menunjukkan status loading saat pencarian sedang berlangsung
   bool _isLoading = false;
+  // Gemini AI analysis result
+  GeminiAnalysis? _geminiAnalysis;
   // String untuk menyimpan error message jika terjadi kesalahan
   String? _error;
   // Timestamp pencarian terakhir untuk rate limiting
@@ -228,13 +232,17 @@ class _SearchPageState extends State<SearchPage> {
     // === EKSEKUSI PENCARIAN ===
     try {
       // Panggil API dengan query dan limit hasil (default 20)
-      final results = await widget.api.search(query, limit: 20);
+      final response = await widget.api.search(query, limit: 20);
 
       // Safety check lagi setelah await
       if (mounted) {
-        // Update state dengan hasil pencarian
+        // Update state dengan hasil pencarian dan Gemini analysis
         setState(() {
-          _results = results; // Set hasil pencarian
+          _results =
+              response['results'] as List<SearchResult>; // Set hasil pencarian
+          _geminiAnalysis =
+              response['gemini_analysis']
+                  as GeminiAnalysis?; // Set Gemini analysis
           _isLoading = false; // Matikan loading indicator
         });
       }
@@ -245,6 +253,7 @@ class _SearchPageState extends State<SearchPage> {
         setState(() {
           _error = e.toString(); // Simpan error message
           _isLoading = false; // Matikan loading indicator
+          _geminiAnalysis = null; // Reset Gemini analysis
         });
       }
     }
@@ -428,6 +437,20 @@ class _SearchPageState extends State<SearchPage> {
                   if (_error != null) ...[
                     const SizedBox(height: 12),
                     ErrorBanner(message: _error!),
+                  ],
+
+                  // === GEMINI AI CHATBOT ===
+                  // Tampilkan analisis AI Gemini jika ada hasil pencarian atau loading
+                  if (_results.isNotEmpty || _isLoading) ...[
+                    const SizedBox(height: 12),
+                    GeminiChatbot(
+                      analysis: _geminiAnalysis,
+                      isLoading: _isLoading,
+                      onRetry: () {
+                        // Retry search untuk mendapatkan Gemini analysis
+                        _performSearchWithLimit();
+                      },
+                    ),
                   ],
 
                   // === SPACING ===

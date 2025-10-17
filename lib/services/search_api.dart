@@ -7,6 +7,7 @@ import 'package:http/http.dart' as http;
 
 import '../config.dart';
 import '../models/search_result.dart';
+import '../models/gemini_analysis.dart';
 
 // === HTTP CLIENT CONFIGURATION ===
 // Konfigurasi HTTP client yang berbeda untuk setiap platform
@@ -72,9 +73,9 @@ class SearchApi {
   }
 
   /// Mengirim permintaan pencarian ke backend dan mengubah hasil
-  /// JSON menjadi daftar `SearchResult`.
+  /// JSON menjadi daftar `SearchResult` dengan Gemini analysis.
   /// Dilengkapi dengan retry logic dan timeout handling.
-  Future<List<SearchResult>> search(String query, {int limit = 20}) async {
+  Future<Map<String, dynamic>> search(String query, {int limit = 20}) async {
     Exception? lastException;
 
     // Retry logic untuk handle temporary failures
@@ -114,14 +115,21 @@ class SearchApi {
           )
           .timeout(_requestTimeout);
 
-      return await _handleResponse<List<SearchResult>>(response, (body) {
+      return await _handleResponse<Map<String, dynamic>>(response, (body) {
         final results = body['results'] as List<dynamic>? ?? [];
-        return results
-            .map(
-              (dynamic item) =>
-                  SearchResult.fromJson(item as Map<String, dynamic>),
-            )
-            .toList();
+        final geminiAnalysis = body['gemini_analysis'] as Map<String, dynamic>?;
+        
+        return {
+          'results': results
+              .map(
+                (dynamic item) =>
+                    SearchResult.fromJson(item as Map<String, dynamic>),
+              )
+              .toList(),
+          'gemini_analysis': geminiAnalysis != null 
+              ? GeminiAnalysis.fromJson(geminiAnalysis)
+              : null,
+        };
       }, 'Terjadi kesalahan saat mengambil data pencarian.');
     } finally {
       client.close();
