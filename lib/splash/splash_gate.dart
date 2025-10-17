@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../app/home_shell.dart';
@@ -88,15 +87,12 @@ class _SplashScreen extends StatelessWidget {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              SvgPicture.asset(
-                'assets/logo/FIX_white.svg',
+              Image.asset(
+                'assets/logo/logo_klarifikasi_hanya_icon_kacamata_pembesar.png',
                 width: 200,
                 height: 200,
-                colorFilter: const ColorFilter.mode(
-                  Colors.white,
-                  BlendMode.srcIn,
-                ),
-                placeholderBuilder: (context) => const Icon(
+                fit: BoxFit.contain,
+                errorBuilder: (context, error, stackTrace) => const Icon(
                   Icons.verified_user,
                   size: 200,
                   color: Colors.white,

@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
@@ -298,20 +297,18 @@ class _RegisterPageState extends State<RegisterPage> {
                       Center(
                         child: Column(
                           children: [
-                            // Clean logo tanpa container yang berlebihan
-                            SvgPicture.asset(
-                              'assets/logo/FIX_white.svg',
-                              width: 80,
+                            // Logo KLARIFIKASI.ID yang baru
+                            Image.asset(
+                              'assets/logo/logo_klarifikasi_dengan_nama.png',
+                              width: 200,
                               height: 80,
-                              colorFilter: const ColorFilter.mode(
-                                Colors.white,
-                                BlendMode.srcIn,
-                              ),
-                              placeholderBuilder: (context) => const Icon(
-                                Icons.person_add,
-                                size: 80,
-                                color: Colors.white,
-                              ),
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
+                                    Icons.person_add,
+                                    size: 80,
+                                    color: Colors.white,
+                                  ),
                             ),
                             const SizedBox(height: 60),
                             Text(
@@ -335,164 +332,182 @@ class _RegisterPageState extends State<RegisterPage> {
 
                       const SizedBox(height: 32),
 
-                      // Form Fields
-                      _buildTextField(
-                        controller: _nameController,
-                        label: 'Nama Lengkap',
-                        hint: 'Masukkan nama lengkap Anda',
-                        icon: Icons.person,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Nama tidak boleh kosong';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      _buildTextField(
-                        controller: _emailController,
-                        label: 'Email',
-                        hint: 'nama@email.com',
-                        icon: Icons.email,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Email tidak boleh kosong';
-                          }
-                          if (!RegExp(
-                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                          ).hasMatch(value)) {
-                            return 'Format email tidak valid';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      _buildTextField(
-                        controller: _passwordController,
-                        label: 'Password',
-                        hint: 'Minimal 8 karakter',
-                        icon: Icons.lock,
-                        obscureText: _obscurePassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.white70,
-                          ),
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Password tidak boleh kosong';
-                          }
-                          if (value.length < 8) {
-                            return 'Password minimal 8 karakter';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      _buildTextField(
-                        controller: _confirmPasswordController,
-                        label: 'Konfirmasi Password',
-                        hint: 'Ulangi password Anda',
-                        icon: Icons.lock,
-                        obscureText: _obscureConfirmPassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscureConfirmPassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.white70,
-                          ),
-                          onPressed: () => setState(
-                            () => _obscureConfirmPassword =
-                                !_obscureConfirmPassword,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Konfirmasi password tidak boleh kosong';
-                          }
-                          if (value != _passwordController.text) {
-                            return 'Password tidak cocok';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Birth Date Field
-                      _buildDateField(),
-
-                      const SizedBox(height: 16),
-
-                      // Education Level Dropdown
-                      _buildEducationDropdown(),
-
-                      if (_selectedEducation != null) ...[
-                        const SizedBox(height: 16),
-                        _buildTextField(
-                          controller: _institutionController,
-                          label:
-                              'Nama ${_educationOptions.firstWhere((e) => e['value'] == _selectedEducation)['label']}',
-                          hint:
-                              'Masukkan nama ${_educationOptions.firstWhere((e) => e['value'] == _selectedEducation)['label'].toString().toLowerCase()}',
-                          icon: Icons.school,
-                        ),
-                      ],
-
-                      const SizedBox(height: 24),
-
-                      // Register Button
-                      SizedBox(
-                        width: double.infinity,
-                        height: 50,
-                        child: LoadingButton(
-                          isLoading: _isLoading,
-                          onPressed: _register,
-                          child: Text(
-                            'Daftar',
-                            style: Theme.of(context).textTheme.titleMedium
-                                ?.copyWith(
-                                  color: Colors.white,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                          ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      // Login Link
+                      // Form Fields dengan width constraint seperti Spotify
                       Center(
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            Text(
-                              'Sudah punya akun? ',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(color: Colors.white70),
-                            ),
-                            TextButton(
-                              onPressed: () => Navigator.of(
-                                context,
-                              ).pushReplacementNamed('/login'),
-                              child: Text(
-                                'Masuk',
-                                style: Theme.of(context).textTheme.bodyMedium
-                                    ?.copyWith(
-                                      color: AppTheme.primarySeedColor,
-                                      fontWeight: FontWeight.w600,
-                                    ),
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxWidth: 400, // Maksimal lebar seperti Spotify
+                            minWidth: 300, // Minimal lebar untuk mobile
+                          ),
+                          child: Column(
+                            children: [
+                              _buildTextField(
+                                controller: _nameController,
+                                label: 'Nama Lengkap',
+                                hint: 'Masukkan nama lengkap Anda',
+                                icon: Icons.person,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Nama tidak boleh kosong';
+                                  }
+                                  return null;
+                                },
                               ),
-                            ),
-                          ],
+
+                              _buildTextField(
+                                controller: _emailController,
+                                label: 'Email',
+                                hint: 'nama@email.com',
+                                icon: Icons.email,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Email tidak boleh kosong';
+                                  }
+                                  if (!RegExp(
+                                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                  ).hasMatch(value)) {
+                                    return 'Format email tidak valid';
+                                  }
+                                  return null;
+                                },
+                              ),
+
+                              _buildTextField(
+                                controller: _passwordController,
+                                label: 'Password',
+                                hint: 'Minimal 8 karakter',
+                                icon: Icons.lock,
+                                obscureText: _obscurePassword,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Colors.white70,
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Password tidak boleh kosong';
+                                  }
+                                  if (value.length < 8) {
+                                    return 'Password minimal 8 karakter';
+                                  }
+                                  return null;
+                                },
+                              ),
+
+                              _buildTextField(
+                                controller: _confirmPasswordController,
+                                label: 'Konfirmasi Password',
+                                hint: 'Ulangi password Anda',
+                                icon: Icons.lock,
+                                obscureText: _obscureConfirmPassword,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscureConfirmPassword
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Colors.white70,
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _obscureConfirmPassword =
+                                        !_obscureConfirmPassword,
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Konfirmasi password tidak boleh kosong';
+                                  }
+                                  if (value != _passwordController.text) {
+                                    return 'Password tidak cocok';
+                                  }
+                                  return null;
+                                },
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Birth Date Field
+                              _buildDateField(),
+
+                              const SizedBox(height: 16),
+
+                              // Education Level Dropdown
+                              _buildEducationDropdown(),
+
+                              if (_selectedEducation != null) ...[
+                                const SizedBox(height: 16),
+                                _buildTextField(
+                                  controller: _institutionController,
+                                  label:
+                                      'Nama ${_educationOptions.firstWhere((e) => e['value'] == _selectedEducation)['label']}',
+                                  hint:
+                                      'Masukkan nama ${_educationOptions.firstWhere((e) => e['value'] == _selectedEducation)['label'].toString().toLowerCase()}',
+                                  icon: Icons.school,
+                                ),
+                              ],
+
+                              const SizedBox(height: 24),
+
+                              // Register Button
+                              SizedBox(
+                                width: double.infinity,
+                                height: 50,
+                                child: LoadingButton(
+                                  isLoading: _isLoading,
+                                  onPressed: _register,
+                                  child: Text(
+                                    'Daftar',
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleMedium
+                                        ?.copyWith(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                  ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 16),
+
+                              // Login Link
+                              Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.center,
+                                  children: [
+                                    Text(
+                                      'Sudah punya akun? ',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodyMedium
+                                          ?.copyWith(color: Colors.white70),
+                                    ),
+                                    TextButton(
+                                      onPressed: () => Navigator.of(
+                                        context,
+                                      ).pushReplacementNamed('/login'),
+                                      child: Text(
+                                        'Masuk',
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .bodyMedium
+                                            ?.copyWith(
+                                              color: AppTheme.primarySeedColor,
+                                              fontWeight: FontWeight.w600,
+                                            ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
                         ),
                       ),
 

@@ -678,7 +678,7 @@ class _SearchCardState extends State<_SearchCard> {
                     onSubmitted: (_) => _performSearch(),
                     textInputAction: TextInputAction.search,
                     decoration: InputDecoration(
-                      hintText: "Cari fakta atau klaim...",
+                      hintText: "Cari fakta dari klaim di media sosial...",
                       hintStyle: theme.textTheme.bodyMedium?.copyWith(
                         color: Colors.white.withValues(alpha: 0.5),
                         fontWeight: FontWeight.w400,
@@ -823,17 +823,23 @@ class _EmptyState extends StatelessWidget {
                 builder: (context, value, child) {
                   return Transform.scale(scale: value, child: child);
                 },
-                child: Container(
+                child: Image.asset(
+                  'assets/logo/logo_klarifikasi_hanya_icon_kacamata_pembesar.png',
                   width: 96,
                   height: 96,
-                  decoration: BoxDecoration(
-                    gradient: AppTheme.secondaryGradient,
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.travel_explore,
-                    size: 46,
-                    color: Colors.white,
+                  fit: BoxFit.contain,
+                  errorBuilder: (context, error, stackTrace) => Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      gradient: AppTheme.secondaryGradient,
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.travel_explore,
+                      size: 46,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -847,7 +853,7 @@ class _EmptyState extends StatelessWidget {
                   colors: [Colors.white, Colors.white.withValues(alpha: 0.8)],
                 ).createShader(bounds),
                 child: Text(
-                  'Mulai verifikasi klaimmu',
+                  'Verifikasi klaim di media sosial',
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w800,
                     color: Colors.white,
@@ -874,34 +880,13 @@ class _EmptyState extends StatelessWidget {
                   ),
                 ),
                 child: Text(
-                  "Ketikkan klaim atau berita yang ingin diperiksa. Sistem kami akan mencari sumber terpercaya untuk memverifikasi kebenarannya.",
+                  "Ketikkan klaim dari sosial media yang ingin diperiksa. Sistem kami akan mencari sumber terpercaya untuk memverifikasi kebenarannya.",
                   style: theme.textTheme.bodyLarge?.copyWith(
                     color: Colors.white.withValues(alpha: 0.85),
                     height: 1.6,
                   ),
                   textAlign: TextAlign.center,
                 ),
-              ),
-
-              const SizedBox(height: 24),
-
-              // === STATISTICS ROW ===
-              // Baris statistik dengan dua item statistik
-              Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  _StatItem(
-                    number: '10,000+',
-                    label: 'Klaim diverifikasi',
-                    icon: Icons.verified,
-                  ),
-                  const SizedBox(width: 32),
-                  _StatItem(
-                    number: '50+',
-                    label: 'Sumber terpercaya',
-                    icon: Icons.library_books,
-                  ),
-                ],
               ),
 
               const SizedBox(height: 32),
@@ -949,15 +934,15 @@ class _EmptyState extends StatelessWidget {
                       ],
                     ),
                     const SizedBox(height: 12),
-                    _TipItem(
-                      text:
-                          'Periksa tanggal berita - klaim lama mungkin sudah terjawab',
-                    ),
+                    _TipItem(text: 'Periksa tanggal berita dan klaim yang ada'),
                     _TipItem(
                       text:
                           'Bandingkan dengan sumber resmi pemerintah atau lembaga terpercaya',
                     ),
-                    _TipItem(text: 'Waspadai judul clickbait yang provokatif'),
+                    _TipItem(
+                      text:
+                          'Waspadai judul clickbait yang provokatif di internet',
+                    ),
                   ],
                 ),
               ),
@@ -965,54 +950,6 @@ class _EmptyState extends StatelessWidget {
           ),
         ),
       ),
-    );
-  }
-}
-
-// === STATISTICS ITEM WIDGET ===
-// Widget untuk menampilkan statistik dengan icon, number, dan label
-// Menggunakan gradient background dan typography yang konsisten
-class _StatItem extends StatelessWidget {
-  const _StatItem({
-    required this.number,
-    required this.label,
-    required this.icon,
-  });
-
-  final String number;
-  final String label;
-  final IconData icon;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      children: [
-        Container(
-          padding: const EdgeInsets.all(12),
-          decoration: BoxDecoration(
-            gradient: AppTheme.accentGradient,
-            shape: BoxShape.circle,
-          ),
-          child: Icon(icon, color: Colors.white, size: 20),
-        ),
-        const SizedBox(height: 8),
-        Text(
-          number,
-          style: theme.textTheme.titleLarge?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w800,
-          ),
-        ),
-        Text(
-          label,
-          style: theme.textTheme.bodySmall?.copyWith(
-            color: Colors.white.withValues(alpha: 0.7),
-          ),
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 }

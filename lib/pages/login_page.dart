@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_svg/flutter_svg.dart';
 import 'package:provider/provider.dart';
 
 import '../providers/auth_provider.dart';
@@ -242,20 +241,18 @@ class _LoginPageState extends State<LoginPage> {
                       Center(
                         child: Column(
                           children: [
-                            // Clean logo tanpa container yang berlebihan
-                            SvgPicture.asset(
-                              'assets/logo/FIX_white.svg',
-                              width: 80,
+                            // Logo KLARIFIKASI.ID yang baru
+                            Image.asset(
+                              'assets/logo/logo_klarifikasi_dengan_nama.png',
+                              width: 200,
                               height: 80,
-                              colorFilter: const ColorFilter.mode(
-                                Colors.white,
-                                BlendMode.srcIn,
-                              ),
-                              placeholderBuilder: (context) => const Icon(
-                                Icons.verified_user,
-                                size: 80,
-                                color: Colors.white,
-                              ),
+                              fit: BoxFit.contain,
+                              errorBuilder: (context, error, stackTrace) =>
+                                  const Icon(
+                                    Icons.verified_user,
+                                    size: 80,
+                                    color: Colors.white,
+                                  ),
                             ),
                             const SizedBox(height: 60),
                             Text(
@@ -279,121 +276,144 @@ class _LoginPageState extends State<LoginPage> {
 
                       const SizedBox(height: 48),
 
-                      // Form Fields
-                      _buildTextField(
-                        controller: _emailController,
-                        label: 'Email',
-                        hint: 'nama@email.com',
-                        icon: Icons.email,
-                        keyboardType: TextInputType.emailAddress,
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Email tidak boleh kosong';
-                          }
-                          if (!RegExp(
-                            r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
-                          ).hasMatch(value)) {
-                            return 'Format email tidak valid';
-                          }
-                          return null;
-                        },
-                      ),
-
-                      const SizedBox(height: 16),
-
-                      _buildTextField(
-                        controller: _passwordController,
-                        label: 'Password',
-                        hint: 'Masukkan password Anda',
-                        icon: Icons.lock,
-                        obscureText: _obscurePassword,
-                        suffixIcon: IconButton(
-                          icon: Icon(
-                            _obscurePassword
-                                ? Icons.visibility
-                                : Icons.visibility_off,
-                            color: Colors.white70,
+                      // Form Fields dengan width constraint seperti Spotify
+                      Center(
+                        child: ConstrainedBox(
+                          constraints: const BoxConstraints(
+                            maxWidth: 400, // Maksimal lebar seperti Spotify
+                            minWidth: 300, // Minimal lebar untuk mobile
                           ),
-                          onPressed: () => setState(
-                            () => _obscurePassword = !_obscurePassword,
-                          ),
-                        ),
-                        validator: (value) {
-                          if (value == null || value.isEmpty) {
-                            return 'Password tidak boleh kosong';
-                          }
-                          return null;
-                        },
-                      ),
+                          child: Column(
+                            children: [
+                              _buildTextField(
+                                controller: _emailController,
+                                label: 'Email',
+                                hint: 'nama@email.com',
+                                icon: Icons.email,
+                                keyboardType: TextInputType.emailAddress,
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Email tidak boleh kosong';
+                                  }
+                                  if (!RegExp(
+                                    r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$',
+                                  ).hasMatch(value)) {
+                                    return 'Format email tidak valid';
+                                  }
+                                  return null;
+                                },
+                              ),
 
-                      const SizedBox(height: 32),
+                              const SizedBox(height: 16),
 
-                      // Spotify-style Login Button
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton(
-                          onPressed: _isLoading ? null : _login,
-                          style: ElevatedButton.styleFrom(
-                            backgroundColor: AppTheme.primarySeedColor,
-                            foregroundColor:
-                                Colors.black, // Black text seperti Spotify
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(
-                                25,
-                              ), // More rounded seperti Spotify
-                            ),
-                            elevation: 0,
-                          ),
-                          child: _isLoading
-                              ? const SizedBox(
-                                  width: 20,
-                                  height: 20,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    valueColor: AlwaysStoppedAnimation<Color>(
-                                      Colors.black,
+                              _buildTextField(
+                                controller: _passwordController,
+                                label: 'Password',
+                                hint: 'Masukkan password Anda',
+                                icon: Icons.lock,
+                                obscureText: _obscurePassword,
+                                suffixIcon: IconButton(
+                                  icon: Icon(
+                                    _obscurePassword
+                                        ? Icons.visibility
+                                        : Icons.visibility_off,
+                                    color: Colors.white70,
+                                  ),
+                                  onPressed: () => setState(
+                                    () => _obscurePassword = !_obscurePassword,
+                                  ),
+                                ),
+                                validator: (value) {
+                                  if (value == null || value.isEmpty) {
+                                    return 'Password tidak boleh kosong';
+                                  }
+                                  return null;
+                                },
+                              ),
+
+                              const SizedBox(height: 32),
+
+                              // Spotify-style Login Button
+                              SizedBox(
+                                width: double.infinity,
+                                child: ElevatedButton(
+                                  onPressed: _isLoading ? null : _login,
+                                  style: ElevatedButton.styleFrom(
+                                    backgroundColor: AppTheme.primarySeedColor,
+                                    foregroundColor: Colors
+                                        .black, // Black text seperti Spotify
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 16,
+                                    ),
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(
+                                        25,
+                                      ), // More rounded seperti Spotify
+                                    ),
+                                    elevation: 0,
+                                  ),
+                                  child: _isLoading
+                                      ? const SizedBox(
+                                          width: 20,
+                                          height: 20,
+                                          child: CircularProgressIndicator(
+                                            strokeWidth: 2,
+                                            valueColor:
+                                                AlwaysStoppedAnimation<Color>(
+                                                  Colors.black,
+                                                ),
+                                          ),
+                                        )
+                                      : Text(
+                                          'Masuk',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .labelLarge
+                                              ?.copyWith(
+                                                color: Colors.black,
+                                                fontWeight: FontWeight.w700,
+                                                fontSize: 16,
+                                              ),
+                                        ),
+                                ),
+                              ),
+
+                              const SizedBox(height: 24),
+
+                              // Register Link dengan better styling
+                              Center(
+                                child: TextButton(
+                                  onPressed: () => Navigator.of(
+                                    context,
+                                  ).pushReplacementNamed('/register'),
+                                  child: RichText(
+                                    text: TextSpan(
+                                      text: 'Belum punya akun? ',
+                                      style: Theme.of(
+                                        context,
+                                      ).textTheme.bodyMedium,
+                                      children: [
+                                        TextSpan(
+                                          text: 'Daftar sekarang',
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .bodyMedium
+                                              ?.copyWith(
+                                                color:
+                                                    AppTheme.primarySeedColor,
+                                                fontWeight: FontWeight.w600,
+                                                decoration:
+                                                    TextDecoration.underline,
+                                                decorationColor:
+                                                    AppTheme.primarySeedColor,
+                                              ),
+                                        ),
+                                      ],
                                     ),
                                   ),
-                                )
-                              : Text(
-                                  'Masuk',
-                                  style: Theme.of(context).textTheme.labelLarge
-                                      ?.copyWith(
-                                        color: Colors.black,
-                                        fontWeight: FontWeight.w700,
-                                        fontSize: 16,
-                                      ),
                                 ),
-                        ),
-                      ),
-
-                      const SizedBox(height: 24),
-
-                      // Register Link dengan better styling
-                      Center(
-                        child: TextButton(
-                          onPressed: () => Navigator.of(
-                            context,
-                          ).pushReplacementNamed('/register'),
-                          child: RichText(
-                            text: TextSpan(
-                              text: 'Belum punya akun? ',
-                              style: Theme.of(context).textTheme.bodyMedium,
-                              children: [
-                                TextSpan(
-                                  text: 'Daftar sekarang',
-                                  style: Theme.of(context).textTheme.bodyMedium
-                                      ?.copyWith(
-                                        color: AppTheme.primarySeedColor,
-                                        fontWeight: FontWeight.w600,
-                                        decoration: TextDecoration.underline,
-                                        decorationColor:
-                                            AppTheme.primarySeedColor,
-                                      ),
-                                ),
-                              ],
-                            ),
+                              ),
+                            ],
                           ),
                         ),
                       ),

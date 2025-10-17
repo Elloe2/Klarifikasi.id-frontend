@@ -32,21 +32,13 @@ class _LoadingScreenState extends State<LoadingScreen>
       vsync: this,
     )..repeat(reverse: true);
 
-    _fadeAnimation = Tween<double>(
-      begin: 0.3,
-      end: 1.0,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _fadeAnimation = Tween<double>(begin: 0.3, end: 1.0).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
 
-    _scaleAnimation = Tween<double>(
-      begin: 0.8,
-      end: 1.2,
-    ).animate(CurvedAnimation(
-      parent: _animationController,
-      curve: Curves.easeInOut,
-    ));
+    _scaleAnimation = Tween<double>(begin: 0.8, end: 1.2).animate(
+      CurvedAnimation(parent: _animationController, curve: Curves.easeInOut),
+    );
   }
 
   @override
@@ -63,48 +55,59 @@ class _LoadingScreenState extends State<LoadingScreen>
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [
-              Color(0xFF1a1a2e),
-              Color(0xFF16213e),
-              Color(0xFF0f3460),
-            ],
+            colors: [Color(0xFF1a1a2e), Color(0xFF16213e), Color(0xFF0f3460)],
           ),
         ),
         child: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              // Animated Logo/Icon
-              AnimatedBuilder(
-                animation: _animationController,
-                builder: (context, child) {
-                  return Transform.scale(
-                    scale: _scaleAnimation.value,
-                    child: FadeTransition(
-                      opacity: _fadeAnimation,
-                      child: Container(
-                        width: 120,
-                        height: 120,
-                        decoration: BoxDecoration(
-                          gradient: AppTheme.primaryGradient,
-                          shape: BoxShape.circle,
-                          boxShadow: [
-                            BoxShadow(
-                              color: AppTheme.primarySeedColor.withValues(alpha: 0.3),
-                              blurRadius: 20,
-                              spreadRadius: 5,
+              // Animated Circle with Static Logo
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  // Animated Circle Background
+                  AnimatedBuilder(
+                    animation: _animationController,
+                    builder: (context, child) {
+                      return Transform.scale(
+                        scale: _scaleAnimation.value,
+                        child: FadeTransition(
+                          opacity: _fadeAnimation,
+                          child: Container(
+                            width: 160,
+                            height: 160,
+                            decoration: BoxDecoration(
+                              gradient: AppTheme.primaryGradient,
+                              shape: BoxShape.circle,
+                              boxShadow: [
+                                BoxShadow(
+                                  color: AppTheme.primarySeedColor.withValues(
+                                    alpha: 0.3,
+                                  ),
+                                  blurRadius: 20,
+                                  spreadRadius: 5,
+                                ),
+                              ],
                             ),
-                          ],
+                          ),
                         ),
-                        child: const Icon(
-                          Icons.verified_user,
-                          size: 60,
-                          color: Colors.white,
-                        ),
-                      ),
+                      );
+                    },
+                  ),
+                  // Static Logo (no animation)
+                  Image.asset(
+                    'assets/logo/logo_klarifikasi_hanya_icon_kacamata_pembesar.png',
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) => const Icon(
+                      Icons.verified_user,
+                      size: 50,
+                      color: Colors.white,
                     ),
-                  );
-                },
+                  ),
+                ],
               ),
 
               const SizedBox(height: 32),
@@ -123,9 +126,9 @@ class _LoadingScreenState extends State<LoadingScreen>
               // Subtitle
               Text(
                 'Mohon tunggu sebentar...',
-                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: Colors.white70,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(color: Colors.white70),
               ),
 
               const SizedBox(height: 40),
@@ -154,8 +157,11 @@ class _LoadingScreenState extends State<LoadingScreen>
                       animation: _animationController,
                       builder: (context, child) {
                         final delay = index * 0.2;
-                        final animationValue = (_animationController.value + delay) % 1.0;
-                        final opacity = animationValue < 0.5 ? animationValue * 2 : (1.0 - animationValue) * 2;
+                        final animationValue =
+                            (_animationController.value + delay) % 1.0;
+                        final opacity = animationValue < 0.5
+                            ? animationValue * 2
+                            : (1.0 - animationValue) * 2;
 
                         return Container(
                           margin: const EdgeInsets.symmetric(horizontal: 4),
@@ -202,7 +208,10 @@ class LoadingOverlay extends StatelessWidget {
             color: Colors.black.withValues(alpha: 0.5),
             child: Center(
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 24),
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 32,
+                  vertical: 24,
+                ),
                 decoration: BoxDecoration(
                   color: AppTheme.surfaceDark,
                   borderRadius: BorderRadius.circular(16),
@@ -276,9 +285,13 @@ class _LoadingButtonState extends State<LoadingButton> {
       child: ElevatedButton(
         onPressed: widget.isLoading ? null : widget.onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: widget.isLoading ? Colors.grey : AppTheme.primarySeedColor,
+          backgroundColor: widget.isLoading
+              ? Colors.grey
+              : AppTheme.primarySeedColor,
           foregroundColor: Colors.white,
-          padding: widget.padding ?? const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+          padding:
+              widget.padding ??
+              const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
