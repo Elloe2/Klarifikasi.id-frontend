@@ -22,9 +22,7 @@ class GeminiChatbot extends StatelessWidget {
       child: Card(
         elevation: 0,
         color: AppTheme.surfaceElevated,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(16),
-        ),
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -52,16 +50,16 @@ class GeminiChatbot extends StatelessWidget {
                       children: [
                         Text(
                           'AI Fact-Checker',
-                          style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Colors.white,
-                          ),
+                          style: Theme.of(context).textTheme.titleMedium
+                              ?.copyWith(
+                                fontWeight: FontWeight.w600,
+                                color: Colors.white,
+                              ),
                         ),
                         Text(
                           'Powered by Gemini AI',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.subduedGray,
-                          ),
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppTheme.subduedGray),
                         ),
                       ],
                     ),
@@ -114,18 +112,18 @@ class GeminiChatbot extends StatelessWidget {
             const SizedBox(width: 12),
             Text(
               'Menganalisis klaim...',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppTheme.subduedGray,
-              ),
+              style: Theme.of(
+                context,
+              ).textTheme.bodyMedium?.copyWith(color: AppTheme.subduedGray),
             ),
           ],
         ),
         const SizedBox(height: 8),
         Text(
           'AI sedang memeriksa kebenaran klaim ini',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppTheme.mutedGray,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: AppTheme.mutedGray),
         ),
       ],
     );
@@ -134,24 +132,20 @@ class GeminiChatbot extends StatelessWidget {
   Widget _buildEmptyState(BuildContext context) {
     return Column(
       children: [
-        Icon(
-          Icons.psychology_outlined,
-          color: AppTheme.mutedGray,
-          size: 32,
-        ),
+        Icon(Icons.psychology_outlined, color: AppTheme.mutedGray, size: 32),
         const SizedBox(height: 8),
         Text(
           'AI Fact-Checker siap menganalisis',
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppTheme.subduedGray,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(color: AppTheme.subduedGray),
         ),
         const SizedBox(height: 4),
         Text(
           'Masukkan klaim untuk mendapatkan analisis AI',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppTheme.mutedGray,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: AppTheme.mutedGray),
         ),
       ],
     );
@@ -175,9 +169,9 @@ class GeminiChatbot extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           analysis?.error ?? 'Terjadi kesalahan saat menganalisis',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppTheme.mutedGray,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: AppTheme.mutedGray),
         ),
       ],
     );
@@ -196,7 +190,7 @@ class GeminiChatbot extends StatelessWidget {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
               decoration: BoxDecoration(
-                color: isFact 
+                color: isFact
                     ? Colors.green.withValues(alpha: 0.2)
                     : Colors.red.withValues(alpha: 0.2),
                 borderRadius: BorderRadius.circular(20),
