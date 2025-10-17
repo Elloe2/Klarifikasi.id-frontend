@@ -466,22 +466,22 @@ class _SearchPageState extends State<SearchPage> {
                             const SizedBox(width: 8),
                             Text(
                               'Analisis AI Gemini',
-                              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: Colors.white,
-                              ),
+                              style: Theme.of(context).textTheme.titleSmall
+                                  ?.copyWith(
+                                    fontWeight: FontWeight.w600,
+                                    color: Colors.white,
+                                  ),
                             ),
                           ],
                         ),
                         subtitle: Text(
-                          _isLoading 
-                              ? 'Menganalisis klaim...' 
-                              : _geminiAnalysis != null 
-                                  ? 'Klik untuk melihat analisis' 
-                                  : 'Siap menganalisis',
-                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            color: AppTheme.subduedGray,
-                          ),
+                          _isLoading
+                              ? 'Menganalisis klaim...'
+                              : _geminiAnalysis != null
+                              ? 'Klik untuk melihat analisis'
+                              : 'Siap menganalisis',
+                          style: Theme.of(context).textTheme.bodySmall
+                              ?.copyWith(color: AppTheme.subduedGray),
                         ),
                         initiallyExpanded: _isGeminiExpanded,
                         onExpansionChanged: (expanded) {

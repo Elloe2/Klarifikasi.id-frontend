@@ -56,8 +56,9 @@ class GeminiChatbot extends StatelessWidget {
                       ),
                       Text(
                         'Powered by Gemini AI',
-                        style: Theme.of(context).textTheme.bodySmall
-                            ?.copyWith(color: AppTheme.subduedGray),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppTheme.subduedGray,
+                        ),
                       ),
                     ],
                   ),
@@ -217,5 +218,4 @@ class GeminiChatbot extends StatelessWidget {
       ],
     );
   }
-
 }
