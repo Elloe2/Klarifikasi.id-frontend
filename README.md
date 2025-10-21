@@ -221,7 +221,7 @@ flutter build appbundle --release
 2. **Create New Project**:
    - Pilih region: Asia Southeast (Singapore)
    - Database name: `neondb`
-   - Username: `neondb_owner`
+   - Usernamea: `neondb_owner`
 
 3. **Get Connection String**:
    ```
