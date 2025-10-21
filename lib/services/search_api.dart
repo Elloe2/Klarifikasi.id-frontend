@@ -14,10 +14,10 @@ import '../models/gemini_analysis.dart';
 class ApiHttpClient {
   static http.Client getClient() {
     if (kIsWeb) {
-      // Flutter Web - gunakan client dengan konfigurasi khusus
+      // Flutter Web memerlukan client khusus untuk inject header CORS
       return _WebHttpClient();
     }
-    // Mobile/Desktop - gunakan client default dengan timeout
+    // Mobile/Desktop cukup menggunakan client default
     return http.Client();
   }
 }
@@ -28,7 +28,7 @@ class _WebHttpClient extends http.BaseClient {
 
   @override
   Future<http.StreamedResponse> send(http.BaseRequest request) {
-    // Tambahkan headers tambahan untuk web
+    // Pastikan request web memiliki header CORS minimal
     request.headers['Access-Control-Allow-Origin'] = '*';
     request.headers['Access-Control-Allow-Methods'] =
         'GET, POST, DELETE, OPTIONS';
@@ -45,7 +45,10 @@ class SearchApi {
   const SearchApi();
 
   // === TIMEOUT CONFIGURATION ===
+  // Lamanya request sebelum dianggap timeout
   static const Duration _requestTimeout = Duration(seconds: 15);
+
+  // Jumlah maksimal percobaan ulang ketika terjadi kegagalan sementara
   static const int _maxRetries = 2;
 
   // === SECURE STORAGE ===
@@ -88,9 +91,8 @@ class SearchApi {
 
         // Jika ini adalah status code 0 atau network error, retry
         if (attempt < _maxRetries && _isRetryableError(e)) {
-          await Future.delayed(
-            Duration(seconds: attempt + 1),
-          ); // Exponential backoff
+          // Gunakan backoff bertahap untuk memberi waktu server pulih
+          await Future.delayed(Duration(seconds: attempt + 1));
           continue;
         }
         break;
@@ -116,9 +118,11 @@ class SearchApi {
           .timeout(_requestTimeout);
 
       return await _handleResponse<Map<String, dynamic>>(response, (body) {
+        // Parse JSON response menjadi map
         final results = body['results'] as List<dynamic>? ?? [];
         final geminiAnalysis = body['gemini_analysis'] as Map<String, dynamic>?;
 
+        // Ubah hasil JSON menjadi daftar SearchResult dan optional Gemini analysis
         return {
           'results': results
               .map(
@@ -184,7 +188,6 @@ class SearchApi {
       }
     }
 
-    // Parse successful response
     try {
       // Check if response is HTML instead of JSON
       if (response.body.trim().startsWith('<')) {

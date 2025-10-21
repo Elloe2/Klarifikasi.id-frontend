@@ -1,49 +1,46 @@
 /// ============================================================================
 /// MAIN APPLICATION WIDGET - KLARIFIKASI.ID
 /// ============================================================================
-/// File ini berisi konfigurasi utama aplikasi Flutter.
-/// Mengatur theme, routing, providers, dan struktur aplikasi.
+/// File ini berisi jantung konfigurasi Flutter app.
+/// Di sinilah seluruh dependency global, tema, dan routing diikat menjadi satu.
 ///
-/// Struktur:
-/// - MainApp: Root widget dengan semua konfigurasi aplikasi
-/// - MultiProvider: Setup untuk state management (AuthProvider)
-/// - MaterialApp: Konfigurasi tema, routes, dan navigasi
+/// Struktur utama file:
+/// - Import dependency lintas modul (providers, theme, pages)
+/// - Definisi `MainApp` sebagai root widget
+/// - Konfigurasi `MultiProvider` untuk state management
+/// - Pengaturan `MaterialApp` (tema, routes, initial route, error handling)
 /// ============================================================================
 library;
 
-import 'package:flutter/material.dart'; // Flutter core widgets
-import 'package:provider/provider.dart'; // State management provider
+import 'package:flutter/material.dart'; // Flutter core widgets untuk UI dasar
+import 'package:provider/provider.dart'; // Paket Provider untuk state management
 
 // === PROVIDERS ===
 // Import AuthProvider untuk state management autentikasi
-import '../providers/auth_provider.dart';
+import '../providers/auth_provider.dart'; // Menyediakan status login ke seluruh app
 
 // === THEME ===
 // Import custom theme dengan dark mode dan gradient design
-import '../theme/app_theme.dart';
+import '../theme/app_theme.dart'; // Menyediakan skema warna dan typography custom
 
 // === PAGES ===
 // Import semua halaman utama aplikasi
-import '../splash/splash_gate.dart'; // Splash screen dengan auth check
-import '../pages/login_page.dart'; // Halaman login pengguna
-import '../pages/register_page.dart'; // Halaman registrasi pengguna
-import '../app/home_shell.dart'; // Main navigation shell
+import '../splash/splash_gate.dart'; // Splash screen yang memeriksa status auth
+import '../pages/login_page.dart'; // Halaman autentikasi login user
+import '../pages/register_page.dart'; // Halaman pendaftaran user baru
+import '../app/home_shell.dart'; // Shell utama berisi tab navigasi (search/settings)
 
 /// === MAIN APP WIDGET ===
-/// Root widget aplikasi yang mengatur semua konfigurasi utama.
-/// Menggunakan MultiProvider untuk state management dan MaterialApp
-/// untuk konfigurasi tema dan navigasi.
+/// Root widget aplikasi yang mengatur semua konfigurasi global.
+/// Menggunakan `MultiProvider` agar state (seperti autentikasi) bisa
+/// diakses oleh seluruh widget tree, lalu membungkusnya dengan `MaterialApp`
+/// untuk mendefinisikan tema, routing, dan konfigurasi UI lainnya.
 ///
-/// Features:
-/// - Provider setup untuk authentication state
-/// - Custom dark theme dengan gradient backgrounds
-/// - Route definitions untuk semua pages
-/// - Debug banner disabled untuk clean look
-///
-/// Architecture:
-/// - StatelessWidget untuk performa optimal
-/// - MultiProvider untuk dependency injection
-/// - Named routes untuk type-safe navigation
+/// Fitur kunci:
+/// - Injeksi `AuthProvider` sehingga halaman bisa memantau status login.
+/// - Tema gelap custom (`AppTheme.light`) yang konsisten di seluruh app.
+/// - Definisi route menggunakan map untuk navigasi terpusat.
+/// - Override `builder` untuk mengunci text scale (mencegah layout shifting).
 class MainApp extends StatelessWidget {
   /// Constructor dengan key untuk widget identification
   const MainApp({super.key});
@@ -51,56 +48,55 @@ class MainApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
-      /// === PROVIDER SETUP ===
-      /// Konfigurasi provider untuk state management.
-      /// AuthProvider mengelola state autentikasi seluruh aplikasi.
+      // ===== PROVIDER SETUP =====
+      // Semua provider global dideklarasikan di daftar ini sehingga dapat diakses
+      // melalui `context.read()` atau `context.watch()` di seluruh widget.
       providers: [
         // AuthProvider untuk development dengan local Laravel backend
         ChangeNotifierProvider<AuthProvider>(
-          create: (context) => AuthProvider(),
+          create: (context) => AuthProvider(), // Menyediakan state autentikasi
         ),
-        //
-        // ChangeNotifierProvider<SearchProvider>(create: (_) => SearchProvider()),
+        // Tambahkan provider lain di sini jika diperlukan (mis. SearchProvider)
       ],
 
-      /// === MATERIAL APP CONFIGURATION ===
-      /// Konfigurasi utama aplikasi dengan Material Design.
+      // ===== MATERIAL APP CONFIGURATION =====
+      // Setelah provider siap, bungkus aplikasi dengan `MaterialApp` untuk
+      // mendefinisikan tema, routing, dan konfigurasi global lainnya.
       child: MaterialApp(
-        // === BASIC CONFIGURATION ===
-        title: 'Klarifikasi.id', // App title untuk window bar
-        debugShowCheckedModeBanner: false, // Hide debug banner di development
-        // === THEME CONFIGURATION ===
-        // Menggunakan custom dark theme dengan gradient design
-        theme: AppTheme.light, // Custom theme dari app_theme.dart
-        // === ROUTE CONFIGURATION ===
-        // Definisi semua routes (halaman) dalam aplikasi
+        // Judul aplikasi yang muncul di window/browser tab
+        title: 'Klarifikasi.id',
+        // Sembunyikan banner debug untuk tampilan yang bersih
+        debugShowCheckedModeBanner: false,
+        // Terapkan tema gelap custom dari `AppTheme`
+        theme: AppTheme.light,
+
+        // ===== ROUTE CONFIGURATION =====
+        // Semua halaman utama didaftarkan di sini untuk navigasi berbasis nama.
         routes: {
           // Route definitions dengan named routes untuk type safety
-          '/': (context) => const SplashGate(), // Root route -> splash screen
-          '/login': (context) => const LoginPage(), // Login page
-          '/register': (context) => const RegisterPage(), // Registration page
-          '/home': (context) =>
-              const HomeShell(), // Main app shell dengan navigation
+          '/': (context) => const SplashGate(), // Entry point → cek autentikasi
+          '/login': (context) => const LoginPage(), // Form login pengguna
+          '/register': (context) => const RegisterPage(), // Form registrasi
+          '/home': (context) => const HomeShell(), // Shell utama setelah login
         },
 
-        // === INITIAL ROUTE ===
-        // Halaman pertama yang ditampilkan saat app start
-        initialRoute: '/', // Mulai dari splash screen
-        // === ERROR HANDLING ===
-        // Global error handling untuk uncaught exceptions
+        // Tentukan route awal yang ditampilkan saat aplikasi dibuka
+        initialRoute: '/',
+
+        // ===== ERROR & MEDIA CONFIG =====
+        // Override `builder` untuk memastikan text scale tetap 1.0 (stabil di web)
         builder: (context, child) {
           return MediaQuery(
-            data: MediaQuery.of(
-              context,
-            ).copyWith(textScaler: const TextScaler.linear(1.0)),
+            data: MediaQuery.of(context)
+                .copyWith(textScaler: const TextScaler.linear(1.0)),
             child: child!,
           );
         },
 
-        // === ADDITIONAL CONFIGURATION ===
-        // locale: const Locale('id', 'ID'), // Indonesian localization
-        // localizationsDelegates: [...], // Localization setup
-        // supportedLocales: [Locale('id', 'ID')], // Supported locales
+        // Konfigurasi tambahan (lokalisasi, dsb) bisa diaktifkan bila diperlukan
+        // locale: const Locale('id', 'ID'),
+        // localizationsDelegates: [...],
+        // supportedLocales: [Locale('id', 'ID')],
       ),
     );
   }

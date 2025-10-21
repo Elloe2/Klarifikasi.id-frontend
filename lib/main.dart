@@ -1,42 +1,39 @@
-/// ============================================================================
+/// =========================================================================
 /// ENTRY POINT - KLARIFIKASI.ID FLUTTER APPLICATION
-/// ============================================================================
-/// File ini adalah entry point utama aplikasi Flutter.
-/// Menginisialisasi dan menjalankan aplikasi dengan konfigurasi dasar.
+/// =========================================================================
+/// File ini adalah pintu masuk pertama ketika aplikasi dijalankan.
+/// Tanggung jawab utamanya hanya memanggil `runApp()` dengan root widget
+/// `MainApp`, sementara seluruh konfigurasi detail (theme, routes, providers)
+/// diserahkan ke `lib/app/app.dart`.
 ///
 /// Struktur:
-/// - main(): Function entry point yang memanggil runApp()
-/// - MainApp: Root widget aplikasi dengan konfigurasi MaterialApp
-/// ============================================================================
+/// - `main()`: fungsi entry point yang men-setup Flutter binding dan
+///   mengeksekusi `runApp()`.
+/// - `MainApp`: root widget yang mengatur konfigurasi global aplikasi.
+/// =========================================================================
 library;
 
-import 'package:flutter/material.dart'; // Flutter Material Design widgets
+import 'package:flutter/material.dart'; // Widget & utilities Material Design
 
-import 'app/app.dart'; // Import MainApp widget dari folder app/
+import 'app/app.dart'; // Root widget yang berisi konfigurasi lengkap aplikasi
 
 /// === MAIN ENTRY POINT ===
-/// Function utama yang dieksekusi pertama kali ketika aplikasi dijalankan.
-/// Memanggil runApp() untuk memulai Flutter application.
+/// Fungsi pertama yang dieksekusi saat aplikasi mulai berjalan.
+/// Menjalankan `MainApp` sebagai root widget sehingga semua konfigurasi
+/// (tema, routing, provider) tersusun di satu tempat.
 ///
-/// Tidak ada konfigurasi khusus di sini karena semua konfigurasi
-/// aplikasi dilakukan di dalam MainApp widget.
+/// Catatan praktik terbaik:
+/// - Jaga fungsi `main()` tetap ringkas dan bebas logika berat.
+/// - Lakukan setup dependency/konfigurasi lewat widget tree di `MainApp`.
+/// - Gunakan `runApp()` untuk mem-boot aplikasi ke platform target.
 ///
-/// Best Practices:
-/// - Keep main() function sesederhana mungkin
-/// - Semua konfigurasi dilakukan di widget tree
-/// - Error handling dilakukan di root widget
-///
-/// Usage:
+/// Contoh eksekusi:
 /// ```bash
-/// flutter run -d chrome  # Jalankan di browser
-/// flutter run -d android # Jalankan di Android
+/// flutter run -d chrome   # Menjalankan aplikasi di browser web
+/// flutter run -d android  # Menjalankan aplikasi di emulator/perangkat Android
 /// ```
 void main() {
-  // Jalankan aplikasi dengan MainApp sebagai root widget
-  // MainApp berisi semua konfigurasi aplikasi termasuk:
-  // - Theme configuration
-  // - Route definitions
-  // - Provider setup untuk state management
-  // - Authentication flow
+  // Start aplikasi Flutter dengan `MainApp` sebagai root widget.
+  // Seluruh konfigurasi (theme, routes, provider, autentikasi) dilakukan di sana.
   runApp(const MainApp());
 }

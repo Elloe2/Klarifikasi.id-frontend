@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/auth_provider.dart';
-import '../theme/app_theme.dart';
-import '../widgets/loading_button.dart';
+import '../providers/auth_provider.dart'; // Provider untuk operasi autentikasi
+import '../theme/app_theme.dart'; // Konsistensi warna & gaya UI
+import '../widgets/loading_button.dart'; // Tombol dengan indikator loading built-in
 
+/// Halaman registrasi akun baru untuk Klarifikasi.id.
+/// Menyediakan form multi-field, validasi, serta feedback error kontekstual.
 class RegisterPage extends StatefulWidget {
   const RegisterPage({super.key});
 
@@ -13,9 +15,10 @@ class RegisterPage extends StatefulWidget {
 }
 
 class _RegisterPageState extends State<RegisterPage> {
+  // Kunci form untuk validasi terpusat dan akses state form
   final _formKey = GlobalKey<FormState>();
 
-  // Controllers
+  // Controllers untuk menangkap input dari setiap field form
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
@@ -23,7 +26,7 @@ class _RegisterPageState extends State<RegisterPage> {
   final _birthDateController = TextEditingController();
   final _institutionController = TextEditingController();
 
-  // State
+  // State tambahan untuk dropdown pendidikan, loading state, dan visibilitas password
   String? _selectedEducation;
   bool _isLoading = false;
   bool _obscurePassword = true;
@@ -39,7 +42,7 @@ class _RegisterPageState extends State<RegisterPage> {
   @override
   void initState() {
     super.initState();
-    // Listen for authentication state changes
+    // Dengarkan perubahan autentikasi untuk auto-redirect setelah sukses register
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<AuthProvider>();
       authProvider.addListener(_onAuthStateChanged);
@@ -68,6 +71,7 @@ class _RegisterPageState extends State<RegisterPage> {
   void _onAuthStateChanged() {
     final authProvider = context.read<AuthProvider>();
     if (authProvider.isAuthenticated && mounted) {
+      // Jika registrasi sukses, arahkan user ke dashboard utama
       Navigator.of(context).pushReplacementNamed('/home');
     }
   }
@@ -101,6 +105,7 @@ class _RegisterPageState extends State<RegisterPage> {
   }
 
   Future<void> _register() async {
+    // Pastikan seluruh field lolos validasi sebelum request ke backend
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);

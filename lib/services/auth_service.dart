@@ -82,6 +82,12 @@ class AuthService {
   ); // Timeout untuk HTTP requests
   static const String _tokenKey = 'auth_token'; // Key untuk token storage
 
+  // === ENDPOINTS ===
+  static const String _loginEndpoint = '/api/auth/login';
+  static const String _registerEndpoint = '/api/auth/register';
+  static const String _profileEndpoint = '/api/auth/profile';
+  static const String _logoutEndpoint = '/api/auth/logout';
+
   /// === GET CURRENT USER PROFILE ===
   /// Mendapatkan informasi profil pengguna yang sedang login.
   /// Menggunakan token yang tersimpan untuk autentikasi.
@@ -110,7 +116,7 @@ class AuthService {
       // Request profile dengan Bearer token
       final response = await _httpClient
           .get(
-            Uri.parse('$_baseUrl/api/auth/profile'),
+            Uri.parse('$_baseUrl$_profileEndpoint'),
             headers: {
               'Authorization': 'Bearer $token', // Bearer token authentication
               'Content-Type': 'application/json',
@@ -119,12 +125,6 @@ class AuthService {
           .timeout(_requestTimeout); // Timeout protection
 
       if (response.statusCode == 200) {
-        // Check if response is HTML instead of JSON
-        if (response.body.trim().startsWith('<')) {
-          throw Exception(
-            'Server returned HTML instead of JSON. Please check API configuration.',
-          );
-        }
         // Success: Parse user data dari response
         final data = jsonDecode(response.body);
         return User.fromJson(data['user']);
@@ -193,22 +193,19 @@ class AuthService {
     String? institution,
   }) async {
     // HTTP POST request ke register endpoint
-    final response = await _httpClient
-        .post(
-          Uri.parse('$_baseUrl/api/auth/register'),
-          headers: {'Content-Type': 'application/json'},
-          body: jsonEncode({
-            'name': name, // Nama lengkap pengguna
-            'email': email, // Email address unik
-            'password': password, // Password
-            'password_confirmation': password, // Konfirmasi password
-            // Optional fields dengan conditional inclusion
-            if (birthDate != null) 'birth_date': birthDate,
-            if (educationLevel != null) 'education_level': educationLevel,
-            if (institution != null) 'institution': institution,
-          }),
-        )
-        .timeout(_requestTimeout);
+    final response = await _post(
+      _registerEndpoint,
+      body: {
+        'name': name, // Nama lengkap pengguna
+        'email': email, // Email address unik
+        'password': password, // Password
+        'password_confirmation': password, // Konfirmasi password
+        // Optional fields dengan conditional inclusion
+        if (birthDate != null) 'birth_date': birthDate,
+        if (educationLevel != null) 'education_level': educationLevel,
+        if (institution != null) 'institution': institution,
+      },
+    );
 
     if (response.statusCode == 201) {
       // Success: Parse response dan simpan token
@@ -267,55 +264,42 @@ class AuthService {
   ///   // Handle error di UI (show dialog, snackbar, etc)
   /// }
   /// ```
-  Future<User> login({required String email, required String password}) async {
-    try {
-      // HTTP POST request ke login endpoint
-      final response = await _httpClient
-          .post(
-            Uri.parse('$_baseUrl/api/auth/login'),
-            headers: {'Content-Type': 'application/json'},
-            body: jsonEncode({
-              'email': email, // Email pengguna
-              'password': password, // Password pengguna
-            }),
-          )
-          .timeout(_requestTimeout);
+  Future<User> login({
+    required String email,
+    required String password,
+  }) async {
+    final response = await _post(
+      _loginEndpoint,
+      body: {
+        'email': email, // Email pengguna
+        'password': password, // Password pengguna
+      },
+    );
 
-      if (response.statusCode == 200) {
-        // Success: Parse response dan simpan token
-        final data = jsonDecode(response.body);
-        final token = data['token'];
+    if (response.statusCode == 200) {
+      // Success: Parse response dan simpan token
+      final data = jsonDecode(response.body);
+      final token = data['token'];
 
-        // Simpan token ke secure storage
-        await _storage.write(key: _tokenKey, value: token);
+      // Simpan token ke secure storage
+      await _storage.write(key: _tokenKey, value: token);
 
-        // Return user data
-        return User.fromJson(data['user']);
+      // Return user data
+      return User.fromJson(data['user']);
+    } else {
+      // Error: Parse error message dari backend
+      final errorData = jsonDecode(response.body);
+      final errorMessage = errorData['message'] ?? 'Login failed';
+
+      // Buat exception dengan informasi lebih spesifik berdasarkan status code
+      if (response.statusCode == 401) {
+        throw Exception('Invalid credentials');
+      } else if (response.statusCode == 422) {
+        throw Exception('Validation error: $errorMessage');
+      } else if (response.statusCode >= 500) {
+        throw Exception('Server error: $errorMessage');
       } else {
-        // Error: Parse error message dari backend
-        final errorData = jsonDecode(response.body);
-        final errorMessage = errorData['message'] ?? 'Login failed';
-
-        // Buat exception dengan informasi lebih spesifik berdasarkan status code
-        if (response.statusCode == 401) {
-          throw Exception('Invalid credentials');
-        } else if (response.statusCode == 422) {
-          throw Exception('Validation error: $errorMessage');
-        } else if (response.statusCode >= 500) {
-          throw Exception('Server error: $errorMessage');
-        } else {
-          throw Exception(errorMessage);
-        }
-      }
-    } catch (e) {
-      // Network error handling dengan user-friendly messages
-      if (e.toString().contains('SocketException') ||
-          e.toString().contains('Network is unreachable')) {
-        throw Exception('Network error - please check your connection');
-      } else if (e.toString().contains('TimeoutException')) {
-        throw Exception('Request timeout - please try again');
-      } else {
-        throw Exception(e.toString());
+        throw Exception(errorMessage);
       }
     }
   }
@@ -352,15 +336,13 @@ class AuthService {
     if (token != null) {
       try {
         // Kirim logout request ke backend dengan token
-        await _httpClient
-            .post(
-              Uri.parse('$_baseUrl/api/auth/logout'),
-              headers: {
-                'Authorization': 'Bearer $token', // Bearer token untuk logout
-                'Content-Type': 'application/json',
-              },
-            )
-            .timeout(_requestTimeout);
+        await _post(
+          _logoutEndpoint,
+          headers: {
+            'Authorization': 'Bearer $token', // Bearer token untuk logout
+            'Content-Type': 'application/json',
+          },
+        );
       } catch (e) {
         // Ignore errors during logout untuk memastikan process selalu selesai
         // Backend logout failure tidak boleh mencegah local cleanup
@@ -418,23 +400,21 @@ class AuthService {
     if (token == null) throw Exception('Not authenticated');
 
     // HTTP POST request ke profile update endpoint
-    final response = await _httpClient
-        .post(
-          Uri.parse('$_baseUrl/api/auth/profile'),
-          headers: {
-            'Authorization': 'Bearer $token', // Bearer token authentication
-            'Content-Type': 'application/json',
-          },
-          body: jsonEncode({
-            // Conditional field inclusion - hanya kirim field yang diubah
-            if (name != null) 'name': name,
-            if (email != null) 'email': email,
-            if (birthDate != null) 'birth_date': birthDate,
-            if (educationLevel != null) 'education_level': educationLevel,
-            if (institution != null) 'institution': institution,
-          }),
-        )
-        .timeout(_requestTimeout);
+    final response = await _post(
+      _profileEndpoint,
+      headers: {
+        'Authorization': 'Bearer $token', // Bearer token authentication
+        'Content-Type': 'application/json',
+      },
+      body: {
+        // Conditional field inclusion - hanya kirim field yang diubah
+        if (name != null) 'name': name,
+        if (email != null) 'email': email,
+        if (birthDate != null) 'birth_date': birthDate,
+        if (educationLevel != null) 'education_level': educationLevel,
+        if (institution != null) 'institution': institution,
+      },
+    );
 
     if (response.statusCode == 200) {
       // Success: Parse response dan return user data terbaru
@@ -491,6 +471,38 @@ class AuthService {
     } catch (e) {
       // Network error atau timeout = anggap tidak login
       return false;
+    }
+  }
+
+  /// === INTERNAL POST HELPER ===
+  /// Helper untuk mengirim HTTP POST request dengan konfigurasi default.
+  /// Menyatukan base URL, headers umum, encoding JSON, dan timeout handling.
+  Future<http.Response> _post(
+    String endpoint, {
+    Map<String, String>? headers,
+    Map<String, dynamic>? body,
+  }) async {
+    final uri = Uri.parse('$_baseUrl$endpoint');
+
+    // Header dasar untuk semua request JSON
+    final requestHeaders = <String, String>{
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      ...?headers,
+    };
+
+    try {
+      final response = await _httpClient
+          .post(
+            uri,
+            headers: requestHeaders,
+            body: body != null ? jsonEncode(body) : null,
+          )
+          .timeout(_requestTimeout);
+
+      return response;
+    } on Exception {
+      rethrow; // Propagasi ke caller untuk ditangani sesuai konteks
     }
   }
 }

@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../models/user.dart';
-import '../providers/auth_provider.dart';
-import '../theme/app_theme.dart';
+import '../models/user.dart'; // Representasi data profil pengguna
+import '../providers/auth_provider.dart'; // Sumber status autentikasi & profil
+import '../theme/app_theme.dart'; // Konsistensi warna dan gradient UI
 
+/// Halaman pengaturan untuk menampilkan dan mengedit profil pengguna.
+/// Menyediakan card informasi pengguna, form edit profil, dan tombol logout.
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -18,12 +20,14 @@ class _SettingsPageState extends State<SettingsPage> {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
         if (!authProvider.isInitialized) {
+          // Tampilkan loading sederhana saat provider memuat data autentikasi awal
           return const Scaffold(
             body: Center(child: CircularProgressIndicator()),
           );
         }
 
         if (!authProvider.isAuthenticated) {
+          // Tampilan khusus jika user belum login
           return Scaffold(
             backgroundColor: Colors.transparent,
             appBar: AppBar(
@@ -98,17 +102,17 @@ class _SettingsPageState extends State<SettingsPage> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                // Profile Card
+                // Profile Card menampilkan informasi singkat pengguna
                 _ProfileCard(user: authProvider.currentUser!),
 
                 const SizedBox(height: 16),
 
-                // Edit Profile Card
+                // Edit Profile Card memungkinkan pengguna memperbarui profil
                 _EditProfileCard(user: authProvider.currentUser!),
 
                 const SizedBox(height: 16),
 
-                // App Info Card
+                // App Info Card berisi metadata aplikasi
                 Container(
                   decoration: BoxDecoration(
                     gradient: AppTheme.cardGradient,
@@ -152,7 +156,7 @@ class _SettingsPageState extends State<SettingsPage> {
               // Tutup dialog terlebih dahulu
               Navigator.of(dialogContext).pop();
 
-              // Lakukan logout
+              // Lakukan logout melalui provider
               await authProvider.logout();
 
               // Gunakan context dari State untuk operasi UI
@@ -174,6 +178,7 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 }
 
+/// Card ringkas yang menampilkan data profil aktif.
 class _ProfileCard extends StatelessWidget {
   const _ProfileCard({required this.user});
 
@@ -261,6 +266,7 @@ class _ProfileCard extends StatelessWidget {
   }
 }
 
+/// Card interaktif untuk mengedit data profil pengguna.
 class _EditProfileCard extends StatefulWidget {
   const _EditProfileCard({required this.user});
 

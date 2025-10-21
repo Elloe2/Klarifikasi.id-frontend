@@ -27,6 +27,7 @@ library;
 String get apiBaseUrl {
   // === LARAVEL CLOUD BACKEND ===
   // Gunakan Laravel Cloud untuk semua environment
+  // Semua request frontend diarahkan ke instance Laravel Cloud produksi
   return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
 }
 
@@ -46,7 +47,8 @@ String get googleCseApiKey {
   }
 
   // === FALLBACK ===
-  return 'AIzaSyAFOdoaMwgurnjfnhGKn5GFy6_m2HKiGtA'; // Ganti dengan API key production
+  // Nilai default saat build lokal—harus diganti sebelum produksi
+  return 'AIzaSyAFOdoaMwgurnjfnhGKn5GFy6_m2HKiGtA';
 }
 
 /// === GOOGLE CSE CX CONFIGURATION ===
@@ -65,7 +67,8 @@ String get googleCseCx {
   }
 
   // === FALLBACK ===
-  return '6242f5825dedb4b59'; // Ganti dengan CX production
+  // Default CX untuk development/testing
+  return '6242f5825dedb4b59';
 }
 
 /// === SEARCH ENDPOINT CONFIGURATION ===
@@ -84,7 +87,7 @@ String get googleCseCx {
 ///   body: jsonEncode({'query': query, 'limit': 20}),
 /// );
 /// ```
-const String searchEndpoint = '/api/search';
+const String searchEndpoint = '/api/search'; // Endpoint tunggal untuk pencarian klaim
 
 /// === ADDITIONAL ENDPOINTS ===
 /// Berikut adalah endpoint lainnya yang digunakan dalam aplikasi:

@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../pages/search_page.dart';
-import '../pages/settings_page.dart';
-import '../providers/auth_provider.dart';
-import '../theme/app_theme.dart';
-import '../services/search_api.dart';
-import '../widgets/loading_widgets.dart';
+import '../pages/search_page.dart'; // Tab utama untuk pencarian klaim
+import '../pages/settings_page.dart'; // Tab pengaturan profil dan preferensi
+import '../providers/auth_provider.dart'; // Menyediakan status autentikasi global
+import '../theme/app_theme.dart'; // Warna dan gaya tema aplikasi
+import '../services/search_api.dart'; // Service pencarian yang dioper ke SearchPage
+import '../widgets/loading_widgets.dart'; // Widget loading reusable
 
+/// Shell navigasi utama setelah user berhasil login.
+/// Mengatur tab bottom navigation antara pencarian dan pengaturan,
+/// sekaligus meng-handle loading state awal dashboard.
 class HomeShell extends StatefulWidget {
   const HomeShell({super.key});
 
@@ -16,18 +19,24 @@ class HomeShell extends StatefulWidget {
 }
 
 class _HomeShellState extends State<HomeShell> {
+  // Index tab yang sedang aktif pada bottom navigation
   int _currentIndex = 0;
+
+  // Instance `SearchApi` yang diteruskan ke `SearchPage`
   final SearchApi _api = const SearchApi();
+
+  // Flag loading untuk menampilkan splash kecil sebelum dashboard siap
   bool _isDashboardLoading = true;
 
   @override
   void initState() {
     super.initState();
+    // Trigger loading animasi singkat sebelum halaman utama muncul
     _initializeDashboard();
   }
 
   Future<void> _initializeDashboard() async {
-    // Simulate dashboard loading for better UX
+    // Menunda 1.5 detik agar transisi terasa smooth saat memasuki dashboard
     await Future.delayed(const Duration(milliseconds: 1500));
 
     if (mounted) {
@@ -41,7 +50,7 @@ class _HomeShellState extends State<HomeShell> {
   Widget build(BuildContext context) {
     return Consumer<AuthProvider>(
       builder: (context, authProvider, child) {
-        // Pastikan provider sudah initialized
+        // Pastikan `AuthProvider` selesai melakukan inisialisasi awal
         if (!authProvider.isInitialized) {
           return const LoadingScreen(
             message: 'Memuat aplikasi...',
@@ -50,7 +59,7 @@ class _HomeShellState extends State<HomeShell> {
         }
 
         if (!authProvider.isAuthenticated) {
-          // Redirect to login if not authenticated
+          // Jika token tidak valid, arahkan kembali ke halaman login
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (mounted && context.mounted) {
               Navigator.of(context).pushReplacementNamed('/login');
@@ -62,7 +71,7 @@ class _HomeShellState extends State<HomeShell> {
           );
         }
 
-        // Show loading screen when first entering dashboard
+        // Saat pertama kali masuk dashboard, tampilkan shimmer loading
         if (_isDashboardLoading) {
           return const LoadingScreen(
             message: 'Memuat dashboard...',
@@ -70,10 +79,12 @@ class _HomeShellState extends State<HomeShell> {
           );
         }
 
+        // Daftar halaman yang di-stack; `IndexedStack` menjaga state antar tab
         final pages = [SearchPage(api: _api), const SettingsPage()];
 
         return Scaffold(
           body: SafeArea(
+            // IndexedStack menjaga state masing-masing tab agar tidak rebuild
             child: IndexedStack(index: _currentIndex, children: pages),
           ),
           bottomNavigationBar: Container(

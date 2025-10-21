@@ -319,6 +319,7 @@ class _SearchPageState extends State<SearchPage> {
     // Ambil theme context untuk styling yang konsisten
     final theme = Theme.of(context);
     // Hitung tinggi maksimal panel Gemini agar tidak overflow
+    // Menggunakan tinggi layar agar panel tetap proporsional di berbagai device
     final geminiPanelHeight = math.min(
       420.0,
       math.max(260.0, MediaQuery.of(context).size.height * 0.5),
@@ -487,6 +488,8 @@ class _SearchPageState extends State<SearchPage> {
                         },
                         children: [
                           SizedBox(
+                            // Bungkus GeminiChatbot dalam container tetap agar
+                            // tinggi panel tidak melebihi viewport dan tetap bisa discroll
                             height: geminiPanelHeight,
                             child: Scrollbar(
                               thumbVisibility: true,

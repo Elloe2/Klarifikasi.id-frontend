@@ -3,13 +3,19 @@ import 'package:flutter/material.dart';
 import '../models/user.dart';
 import '../services/auth_service.dart';
 
+/// Provider yang menangani state autentikasi aplikasi.
+/// Berinteraksi dengan `AuthService` untuk login, register, dan manajemen profil,
+/// lalu memancarkan perubahan state ke widget yang mendengarkan.
 class AuthProvider extends ChangeNotifier {
+  // Service layer yang berkomunikasi dengan backend Laravel
   final AuthService _authService = AuthService();
 
+  // State internal yang menyimpan data user dan status proses
   User? _currentUser;
   bool _isLoading = false;
   bool _isInitialized = false;
 
+  // Getter untuk expose state ke UI tanpa memperbolehkan modifikasi langsung
   User? get currentUser => _currentUser;
   bool get isLoading => _isLoading;
   bool get isAuthenticated => _currentUser != null;

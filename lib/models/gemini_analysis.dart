@@ -1,12 +1,24 @@
 /// Model untuk data analisis Gemini AI
 class GeminiAnalysis {
+  /// Menyatakan apakah pemanggilan Gemini berhasil memproses klaim
   final bool success;
+
+  /// Ringkasan penjelasan yang disampaikan oleh Gemini
   final String explanation;
+
+  /// Informasi sumber yang dirujuk (jika tersedia)
   final String sources;
+
+  /// Analisis mendalam yang diberikan oleh Gemini
   final String analysis;
+
+  /// Klaim asli yang dianalisis sehingga mudah ditampilkan ulang di UI
   final String claim;
+
+  /// Pesan error jika proses analisis gagal
   final String? error;
 
+  /// Constructor utama untuk membuat instance analisis
   const GeminiAnalysis({
     required this.success,
     required this.explanation,
@@ -16,6 +28,7 @@ class GeminiAnalysis {
     this.error,
   });
 
+  /// Factory constructor untuk mengubah response JSON menjadi objek model
   factory GeminiAnalysis.fromJson(Map<String, dynamic> json) {
     return GeminiAnalysis(
       success: json['success'] ?? false,

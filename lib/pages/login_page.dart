@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 
-import '../providers/auth_provider.dart';
-import '../theme/app_theme.dart';
+import '../providers/auth_provider.dart'; // Provider yang mengelola status autentikasi
+import '../theme/app_theme.dart'; // Palet warna dan gaya UI konsisten
 
+/// Halaman login utama untuk pengguna Klarifikasi.id.
+/// Menyediakan form email/password, validasi, dan feedback error terarah.
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
 
@@ -12,18 +14,23 @@ class LoginPage extends StatefulWidget {
 }
 
 class _LoginPageState extends State<LoginPage> {
+  // Kunci form untuk melakukan validasi dan menyimpan state form
   final _formKey = GlobalKey<FormState>();
 
+  // Controller input untuk mengambil nilai email & password dari TextField
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
+  // Flag untuk menampilkan indikator loading saat request login diproses
   bool _isLoading = false;
+
+  // Flag untuk mengendalikan visibilitas password pada field password
   bool _obscurePassword = true;
 
   @override
   void initState() {
     super.initState();
-    // Listen for authentication state changes
+    // Dengarkan perubahan autentikasi setelah frame pertama ter-render
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final authProvider = context.read<AuthProvider>();
       authProvider.addListener(_onAuthStateChanged);
@@ -48,11 +55,13 @@ class _LoginPageState extends State<LoginPage> {
   void _onAuthStateChanged() {
     final authProvider = context.read<AuthProvider>();
     if (authProvider.isAuthenticated && mounted) {
+      // Jika user berhasil login, navigasikan ke dashboard utama
       Navigator.of(context).pushReplacementNamed('/home');
     }
   }
 
   Future<void> _login() async {
+    // Jalankan validasi form sebelum mengirim request ke server
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);

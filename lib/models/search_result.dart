@@ -35,17 +35,33 @@ import 'dart:ui'; // For Color class
 class SearchResult {
   /// === REQUIRED FIELDS ===
   /// Fields yang wajib diisi untuk setiap hasil pencarian
-  final String title; // Judul artikel/berita
-  final String snippet; // Cuplikan isi artikel (deskripsi singkat)
-  final String link; // URL lengkap artikel
-  final String displayLink; // Domain sumber (contoh: "detik.com")
-  final String formattedUrl; // URL yang sudah diformat untuk display
+  ///
+  /// Judul artikel atau berita pada hasil pencarian
+  final String title;
+
+  /// Cuplikan singkat isi artikel untuk membantu konteks
+  final String snippet;
+
+  /// URL penuh yang dapat diklik oleh pengguna
+  final String link;
+
+  /// Domain sumber (misalnya `detik.com`) untuk kredibilitas cepat
+  final String displayLink;
+
+  /// URL versi tampilan (sebagian besar sama dengan `link`)
+  final String formattedUrl;
 
   /// === OPTIONAL FIELDS ===
   /// Fields tambahan untuk enrich hasil pencarian
-  final String? thumbnail; // URL gambar thumbnail artikel
-  final int? credibilityScore; // Skor kredibilitas (0-100)
-  final DateTime? publishedDate; // Tanggal publikasi artikel
+
+  /// URL thumbnail jika backend menyediakan preview gambar
+  final String? thumbnail;
+
+  /// Skor kredibilitas sumber (0-100) jika dihitung backend
+  final int? credibilityScore;
+
+  /// Tanggal publikasi artikel agar bisa dihitung relative time
+  final DateTime? publishedDate;
 
   /// === CONSTRUCTOR ===
   /// Constructor dengan required fields untuk basic search result.
@@ -90,18 +106,18 @@ class SearchResult {
   factory SearchResult.fromJson(Map<String, dynamic> json) {
     return SearchResult(
       // === REQUIRED FIELDS dengan null-safe parsing ===
-      title: json['title'] as String? ?? 'Tanpa judul', // Fallback jika title kosong
-      snippet: json['snippet'] as String? ?? '', // Fallback ke empty string
-      link: json['link'] as String? ?? '', // URL artikel (wajib untuk akses)
-      displayLink: json['displayLink'] as String? ?? '', // Domain sumber
-      formattedUrl: json['formattedUrl'] as String? ?? '', // URL untuk display
+      title: json['title'] as String? ?? 'Tanpa judul',
+      snippet: json['snippet'] as String? ?? '',
+      link: json['link'] as String? ?? '',
+      displayLink: json['displayLink'] as String? ?? '',
+      formattedUrl: json['formattedUrl'] as String? ?? '',
 
       // === OPTIONAL FIELDS ===
-      thumbnail: json['thumbnail'] as String?, // URL gambar (bisa null)
-      credibilityScore: json['credibility_score'] as int?, // Skor kredibilitas (0-100)
+      thumbnail: json['thumbnail'] as String?,
+      credibilityScore: json['credibility_score'] as int?,
       publishedDate: json['published_date'] != null
-          ? DateTime.tryParse(json['published_date'] as String) // Safe date parsing
-          : null, // Fallback ke null jika parsing gagal
+          ? DateTime.tryParse(json['published_date'] as String)
+          : null,
     );
   }
 

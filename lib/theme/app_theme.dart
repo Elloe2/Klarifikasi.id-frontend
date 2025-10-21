@@ -54,15 +54,20 @@ class AppTheme {
 
   // === SPOTIFY-INSPIRED GREEN PALETTE ===
   // Green yang lebih vibrant dan accessible seperti Spotify
-  static const Color primarySeedColor = Color(0xFF1DB954); // Spotify's green
-  static const Color primaryLight = Color(0xFF1ED760); // Lighter variant
-  static const Color primaryDark = Color(0xFF1AA34A); // Darker variant
-  static const Color secondaryAccentColor = Color(
-    0xFF1DB954,
-  ); // Consistent green
-  static const Color tertiaryAccentColor = Color(
-    0xFF1ED760,
-  ); // Light green accents
+  /// Warna dasar brand yang diambil dari Spotify green sebagai identitas utama
+  static const Color primarySeedColor = Color(0xFF1DB954);
+
+  /// Varian lebih terang untuk hover state atau gradient highlight
+  static const Color primaryLight = Color(0xFF1ED760);
+
+  /// Varian lebih gelap untuk kontras pada gradient dan border
+  static const Color primaryDark = Color(0xFF1AA34A);
+
+  /// Aksen hijau sekunder untuk konsistensi di komponen sekunder
+  static const Color secondaryAccentColor = Color(0xFF1DB954);
+
+  /// Aksen hijau tersier yang digunakan sebagai highlight tambahan
+  static const Color tertiaryAccentColor = Color(0xFF1ED760);
 
   // === GRADIENT DEFINITIONS ===
   // Pre-defined gradients untuk konsistensi visual di seluruh aplikasi

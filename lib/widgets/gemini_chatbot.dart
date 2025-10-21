@@ -4,6 +4,7 @@ import '../theme/app_theme.dart';
 import 'gemini_logo.dart';
 
 /// Widget untuk menampilkan analisis Gemini AI
+/// Meng-handle berbagai state: loading, kosong, error, dan sukses.
 class GeminiChatbot extends StatelessWidget {
   final GeminiAnalysis? analysis;
   final bool isLoading;
@@ -82,6 +83,7 @@ class GeminiChatbot extends StatelessWidget {
     );
   }
 
+  /// Tampilan saat Gemini masih memproses analisis klaim
   Widget _buildLoadingState(BuildContext context) {
     return Column(
       children: [
@@ -117,6 +119,7 @@ class GeminiChatbot extends StatelessWidget {
     );
   }
 
+  /// Tampilan default ketika belum ada analisis yang bisa ditampilkan
   Widget _buildEmptyState(BuildContext context) {
     return Column(
       children: [
@@ -139,6 +142,7 @@ class GeminiChatbot extends StatelessWidget {
     );
   }
 
+  /// Tampilan error ketika analisis gagal atau diblokir
   Widget _buildErrorState(BuildContext context) {
     return Column(
       children: [
@@ -165,6 +169,7 @@ class GeminiChatbot extends StatelessWidget {
     );
   }
 
+  /// Tampilan utama ketika analisis sukses dan siap dibaca
   Widget _buildAnalysisResult(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
