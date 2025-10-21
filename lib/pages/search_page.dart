@@ -7,6 +7,7 @@
 // - Error handling dan loading states yang komprehensif
 
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
@@ -317,6 +318,11 @@ class _SearchPageState extends State<SearchPage> {
 
     // Ambil theme context untuk styling yang konsisten
     final theme = Theme.of(context);
+    // Hitung tinggi maksimal panel Gemini agar tidak overflow
+    final geminiPanelHeight = math.min(
+      420.0,
+      math.max(260.0, MediaQuery.of(context).size.height * 0.5),
+    );
     // Cek status cooldown untuk menampilkan progress bar jika aktif
     final onCooldown = _checkCooldown();
 
@@ -480,13 +486,22 @@ class _SearchPageState extends State<SearchPage> {
                           });
                         },
                         children: [
-                          GeminiChatbot(
-                            analysis: _geminiAnalysis,
-                            isLoading: _isLoading,
-                            onRetry: () {
-                              // Retry search untuk mendapatkan Gemini analysis
-                              _performSearchWithLimit();
-                            },
+                          SizedBox(
+                            height: geminiPanelHeight,
+                            child: Scrollbar(
+                              thumbVisibility: true,
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: GeminiChatbot(
+                                  analysis: _geminiAnalysis,
+                                  isLoading: _isLoading,
+                                  onRetry: () {
+                                    // Retry search untuk mendapatkan Gemini analysis
+                                    _performSearchWithLimit();
+                                  },
+                                ),
+                              ),
+                            ),
                           ),
                         ],
                       ),
