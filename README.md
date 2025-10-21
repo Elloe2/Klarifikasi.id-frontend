@@ -1,25 +1,33 @@
-# 🌟 Klarifikasi.id (Flutter Frontend)
+# 🌟 Klarifikasi.id v2.0.0 (Flutter Frontend)
 
 [![Flutter](https://img.shields.io/badge/Flutter-3.35.3-blue.svg)](https://flutter.dev)
 [![Dart](https://img.shields.io/badge/Dart-3.9.2-blue.svg)](https://dart.dev)
-[![Laravel](https://img.shields.io/badge/Laravel-12.32.5-red.svg)](https://laravel.com)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15.0+-blue.svg)](https://postgresql.org)
+[![Laravel](https://img.shields.io/badge/Laravel-12.0-red.svg)](https://laravel.com)
+[![MySQL](https://img.shields.io/badge/MySQL-8.0+-orange.svg)](https://mysql.com)
+[![Gemini AI](https://img.shields.io/badge/Gemini-AI-purple.svg)](https://ai.google.dev)
 [![Platform](https://img.shields.io/badge/Platform-Web%20%7C%20Android-green.svg)](#)
+[![Version](https://img.shields.io/badge/Version-2.0.0-brightgreen.svg)](#)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-> **Aplikasi Fact-Checking Modern** untuk memverifikasi kebenaran informasi melalui pencarian di portal berita terpercaya menggunakan Google Custom Search Engine dengan backend Laravel dan database PostgreSQL.
+> **Aplikasi Fact-Checking Modern dengan AI** untuk memverifikasi kebenaran informasi melalui pencarian di portal berita terpercaya menggunakan Google Custom Search Engine dan analisis AI Gemini dengan backend Laravel dan database MySQL.
 
 <p align="center">
   <img src="https://via.placeholder.com/800x400/1a1a2e/ffffff?text=Klarifikasi.id+Flutter+App" alt="Klarifikasi.id Screenshot" width="800"/>
 </p>
 
-## ✨ Fitur Unggulan
+## ✨ Fitur Unggulan v2.0.0
 
-### 🔍 **Smart Fact-Checking**
+### 🤖 **AI-Powered Fact-Checking**
+- **Gemini AI Integration**: Analisis klaim otomatis dengan Google Gemini AI
 - **Real-time Search**: Pencarian informasi dengan Google Custom Search Engine
+- **Smart Analysis**: AI memberikan penjelasan dan sumber referensi
+- **Collapsible UI**: Interface AI yang tidak mengganggu saat browsing hasil
+
+### 🔍 **Advanced Search System**
 - **Trusted Sources**: Integrasi dengan portal berita kredibel Indonesia
-- **Search History**: Riwayat pencarian dengan pagination dan metadata
+- **Rich Results**: Preview hasil pencarian dengan thumbnail dan snippet
 - **Rate Limiting**: Pembatasan pencarian untuk mencegah spam
+- **Custom Logo**: Logo Klarifikasi.id yang unik di loading screen
 
 ### 👤 **User Management**
 - **Secure Authentication**: Token-based auth dengan Laravel Sanctum
@@ -33,29 +41,37 @@
 - **Loading Animations**: Smooth loading states dengan custom animations
 - **Error Handling**: Comprehensive error dialogs dan feedback
 
-### 📱 **Multi-Platform**
+### 📱 **Multi-Platform Support**
 - **Flutter Web**: Aplikasi web modern dengan performa tinggi
 - **Android App**: Native Android application dengan APK build
 - **Cross-Platform**: Satu codebase untuk semua platform
 - **Progressive Web App**: PWA-ready dengan service worker
 
+### 🚀 **Production Ready**
+- **Laravel Cloud Backend**: Production-ready dengan SSL encryption
+- **MySQL Database**: Robust database dengan Laravel Cloud MySQL
+- **Custom Favicon**: Logo Klarifikasi.id sebagai web favicon
+- **Version Control**: Git submodules untuk organized development
+
 ## 🌐 Production URLs
 
-- Frontend (Cloudhebat): https://www.klarifikasi.rj22d.my.id/
-- Backend (Laravel Cloud): https://klarifikasiid-backend-main-ki47jp.laravel.cloud/
+- **Frontend (Cloudhebat)**: https://www.klarifikasi.rj22d.my.id/
+- **Frontend (GitHub Pages)**: https://elloe2.github.io/Klarifikasi.id/
+- **Backend (Laravel Cloud)**: https://klarifikasiid-backend-main-ki47jp.laravel.cloud/
+- **GitHub Repository**: https://github.com/Elloe2/Klarifikasi.id
 
-## 🏗️ Arsitektur Aplikasi
+## 🏗️ Arsitektur Aplikasi v2.0.0
 
 ```
 ┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Flutter       │    │     Laravel      │    │   PostgreSQL    │
+│   Flutter       │    │     Laravel      │    │     MySQL       │
 │   Frontend      │◄──►│     Backend      │◄──►│    Database     │
-│   (Multi-Platform)   │   (Laravel Cloud) │   (Neon Cloud)  │
+│   (Multi-Platform)   │   (Laravel Cloud) │   (Laravel Cloud) │
 │                 │    │                  │    │                 │
 │ • Web & Android │    │ • REST API       │    │ • Users         │
-│ • Provider      │    │ • Sanctum Token  │    │ • Search History│
-│ • Secure Storage│    │ • Google CSE     │    │ • Access Tokens │
-│ • Production    │    │ • SSL/HTTPS      │    │ • SSL Encrypted │
+│ • Gemini AI UI  │    │ • Gemini AI      │    │ • Access Tokens │
+│ • Custom Logo   │    │ • Google CSE     │    │ • SSL Encrypted │
+│ • PWA Ready     │    │ • SSL/HTTPS      │    │ • Production    │
 └─────────────────┘    └──────────────────┘    └─────────────────┘
 ```
 
@@ -73,6 +89,7 @@
 - **API Communication**: RESTful API dengan Laravel backend
 - **Authentication**: Token-based dengan Laravel Sanctum
 - **Search Engine**: Google Custom Search Engine integration
+- **AI Integration**: Google Gemini AI untuk analisis klaim
 - **Error Handling**: Comprehensive error management
 
 ### **Development Tools**
@@ -91,6 +108,7 @@ Sebelum memulai, pastikan Anda memiliki:
 - **Android Studio** (untuk Android development) - [Download](https://developer.android.com/studio)
 - **Google Chrome** (untuk Web development) - [Download](https://www.google.com/chrome/)
 - **Backend Laravel** (sudah tersedia di `../Klarifikasi.id-backend/`)
+- **Google Gemini AI API Key** - [Get Key](https://ai.google.dev/)
 
 ## 🚀 Quick Start
 
@@ -119,8 +137,8 @@ cp .env.example .env
 # Generate application key
 php artisan key:generate
 
-# Configure database (gunakan MySQL yang sudah ada)
-# Edit .env dengan kredensial MySQL Anda
+# Configure database (Laravel Cloud MySQL)
+# Edit .env dengan kredensial Laravel Cloud MySQL
 nano .env
 
 # Run database migrations
@@ -429,10 +447,15 @@ Backend Laravel harus dikonfigurasi dengan benar:
 GOOGLE_CSE_KEY=your_api_key_here
 GOOGLE_CSE_CX=your_cx_id_here
 
-# Database MySQL
+# Gemini AI API
+GEMINI_API_KEY=your_gemini_api_key_here
+
+# Database MySQL (Laravel Cloud)
 DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_DATABASE=klarifikasi_id
+DB_HOST=db-a01ccb22-a895-4e6c-83e0-715019c9f1b7.ap-southeast-1.public.db.laravel.cloud
+DB_DATABASE=main
+DB_USERNAME=vtx2ltv8hbmwy7ag
+DB_PASSWORD=aFHjKbQYJP1QTV1RyqNl
 ```
 
 ## 📁 Project Structure
@@ -447,6 +470,7 @@ lib/
 ├── models/                  # Data models
 │   ├── user.dart           # User model dengan factory
 │   ├── search_result.dart  # Search result model
+│   ├── gemini_analysis.dart # Gemini AI analysis model
 │   └── search_history_entry.dart # History entry model
 ├── pages/                   # UI Pages
 │   ├── search_page.dart    # Main search interface
@@ -466,7 +490,9 @@ lib/
 └── widgets/                 # Reusable Widgets
     ├── error_banner.dart   # Error display widget
     ├── loading_button.dart # Loading state button
-    └── loading_widgets.dart # Loading indicators
+    ├── loading_widgets.dart # Loading indicators
+    ├── gemini_chatbot.dart # Gemini AI chatbot widget
+    └── gemini_logo.dart    # Custom Gemini logo widget
 ```
 
 ## 🔗 API Integration
@@ -483,22 +509,49 @@ lib/
 ### **Search Endpoints**
 | Method | Endpoint | Description | Auth Required |
 |--------|----------|-------------|---------------|
-| POST | `/api/search` | Perform fact-checking search | ❌ |
-| GET | `/api/history` | Get search history | ✅ |
-| DELETE | `/api/history` | Clear search history | ✅ |
+| POST | `/api/search` | Perform fact-checking search with Gemini AI | ❌ |
+| GET | `/api/search/{query}` | Search by URL parameter | ❌ |
+| GET | `/api/health` | Health check endpoint | ❌ |
+| GET | `/api/test-google-cse` | Test Google CSE connection | ❌ |
+
+## 🆕 Changelog v2.0.0
+
+### **🤖 AI Integration**
+- ✅ **Google Gemini AI**: Integrasi analisis klaim otomatis
+- ✅ **Smart Analysis**: AI memberikan penjelasan dan sumber referensi
+- ✅ **Collapsible UI**: Interface AI yang tidak mengganggu browsing
+- ✅ **Custom Gemini Logo**: Logo Google Gemini yang authentic
+
+### **🎨 UI/UX Improvements**
+- ✅ **Custom Loading Logo**: Logo Klarifikasi.id di loading screen
+- ✅ **Enhanced Search UI**: Interface pencarian yang lebih modern
+- ✅ **PWA Icons**: Custom favicon dan PWA icons
+- ✅ **Responsive Design**: Optimized untuk semua device
+
+### **🔧 Technical Updates**
+- ✅ **Database Migration**: PostgreSQL → MySQL Laravel Cloud
+- ✅ **API Enhancement**: Search endpoint dengan Gemini analysis
+- ✅ **Error Handling**: Improved error management
+- ✅ **Performance**: Optimized build dan loading
+
+### **🚀 Deployment Ready**
+- ✅ **GitHub Pages**: Automated deployment ready
+- ✅ **Laravel Cloud**: Production backend deployed
+- ✅ **Version Control**: Git submodules organized
+- ✅ **Documentation**: Comprehensive README updates
 
 ## 📱 Screenshots
 
 <div align="center">
 
-### **Search Interface**
-<img src="https://via.placeholder.com/400x600/1a1a2e/ffffff?text=Search+Page" alt="Search Page" width="300"/>
+### **Search Interface with AI**
+<img src="https://via.placeholder.com/400x600/1a1a2e/ffffff?text=Search+with+AI" alt="Search with AI" width="300"/>
 
-### **Results Display**
-<img src="https://via.placeholder.com/400x600/16213e/ffffff?text=Results" alt="Results" width="300"/>
+### **Gemini AI Analysis**
+<img src="https://via.placeholder.com/400x600/16213e/ffffff?text=Gemini+Analysis" alt="Gemini Analysis" width="300"/>
 
-### **Profile Settings**
-<img src="https://via.placeholder.com/400x600/0f3460/ffffff?text=Settings" alt="Settings" width="300"/>
+### **Custom Loading Screen**
+<img src="https://via.placeholder.com/400x600/0f3460/ffffff?text=Loading+Screen" alt="Loading Screen" width="300"/>
 
 </div>
 
@@ -790,8 +843,10 @@ Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more informa
 ## 🙏 Acknowledgments
 
 - **Google Custom Search API** - Untuk search functionality
+- **Google Gemini AI** - Untuk analisis klaim otomatis
 - **Laravel Community** - Excellent documentation dan packages
 - **Flutter Team** - Amazing cross-platform framework
+- **Spotify Design System** - Inspiration untuk UI/UX design
 - **Indonesian Developer Community** - Support dan inspiration
 
 ## 📞 Support & Contact

@@ -123,7 +123,7 @@ class _SettingsPageState extends State<SettingsPage> {
                       style: TextStyle(color: Colors.white),
                     ),
                     subtitle: Text(
-                      'v1.0.0 - Sistem autentikasi terintegrasi',
+                      'v2.0.0 - Sistem autentikasi terintegrasi',
                       style: TextStyle(color: Colors.white70),
                     ),
                   ),
