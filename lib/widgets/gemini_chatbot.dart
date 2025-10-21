@@ -187,6 +187,38 @@ class GeminiChatbot extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
+        // Analysis (baru)
+        if (analysis!.analysis.isNotEmpty &&
+            analysis!.analysis != 'Tidak ada analisis tersedia') ...[
+          Text(
+            'Analisis Mendalam:',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 8),
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppTheme.primarySeedColor.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(8),
+              border: Border.all(
+                color: AppTheme.primarySeedColor.withValues(alpha: 0.3),
+                width: 1,
+              ),
+            ),
+            child: Text(
+              analysis!.analysis,
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: AppTheme.subduedGray,
+                height: 1.4,
+              ),
+            ),
+          ),
+          const SizedBox(height: 16),
+        ],
+
         // Sources
         if (analysis!.sources.isNotEmpty) ...[
           Text(

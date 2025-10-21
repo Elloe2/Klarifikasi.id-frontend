@@ -3,6 +3,7 @@ class GeminiAnalysis {
   final bool success;
   final String explanation;
   final String sources;
+  final String analysis;
   final String claim;
   final String? error;
 
@@ -10,6 +11,7 @@ class GeminiAnalysis {
     required this.success,
     required this.explanation,
     required this.sources,
+    required this.analysis,
     required this.claim,
     this.error,
   });
@@ -19,6 +21,7 @@ class GeminiAnalysis {
       success: json['success'] ?? false,
       explanation: json['explanation'] ?? 'Tidak ada penjelasan tersedia',
       sources: json['sources'] ?? 'Tidak ada sumber tersedia',
+      analysis: json['analysis'] ?? 'Tidak ada analisis tersedia',
       claim: json['claim'] ?? '',
       error: json['error'],
     );
@@ -29,6 +32,7 @@ class GeminiAnalysis {
       'success': success,
       'explanation': explanation,
       'sources': sources,
+      'analysis': analysis,
       'claim': claim,
       if (error != null) 'error': error,
     };
