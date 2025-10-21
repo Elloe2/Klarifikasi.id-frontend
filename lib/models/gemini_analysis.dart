@@ -19,12 +19,22 @@ class GeminiAnalysis {
   factory GeminiAnalysis.fromJson(Map<String, dynamic> json) {
     return GeminiAnalysis(
       success: json['success'] ?? false,
-      explanation: json['explanation'] ?? 'Tidak ada penjelasan tersedia',
-      sources: json['sources'] ?? 'Tidak ada sumber tersedia',
-      analysis: json['analysis'] ?? 'Tidak ada analisis tersedia',
-      claim: json['claim'] ?? '',
-      error: json['error'],
+      explanation:
+          _ensureString(json['explanation']) ?? 'Tidak ada penjelasan tersedia',
+      sources: _ensureString(json['sources']) ?? 'Tidak ada sumber tersedia',
+      analysis:
+          _ensureString(json['analysis']) ?? 'Tidak ada analisis tersedia',
+      claim: _ensureString(json['claim']) ?? '',
+      error: _ensureString(json['error']),
     );
+  }
+
+  /// Helper method untuk memastikan value adalah string
+  static String? _ensureString(dynamic value) {
+    if (value == null) return null;
+    if (value is String) return value;
+    if (value is List) return value.join(' ');
+    return value.toString();
   }
 
   Map<String, dynamic> toJson() {
