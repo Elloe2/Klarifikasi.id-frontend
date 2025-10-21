@@ -191,76 +191,108 @@ flutter build appbundle --release
 ```
 
 
-## 🔧 Configuration
-
-### **API Configuration** (`lib/config.dart`)
-
-```dart
-String get apiBaseUrl {
-  if (kDebugMode) {
-    // Development: Connect ke Laravel backend lokal
-    return 'http://localhost:8000';
-  }
-  // Production: Laravel Cloud backend URL
-  return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
-}
-```
-
-### **Environment Variables**
-
-Backend Laravel harus dikonfigurasi dengan benar:
-
-```env
-# Google Custom Search API
-GOOGLE_CSE_KEY=your_api_key_here
-GOOGLE_CSE_CX=your_cx_id_here
-
-# Gemini AI API
-GEMINI_API_KEY=your_gemini_api_key_here
-
-# Database MySQL (Laravel Cloud)
-DB_CONNECTION=mysql
-DB_HOST=db-a01ccb22-a895-4e6c-83e0-715019c9f1b7.ap-southeast-1.public.db.laravel.cloud
-DB_DATABASE=main
-DB_USERNAME=vtx2ltv8hbmwy7ag
-DB_PASSWORD=aFHjKbQYJP1QTV1RyqNl
-```
 
 ## 📁 Project Structure
 
+### **🎯 Frontend Architecture (Flutter)**
+
 ```
-lib/
-├── config.dart              # API configuration & constants
-├── main.dart                # Application entry point
-├── app/                     # App structure & navigation
-│   ├── app.dart            # Main app widget dengan providers
-│   └── home_shell.dart     # Bottom navigation shell
-├── models/                  # Data models
-│   ├── user.dart           # User model dengan factory
-│   ├── search_result.dart  # Search result model
-│   ├── gemini_analysis.dart # Gemini AI analysis model
-│   └── search_history_entry.dart # History entry model
-├── pages/                   # UI Pages
-│   ├── search_page.dart    # Main search interface
-│   ├── history_page.dart   # Search history dengan pagination
-│   ├── login_page.dart     # User login dengan validation
-│   ├── register_page.dart  # User registration lengkap
-│   └── settings_page.dart  # Profile management
-├── providers/               # State Management
-│   └── auth_provider.dart  # Authentication state provider
-├── services/                # API Services
-│   ├── auth_service.dart   # Authentication API calls
-│   └── search_api.dart     # Search & history API calls
-├── splash/                  # Splash Screen
-│   └── splash_gate.dart    # Authentication gate
-├── theme/                   # App Theme
-│   └── app_theme.dart      # Dark theme dengan gradients
-└── widgets/                 # Reusable Widgets
-    ├── error_banner.dart   # Error display widget
-    ├── loading_button.dart # Loading state button
-    ├── loading_widgets.dart # Loading indicators
-    ├── gemini_chatbot.dart # Gemini AI chatbot widget
-    └── gemini_logo.dart    # Custom Gemini logo widget
+Klarifikasi.id Frontend/
+├── 📱 lib/                                    # Main application code
+│   ├── 🎯 app/                               # Application structure & navigation
+│   │   ├── app.dart                          # Main app widget dengan providers
+│   │   └── home_shell.dart                  # Bottom navigation shell
+│   ├── 📊 models/                           # Data models & serialization
+│   │   ├── user.dart                        # User model dengan factory methods
+│   │   ├── search_result.dart               # Search result model
+│   │   ├── gemini_analysis.dart             # Gemini AI analysis model
+│   │   └── search_history_entry.dart        # History entry model
+│   ├── 📱 pages/                            # UI Pages & screens
+│   │   ├── search_page.dart                 # Main search interface dengan Gemini AI
+│   │   ├── login_page.dart                  # User authentication
+│   │   ├── register_page.dart               # User registration
+│   │   └── settings_page.dart               # Profile management
+│   ├── 🔄 providers/                        # State management
+│   │   └── auth_provider.dart               # Authentication state provider
+│   ├── 🌐 services/                         # API services & HTTP clients
+│   │   ├── auth_service.dart                # Authentication API calls
+│   │   └── search_api.dart                  # Search & Gemini AI API calls
+│   ├── 🎨 theme/                            # App theming & styling
+│   │   └── app_theme.dart                   # Dark theme dengan gradients
+│   ├── 🧩 widgets/                          # Reusable UI components
+│   │   ├── gemini_chatbot.dart              # Gemini AI chatbot widget
+│   │   ├── gemini_logo.dart                 # Custom Gemini logo widget
+│   │   ├── loading_widgets.dart             # Loading animations
+│   │   ├── error_banner.dart                # Error handling UI
+│   │   └── loading_button.dart              # Loading state button
+│   ├── 🚀 splash/                           # Splash screen & initialization
+│   │   └── splash_gate.dart                 # Authentication gate
+│   ├── ⚙️ config.dart                       # API configuration & constants
+│   └── 🎬 main.dart                         # Application entry point
+├── 📦 pubspec.yaml                          # Dependencies & metadata (v2.0.0)
+├── 🎨 assets/                               # Static assets
+│   ├── images/                             # App images & logos
+│   │   └── logo/                           # Klarifikasi.id logos
+│   └── fonts/                              # Custom fonts (SpotifyMix)
+├── 🧪 test/                                # Unit & widget tests
+├── 📱 android/                             # Android-specific configuration
+├── 🌐 web/                                 # Web-specific configuration
+│   ├── index.html                          # Main HTML file
+│   ├── manifest.json                       # PWA manifest
+│   └── favicon.png                         # Custom favicon
+└── 📋 README.md                            # Frontend documentation
+```
+
+### **🔗 API Integration Architecture**
+
+```
+Frontend ↔ Backend Communication Flow:
+├── 🔐 Authentication Layer
+│   ├── Token Management                     # Laravel Sanctum tokens
+│   ├── Secure Storage                       # Flutter Secure Storage
+│   ├── Auto-refresh                         # Token renewal mechanism
+│   └── Session Persistence                 # Cross-app sessions
+├── 🔍 Search & AI Layer
+│   ├── Real-time Search                     # Google CSE integration
+│   ├── Gemini AI Analysis                   # AI-powered fact-checking
+│   ├── Response Parsing                      # JSON data processing
+│   └── Error Handling                       # Comprehensive error management
+├── 📊 Data Flow
+│   ├── Request Validation                   # Input sanitization
+│   ├── Response Caching                     # Performance optimization
+│   ├── State Management                     # Provider pattern
+│   └── UI Updates                          # Reactive UI updates
+└── 🛡️ Security Layer
+    ├── HTTPS Communication                  # Encrypted data transmission
+    ├── CORS Configuration                   # Cross-origin security
+    ├── Rate Limiting                        # API protection
+    └── Input Validation                     # XSS & injection prevention
+```
+
+### **🎨 UI/UX Architecture**
+
+```
+User Interface Layers:
+├── 🎯 Presentation Layer
+│   ├── Material 3 Design                   # Modern Material Design
+│   ├── Dark Theme                          # Spotify-inspired dark theme
+│   ├── Custom Branding                     # Klarifikasi.id visual identity
+│   └── Responsive Design                   # Multi-device compatibility
+├── 🧩 Component Layer
+│   ├── Reusable Widgets                    # Modular UI components
+│   ├── Custom Animations                   # Smooth loading states
+│   ├── Error Handling UI                   # User-friendly error messages
+│   └── Loading States                      # Visual feedback systems
+├── 📱 Navigation Layer
+│   ├── Bottom Navigation                    # Main app navigation
+│   ├── Route Management                     # Page routing system
+│   ├── Deep Linking                         # URL-based navigation
+│   └── State Persistence                   # Navigation state preservation
+└── 🎨 Theming Layer
+    ├── Color Schemes                        # Consistent color palette
+    ├── Typography                           # SpotifyMix font family
+    ├── Spacing System                       # Consistent spacing
+    └── Icon System                          # Custom iconography
 ```
 
 ## 🔗 API Integration
@@ -308,99 +340,10 @@ lib/
 - ✅ **Version Control**: Git submodules organized
 - ✅ **Documentation**: Comprehensive README updates
 
-## 📱 Screenshots
-
-<div align="center">
-
-### **Search Interface with AI**
-<img src="https://via.placeholder.com/400x600/1a1a2e/ffffff?text=Search+with+AI" alt="Search with AI" width="300"/>
-
-### **Gemini AI Analysis**
-<img src="https://via.placeholder.com/400x600/16213e/ffffff?text=Gemini+Analysis" alt="Gemini Analysis" width="300"/>
-
-### **Custom Loading Screen**
-<img src="https://via.placeholder.com/400x600/0f3460/ffffff?text=Loading+Screen" alt="Loading Screen" width="300"/>
-
-</div>
 
 
 
-## 🧪 Testing
 
-### **Unit Tests**
-```bash
-# Jalankan semua tests
-flutter test
-
-# Jalankan test spesifik
-flutter test test/widget_test.dart
-
-# Test dengan coverage
-flutter test --coverage
-```
-
-### **Integration Tests**
-```bash
-# Test integrasi dengan backend
-flutter test integration_test/
-
-# Test API endpoints
-flutter test test/api_test.dart
-```
-
-## 🔧 Development
-
-### **Code Quality**
-```bash
-# Format code
-flutter format .
-
-# Analyze code
-flutter analyze
-
-# Fix linting issues
-flutter fix --dry-run
-```
-
-### **Build & Run**
-```bash
-# Clean build cache
-flutter clean
-
-# Get dependencies
-flutter pub get
-
-# Run di Web
-flutter run -d chrome --web-port 3001
-
-# Run di Android
-flutter run -d <device-id>
-```
-
-## 🤝 Contributing
-
-Kami sangat welcome kontribusi dari komunitas!
-
-### **Cara Kontribusi:**
-
-1. **Fork** repository
-2. **Create feature branch**: `git checkout -b feature/amazing-feature`
-3. **Commit changes**: `git commit -m 'Add amazing feature'`
-4. **Push branch**: `git push origin feature/amazing-feature`
-5. **Open Pull Request**
-
-### **Development Guidelines:**
-
-- **Code Style**: Ikuti Effective Dart guidelines
-- **Testing**: Tulis tests untuk fitur baru
-- **Documentation**: Update README untuk perubahan API
-- **Review**: Semua PR perlu review sebelum merge
-
-### **Issue Reporting:**
-- Gunakan template issue yang disediakan
-- Sertakan steps untuk reproduce bug
-- Tambahkan screenshots jika relevan
-- Tag dengan label yang sesuai
 
 ## 📝 License
 
@@ -420,20 +363,6 @@ Distributed under the **MIT License**. See [`LICENSE`](LICENSE) for more informa
 - **Spotify Design System** - Inspiration untuk UI/UX design
 - **Indonesian Developer Community** - Support dan inspiration
 
-## 📞 Support & Contact
-
-### **Issues & Bugs**
-- GitHub Issues: [Report Bug](https://github.com/Elloe2/Klarifikasi.id-frontend/issues)
-- Feature Requests: [Request Feature](https://github.com/Elloe2/Klarifikasi.id-frontend/issues)
-
-### **Documentation**
-- **API Documentation**: Lihat backend Laravel untuk API docs
-- **Deployment Guide**: See deployment section above
-- **Development Guide**: Contributing guidelines above
-
-### **Community**
-- **Discussions**: GitHub Discussions untuk Q&A
-- **Email**: Contact maintainer untuk partnerships
 
 ---
 
