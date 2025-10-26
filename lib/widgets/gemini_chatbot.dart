@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../models/gemini_analysis.dart';
 import '../theme/app_theme.dart';
 import 'gemini_logo.dart';
+import 'source_details_list.dart';
 
 /// Widget untuk menampilkan analisis Gemini AI
 /// Meng-handle berbagai state: loading, kosong, error, dan sukses.
@@ -175,20 +176,26 @@ class GeminiChatbot extends StatelessWidget {
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         // Explanation
+        _buildVerdictHeader(context),
+        const SizedBox(height: 16),
+
+        _buildSupportSummary(context),
+        const SizedBox(height: 16),
+
         Text(
           'Penjelasan:',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w600,
-          ),
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
         ),
         const SizedBox(height: 8),
         Text(
           analysis!.explanation,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppTheme.subduedGray,
-            height: 1.4,
-          ),
+                color: AppTheme.subduedGray,
+                height: 1.4,
+              ),
         ),
         const SizedBox(height: 16),
 
@@ -224,6 +231,25 @@ class GeminiChatbot extends StatelessWidget {
           const SizedBox(height: 16),
         ],
 
+        if (analysis!.verdictReason.isNotEmpty) ...[
+          Text(
+            'Alasan Verdict:',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            analysis!.verdictReason,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: AppTheme.subduedGray,
+                  height: 1.4,
+                ),
+          ),
+          const SizedBox(height: 16),
+        ],
+
         // Sources
         if (analysis!.sources.isNotEmpty) ...[
           Text(
@@ -241,8 +267,149 @@ class GeminiChatbot extends StatelessWidget {
               fontStyle: FontStyle.italic,
             ),
           ),
+          const SizedBox(height: 16),
         ],
+
+        SourceDetailsList(sources: analysis!.sourceBreakdown),
       ],
     );
+  }
+
+  Widget _buildVerdictHeader(BuildContext context) {
+    final label = analysis!.verdictLabel;
+    final color = _mapVerdictToColor(label);
+
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.12),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: color.withValues(alpha: 0.35), width: 1),
+      ),
+      child: Row(
+        children: [
+          Icon(
+            _mapVerdictToIcon(label),
+            color: color,
+            size: 28,
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Verdict: $label',
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                LinearProgressIndicator(
+                  value: (analysis!.verdictScore.clamp(0, 100)) / 100,
+                  backgroundColor: AppTheme.surfaceElevated.withValues(alpha: 0.4),
+                  valueColor: AlwaysStoppedAnimation<Color>(color),
+                  minHeight: 6,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Text(
+            '${analysis!.verdictScore.toStringAsFixed(0)}%',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color: color,
+                  fontWeight: FontWeight.w700,
+                ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSupportSummary(BuildContext context) {
+    final textTheme = Theme.of(context).textTheme;
+
+    Widget buildBadge(String label, int value, Color color) {
+      return Expanded(
+        child: Container(
+          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+          decoration: BoxDecoration(
+            color: color.withValues(alpha: 0.12),
+            borderRadius: BorderRadius.circular(10),
+            border: Border.all(color: color.withValues(alpha: 0.3), width: 1),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                label,
+                style: textTheme.labelSmall?.copyWith(
+                      color: color.withValues(alpha: 0.9),
+                      fontWeight: FontWeight.w600,
+                    ),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                value.toString(),
+                style: textTheme.titleMedium?.copyWith(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w700,
+                    ),
+              ),
+            ],
+          ),
+        ),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Ringkasan Sumber',
+          style: textTheme.labelMedium?.copyWith(
+                color: Colors.white,
+                fontWeight: FontWeight.w600,
+              ),
+        ),
+        const SizedBox(height: 10),
+        Row(
+          children: [
+            buildBadge('Mendukung', analysis!.supportingSources, const Color(0xFF10B981)),
+            const SizedBox(width: 12),
+            buildBadge('Tidak Mendukung', analysis!.nonSupportingSources, const Color(0xFFEF4444)),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Text(
+          'Total sumber dianalisis: ${analysis!.totalSources}',
+          style: textTheme.bodySmall?.copyWith(color: AppTheme.subduedGray),
+        ),
+      ],
+    );
+  }
+
+  IconData _mapVerdictToIcon(String label) {
+    switch (label) {
+      case 'FAKTA':
+        return Icons.verified;
+      case 'HOAX':
+        return Icons.warning_rounded;
+      default:
+        return Icons.help_outline;
+    }
+  }
+
+  Color _mapVerdictToColor(String label) {
+    switch (label) {
+      case 'FAKTA':
+        return const Color(0xFF10B981);
+      case 'HOAX':
+        return const Color(0xFFEF4444);
+      default:
+        return const Color(0xFFF59E0B);
+    }
   }
 }
