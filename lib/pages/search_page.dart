@@ -62,8 +62,8 @@ class _SearchPageState extends State<SearchPage> {
   ];
 
   // === RATE LIMITING SYSTEM ===
-  // Duration cooldown antara pencarian (5 detik untuk mencegah spam)
-  final Duration _cooldown = const Duration(seconds: 5);
+  // Duration cooldown antara pencarian (TEMPORARY: 0 detik untuk testing)
+  final Duration _cooldown = const Duration(seconds: 0);
 
   // === SEARCH RESULTS STATE ===
   // List untuk menyimpan hasil pencarian dari API
@@ -195,11 +195,17 @@ class _SearchPageState extends State<SearchPage> {
     // Method ini menangani proses pencarian dengan semua validasi dan error handling
     // Mengimplementasikan rate limiting dan validasi input
 
+    print('DEBUG: _performSearchWithLimit called');
+
     // Safety check untuk memastikan widget masih mounted sebelum async operation
-    if (!mounted) return;
+    if (!mounted) {
+      print('DEBUG: Widget not mounted');
+      return;
+    }
 
     // Ambil dan bersihkan query dari text controller
     final query = _controller.text.trim();
+    print('DEBUG: Query = $query');
 
     // === VALIDASI INPUT ===
     // Validasi 1: Pastikan query tidak kosong
@@ -217,10 +223,13 @@ class _SearchPageState extends State<SearchPage> {
     // === CEK RATE LIMITING ===
     // Validasi 3: Cek apakah masih dalam periode cooldown
     final cooldown = _checkCooldown();
+    print('DEBUG: Cooldown check: $cooldown');
     if (cooldown != null) {
+      print('DEBUG: Still in cooldown, ${cooldown.inSeconds} seconds remaining');
       _showSnackBar('Tunggu ${cooldown.inSeconds} detik sebelum mencari lagi.');
       return;
     }
+    print('DEBUG: Cooldown passed, proceeding with search');
 
     // === MULAI PROSES PENCARIAN ===
     // Update state untuk menunjukkan loading state dan reset error
@@ -235,8 +244,10 @@ class _SearchPageState extends State<SearchPage> {
 
     // === EKSEKUSI PENCARIAN ===
     try {
+      print('DEBUG: Calling API search...');
       // Panggil API dengan query dan limit hasil (default 20)
       final response = await widget.api.search(query, limit: 20);
+      print('DEBUG: API response received: ${response.keys}');
 
       // Safety check lagi setelah await
       if (mounted) {
@@ -250,16 +261,23 @@ class _SearchPageState extends State<SearchPage> {
           _isLoading = false; // Matikan loading indicator
           _isGeminiExpanded = true; // Auto-expand Gemini chatbot saat ada hasil
         });
+        print('DEBUG: State updated successfully');
+        print('DEBUG: Results count: ${_results.length}');
+        print('DEBUG: Gemini analysis: ${_geminiAnalysis?.explanation}');
+        print('DEBUG: isLoading: $_isLoading');
       }
     } catch (e) {
       // === ERROR HANDLING ===
       // Tangani error yang terjadi selama proses pencarian
+      print('DEBUG: Error caught: $e');
       if (mounted) {
         setState(() {
           _error = e.toString(); // Simpan error message
           _isLoading = false; // Matikan loading indicator
           _geminiAnalysis = null; // Reset Gemini analysis
         });
+        // Show error in snackbar
+        _showSnackBar('Error: ${e.toString()}');
       }
     }
   }
@@ -491,18 +509,15 @@ class _SearchPageState extends State<SearchPage> {
                             // Bungkus GeminiChatbot dalam container tetap agar
                             // tinggi panel tidak melebihi viewport dan tetap bisa discroll
                             height: geminiPanelHeight,
-                            child: Scrollbar(
-                              thumbVisibility: true,
-                              child: SingleChildScrollView(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: GeminiChatbot(
-                                  analysis: _geminiAnalysis,
-                                  isLoading: _isLoading,
-                                  onRetry: () {
-                                    // Retry search untuk mendapatkan Gemini analysis
-                                    _performSearchWithLimit();
-                                  },
-                                ),
+                            child: SingleChildScrollView(
+                              padding: const EdgeInsets.only(bottom: 12),
+                              child: GeminiChatbot(
+                                analysis: _geminiAnalysis,
+                                isLoading: _isLoading,
+                                onRetry: () {
+                                  // Retry search untuk mendapatkan Gemini analysis
+                                  _performSearchWithLimit();
+                                },
                               ),
                             ),
                           ),
