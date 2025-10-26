@@ -2,9 +2,6 @@ import 'package:flutter/material.dart';
 import '../models/gemini_analysis.dart';
 import '../theme/app_theme.dart';
 import 'gemini_logo.dart';
-import 'accuracy_score_card.dart';
-import 'source_statistics_bar.dart';
-import 'source_details_list.dart';
 
 /// Widget untuk menampilkan analisis Gemini AI
 /// Meng-handle berbagai state: loading, kosong, error, dan sukses.
@@ -195,10 +192,9 @@ class GeminiChatbot extends StatelessWidget {
         ),
         const SizedBox(height: 16),
 
-        // Detailed Analysis
-        if (analysis!.detailedAnalysis != null &&
-            analysis!.detailedAnalysis!.isNotEmpty &&
-            analysis!.detailedAnalysis != 'Tidak ada analisis tersedia') ...[
+        // Analysis (baru)
+        if (analysis!.analysis.isNotEmpty &&
+            analysis!.analysis != 'Tidak ada analisis tersedia') ...[
           Text(
             'Analisis Mendalam:',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
@@ -218,7 +214,7 @@ class GeminiChatbot extends StatelessWidget {
               ),
             ),
             child: Text(
-              analysis!.detailedAnalysis!,
+              analysis!.analysis,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                 color: AppTheme.subduedGray,
                 height: 1.4,
@@ -228,18 +224,23 @@ class GeminiChatbot extends StatelessWidget {
           const SizedBox(height: 16),
         ],
 
-        // Enhanced Data: Show accuracy score if available
-        if (analysis!.hasEnhancedData) ...[
-          // Accuracy Score Card
-          AccuracyScoreCard(score: analysis!.accuracyScore!),
-          const SizedBox(height: 16),
-
-          // Source Statistics Bar
-          SourceStatisticsBar(stats: analysis!.statistics!),
-          const SizedBox(height: 16),
-
-          // Source Details List
-          SourceDetailsList(sources: analysis!.sourceAnalysis!),
+        // Sources
+        if (analysis!.sources.isNotEmpty) ...[
+          Text(
+            'Sumber:',
+            style: Theme.of(context).textTheme.labelMedium?.copyWith(
+              color: Colors.white,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          const SizedBox(height: 4),
+          Text(
+            analysis!.sources,
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: AppTheme.mutedGray,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
         ],
       ],
     );

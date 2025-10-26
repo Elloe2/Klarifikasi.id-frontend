@@ -491,15 +491,18 @@ class _SearchPageState extends State<SearchPage> {
                             // Bungkus GeminiChatbot dalam container tetap agar
                             // tinggi panel tidak melebihi viewport dan tetap bisa discroll
                             height: geminiPanelHeight,
-                            child: SingleChildScrollView(
-                              padding: const EdgeInsets.only(bottom: 12),
-                              child: GeminiChatbot(
-                                analysis: _geminiAnalysis,
-                                isLoading: _isLoading,
-                                onRetry: () {
-                                  // Retry search untuk mendapatkan Gemini analysis
-                                  _performSearchWithLimit();
-                                },
+                            child: Scrollbar(
+                              thumbVisibility: true,
+                              child: SingleChildScrollView(
+                                padding: const EdgeInsets.only(bottom: 12),
+                                child: GeminiChatbot(
+                                  analysis: _geminiAnalysis,
+                                  isLoading: _isLoading,
+                                  onRetry: () {
+                                    // Retry search untuk mendapatkan Gemini analysis
+                                    _performSearchWithLimit();
+                                  },
+                                ),
                               ),
                             ),
                           ),
