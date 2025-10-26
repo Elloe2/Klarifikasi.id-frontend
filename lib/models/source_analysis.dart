@@ -4,10 +4,7 @@ class SourceAnalysis {
   /// Index/nomor urut sumber dalam list
   final int index;
 
-  /// Referensi sumber (nama domain atau judul)
-  final String sourceReference;
-
-  /// Stance sumber terhadap klaim: SUPPORT atau NOT_SUPPORT
+  /// Stance sumber terhadap klaim: SUPPORT, OPPOSE, atau NEUTRAL
   final String stance;
 
   /// Penjelasan reasoning mengapa sumber memiliki stance tersebut
@@ -19,7 +16,6 @@ class SourceAnalysis {
   /// Constructor utama untuk membuat instance analisis sumber
   const SourceAnalysis({
     required this.index,
-    required this.sourceReference,
     required this.stance,
     required this.reasoning,
     this.quote,
@@ -28,10 +24,8 @@ class SourceAnalysis {
   /// Factory constructor untuk mengubah JSON menjadi objek model
   factory SourceAnalysis.fromJson(Map<String, dynamic> json, int index) {
     return SourceAnalysis(
-      index: json['index'] as int? ?? index,
-      sourceReference:
-          json['source_reference'] as String? ?? json['sourceReference'] as String? ?? 'Sumber',
-      stance: (json['stance'] as String? ?? 'NOT_SUPPORT').toUpperCase(),
+      index: index,
+      stance: json['stance'] as String? ?? 'NEUTRAL',
       reasoning: json['reasoning'] as String? ?? 'Tidak ada penjelasan tersedia',
       quote: json['quote'] as String?,
     );
@@ -41,7 +35,6 @@ class SourceAnalysis {
   Map<String, dynamic> toJson() {
     return {
       'index': index,
-      'source_reference': sourceReference,
       'stance': stance,
       'reasoning': reasoning,
       if (quote != null) 'quote': quote,
@@ -53,8 +46,10 @@ class SourceAnalysis {
     switch (stance) {
       case 'SUPPORT':
         return 'Mendukung';
-      case 'NOT_SUPPORT':
-        return 'Tidak Mendukung';
+      case 'OPPOSE':
+        return 'Menentang';
+      case 'NEUTRAL':
+        return 'Netral';
       default:
         return stance;
     }
@@ -62,14 +57,4 @@ class SourceAnalysis {
 
   /// Check apakah sumber memiliki quote
   bool get hasQuote => quote != null && quote!.isNotEmpty;
-
-  /// Warna badge yang disarankan berdasarkan stance
-  String get stanceColorKey {
-    switch (stance) {
-      case 'SUPPORT':
-        return 'support';
-      default:
-        return 'not_support';
-    }
-  }
 }

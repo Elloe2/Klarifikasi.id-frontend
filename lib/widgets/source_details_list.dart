@@ -24,16 +24,16 @@ class SourceDetailsList extends StatelessWidget {
         Text(
           'Detail Sumber (${sources.length})',
           style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: Colors.white,
-                fontWeight: FontWeight.w600,
-              ),
+            color: Colors.white,
+            fontWeight: FontWeight.w600,
+          ),
         ),
         const SizedBox(height: 12),
         ListView.separated(
           shrinkWrap: true,
           physics: const NeverScrollableScrollPhysics(),
           itemCount: sources.length,
-          separatorBuilder: (context, index) => const SizedBox(height: 12),
+          separatorBuilder: (context, index) => const SizedBox(height: 8),
           itemBuilder: (context, index) {
             final source = sources[index];
             return _SourceDetailCard(source: source);
@@ -52,7 +52,7 @@ class _SourceDetailCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.all(14),
+      padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppTheme.surfaceElevated,
         borderRadius: BorderRadius.circular(8),
@@ -86,27 +86,12 @@ class _SourceDetailCard extends StatelessWidget {
               ),
               const SizedBox(width: 8),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      source.sourceReference,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Colors.white,
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      source.stanceText,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                            color: _getStanceColor(),
-                            fontWeight: FontWeight.w600,
-                          ),
-                    ),
-                  ],
+                child: Text(
+                  source.stanceText,
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: _getStanceColor(),
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -155,9 +140,7 @@ class _SourceDetailCard extends StatelessWidget {
     switch (source.stance) {
       case 'SUPPORT':
         return const Color(0xFF10B981); // Green
-      case 'NOT_SUPPORT':
       case 'OPPOSE':
-      case 'OPPOSING':
         return const Color(0xFFEF4444); // Red
       case 'NEUTRAL':
         return const Color(0xFFF59E0B); // Yellow
