@@ -23,10 +23,14 @@ library;
 /// final response = await http.get(Uri.parse('${apiBaseUrl}/api/search'));
 /// ```
 String get apiBaseUrl {
-  // Gunakan backend lokal saat pengembangan untuk menghindari request ke produksi
-  // Karena backend utama berjalan di Laravel Cloud, arahkan seluruh request
-  // ke instance produksi agar environment debug maupun release konsisten.
-  return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
+  // DEVELOPMENT: Gunakan backend lokal untuk testing
+  // PRODUCTION: Gunakan Laravel Cloud
+  
+  // Uncomment untuk local development:
+  return 'http://127.0.0.1:8000';
+  
+  // Uncomment untuk production:
+  // return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
 }
 
 /// === GOOGLE CSE API CONFIGURATION ===
