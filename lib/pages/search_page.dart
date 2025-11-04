@@ -34,6 +34,91 @@ class SearchPage extends StatefulWidget {
   State<SearchPage> createState() => _SearchPageState();
 }
 
+class _FallbackNotice extends StatelessWidget {
+  const _FallbackNotice();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.surfaceDark,
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.08)),
+      ),
+      padding: const EdgeInsets.all(12),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.info_outline, color: AppTheme.primarySeedColor, size: 18),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              'Google Custom Search sedang tidak tersedia. Menampilkan analisis AI berbasis data yang ada.',
+              style: theme.textTheme.bodySmall?.copyWith(color: Colors.white70),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _FallbackState extends StatelessWidget {
+  const _FallbackState();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+
+    return Center(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 48),
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 460),
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Container(
+                width: 90,
+                height: 90,
+                decoration: BoxDecoration(
+                  shape: BoxShape.circle,
+                  gradient: AppTheme.primaryGradient,
+                ),
+                child: const Icon(Icons.bolt_outlined, color: Colors.white, size: 40),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Analisis AI fallback ditampilkan',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.titleMedium?.copyWith(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              const SizedBox(height: 12),
+              Text(
+                'Kami belum mendapatkan hasil dari Google Custom Search, namun Gemini tetap memberikan ringkasan berdasarkan informasi yang tersedia.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyMedium?.copyWith(color: AppTheme.subduedGray),
+              ),
+              const SizedBox(height: 24),
+              Text(
+                'Coba cari lagi beberapa saat atau gunakan kata kunci lain untuk mendapatkan hasil lengkap.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodySmall?.copyWith(color: AppTheme.mutedGray),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 // === STATE MANAGEMENT CLASS ===
 // Mengelola semua state dan logic bisnis untuk halaman pencarian
 // Mengimplementasikan pattern BLoC sederhana untuk state management
@@ -452,7 +537,7 @@ class _SearchPageState extends State<SearchPage> {
 
                   // === GEMINI AI CHATBOT ===
                   // Tampilkan analisis AI Gemini jika ada hasil pencarian atau loading
-                  if (_results.isNotEmpty || _isLoading) ...[
+                  if (_results.isNotEmpty || _isLoading || _geminiAnalysis != null) ...[
                     const SizedBox(height: 12),
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 16),
@@ -474,9 +559,11 @@ class _SearchPageState extends State<SearchPage> {
                         subtitle: Text(
                           _isLoading
                               ? 'Menganalisis klaim...'
-                              : _geminiAnalysis != null
-                              ? 'Klik untuk melihat analisis'
-                              : 'Siap menganalisis',
+                              : (_geminiAnalysis != null
+                                      ? (_results.isEmpty
+                                          ? 'Menampilkan analisis fallback (tanpa hasil Google)'
+                                          : 'Klik untuk melihat analisis')
+                                      : 'Siap menganalisis'),
                           style: Theme.of(context).textTheme.bodySmall
                               ?.copyWith(color: AppTheme.subduedGray),
                         ),
@@ -487,6 +574,11 @@ class _SearchPageState extends State<SearchPage> {
                           });
                         },
                         children: [
+                          if (_results.isEmpty && !_isLoading && _geminiAnalysis != null)
+                            const Padding(
+                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                              child: _FallbackNotice(),
+                            ),
                           SizedBox(
                             // Bungkus GeminiChatbot dalam container tetap agar
                             // tinggi panel tidak melebihi viewport dan tetap bisa discroll
@@ -527,13 +619,15 @@ class _SearchPageState extends State<SearchPage> {
                           ? const _LoadingState()
                           // Empty state ketika belum ada hasil pencarian
                           : _results.isEmpty
-                          ? const _EmptyState()
-                          // Results list dengan semua hasil pencarian
-                          : _ResultsList(
-                              results: _results,
-                              onOpen: _openResult,
-                              onCopy: _copyLink,
-                            ),
+                              ? (_geminiAnalysis != null
+                                  ? const _FallbackState()
+                                  : const _EmptyState())
+                              // Results list dengan semua hasil pencarian
+                              : _ResultsList(
+                                  results: _results,
+                                  onOpen: _openResult,
+                                  onCopy: _copyLink,
+                                ),
                     ),
                   ),
 

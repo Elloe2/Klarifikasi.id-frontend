@@ -10,7 +10,7 @@
 /// ============================================================================
 library;
 
-// Import tidak diperlukan karena menggunakan Laravel Cloud untuk semua environment
+import 'package:flutter/foundation.dart';
 
 /// === BASE URL CONFIGURATION ===
 /// Getter function yang mengembalikan base URL untuk API calls.
@@ -25,9 +25,12 @@ library;
 /// final response = await http.get(Uri.parse('${apiBaseUrl}/api/search'));
 /// ```
 String get apiBaseUrl {
-  // === LARAVEL CLOUD BACKEND ===
-  // Gunakan Laravel Cloud untuk semua environment
-  // Semua request frontend diarahkan ke instance Laravel Cloud produksi
+  // Gunakan backend lokal saat pengembangan untuk menghindari request ke produksi
+  if (!kReleaseMode) {
+    return 'http://127.0.0.1:8000';
+  }
+
+  // Produksi tetap mengarah ke instance Laravel Cloud
   return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
 }
 
