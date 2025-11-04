@@ -10,8 +10,6 @@
 /// ============================================================================
 library;
 
-import 'package:flutter/foundation.dart';
-
 /// === BASE URL CONFIGURATION ===
 /// Getter function yang mengembalikan base URL untuk API calls.
 /// Otomatis mendeteksi environment (development/production) dan platform.
@@ -26,11 +24,8 @@ import 'package:flutter/foundation.dart';
 /// ```
 String get apiBaseUrl {
   // Gunakan backend lokal saat pengembangan untuk menghindari request ke produksi
-  if (!kReleaseMode) {
-    return 'http://127.0.0.1:8000';
-  }
-
-  // Produksi tetap mengarah ke instance Laravel Cloud
+  // Karena backend utama berjalan di Laravel Cloud, arahkan seluruh request
+  // ke instance produksi agar environment debug maupun release konsisten.
   return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
 }
 
