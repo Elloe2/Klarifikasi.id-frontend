@@ -27,10 +27,10 @@ String get apiBaseUrl {
   // PRODUCTION: Gunakan Laravel Cloud
   
   // Uncomment untuk local development:
-  return 'http://127.0.0.1:8000';
+  // return 'http://127.0.0.1:8000';
   
   // Uncomment untuk production:
-  // return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
+  return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
 }
 
 /// === GOOGLE CSE API CONFIGURATION ===
