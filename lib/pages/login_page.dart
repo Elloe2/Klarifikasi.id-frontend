@@ -53,10 +53,20 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _onAuthStateChanged() {
-    final authProvider = context.read<AuthProvider>();
-    if (authProvider.isAuthenticated && mounted) {
-      // Jika user berhasil login, navigasikan ke dashboard utama
-      Navigator.of(context).pushReplacementNamed('/home');
+    if (!mounted) return;
+    
+    try {
+      final authProvider = context.read<AuthProvider>();
+      if (authProvider.isAuthenticated && mounted) {
+        // Jika user berhasil login, navigasikan ke dashboard utama
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted) {
+            Navigator.of(context).pushReplacementNamed('/home');
+          }
+        });
+      }
+    } catch (e) {
+      // Context no longer valid, widget unmounted
     }
   }
 

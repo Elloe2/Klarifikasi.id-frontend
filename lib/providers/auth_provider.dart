@@ -27,7 +27,7 @@ class AuthProvider extends ChangeNotifier {
 
   Future<void> _initializeAuth() async {
     _isLoading = true;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _currentUser = await _authService.getCurrentUser();
@@ -36,22 +36,32 @@ class AuthProvider extends ChangeNotifier {
     } finally {
       _isLoading = false;
       _isInitialized = true;
+      _safeNotifyListeners();
+    }
+  }
+
+  /// Safe notify listeners - only notify if not disposed
+  void _safeNotifyListeners() {
+    if (!hasListeners) return;
+    try {
       notifyListeners();
+    } catch (e) {
+      // Widget already disposed, ignore
     }
   }
 
   Future<bool> login(String email, String password) async {
     _isLoading = true;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _currentUser = await _authService.login(email: email, password: password);
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
       return true;
     } catch (e) {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
 
       // Re-throw dengan informasi error yang lebih spesifik
       if (e.toString().toLowerCase().contains('invalid credentials') ||
@@ -78,7 +88,7 @@ class AuthProvider extends ChangeNotifier {
     String? institution,
   }) async {
     _isLoading = true;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _currentUser = await _authService.register(
@@ -89,11 +99,11 @@ class AuthProvider extends ChangeNotifier {
         educationLevel: educationLevel,
         institution: institution,
       );
-      notifyListeners();
+      _safeNotifyListeners();
       return true;
     } catch (e) {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
       return false;
     }
   }
@@ -108,7 +118,7 @@ class AuthProvider extends ChangeNotifier {
     if (_currentUser == null) return false;
 
     _isLoading = true;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       _currentUser = await _authService.updateProfile(
@@ -118,11 +128,11 @@ class AuthProvider extends ChangeNotifier {
         educationLevel: educationLevel,
         institution: institution,
       );
-      notifyListeners();
+      _safeNotifyListeners();
       return true;
     } catch (e) {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
       return false;
     }
   }
@@ -130,7 +140,7 @@ class AuthProvider extends ChangeNotifier {
   Future<void> logout() async {
     await _authService.logout();
     _currentUser = null;
-    notifyListeners();
+    _safeNotifyListeners();
   }
 
   Future<void> handleAuthError() async {

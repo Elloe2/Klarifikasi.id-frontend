@@ -8,7 +8,9 @@ import '../theme/app_theme.dart'; // Konsistensi warna dan gradient UI
 /// Halaman pengaturan untuk menampilkan dan mengedit profil pengguna.
 /// Menyediakan card informasi pengguna, form edit profil, dan tombol logout.
 class SettingsPage extends StatefulWidget {
-  const SettingsPage({super.key});
+  const SettingsPage({super.key, this.onBackTap});
+
+  final VoidCallback? onBackTap;
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -87,6 +89,13 @@ class _SettingsPageState extends State<SettingsPage> {
             title: const Text('Pengaturan'),
             backgroundColor: Colors.transparent,
             elevation: 0,
+            leading: widget.onBackTap != null
+                ? IconButton(
+                    icon: const Icon(Icons.arrow_back),
+                    onPressed: widget.onBackTap,
+                    tooltip: 'Kembali',
+                  )
+                : null,
             actions: [
               IconButton(
                 icon: const Icon(Icons.logout, color: Colors.white70),

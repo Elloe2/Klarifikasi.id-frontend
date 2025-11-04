@@ -174,6 +174,75 @@ class GeminiChatbot extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
+        // Verdict and Confidence Badges
+        Row(
+          children: [
+            // Verdict Badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: analysis!.verdictColor.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: analysis!.verdictColor.withValues(alpha: 0.5),
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    analysis!.verdictIcon,
+                    size: 18,
+                    color: analysis!.verdictColor,
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    analysis!.verdictDisplayText,
+                    style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                      color: analysis!.verdictColor,
+                      fontWeight: FontWeight.w700,
+                      letterSpacing: 0.3,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(width: 12),
+            // Confidence Badge
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+              decoration: BoxDecoration(
+                color: analysis!.confidenceColor.withValues(alpha: 0.2),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: analysis!.confidenceColor.withValues(alpha: 0.5),
+                  width: 1.5,
+                ),
+              ),
+              child: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Icon(
+                    Icons.speed,
+                    size: 16,
+                    color: analysis!.confidenceColor,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Confidence: ${analysis!.confidenceDisplayText}',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: analysis!.confidenceColor,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 20),
+        
         // Explanation
         Text(
           'Penjelasan:',
@@ -224,24 +293,7 @@ class GeminiChatbot extends StatelessWidget {
           const SizedBox(height: 16),
         ],
 
-        // Sources
-        if (analysis!.sources.isNotEmpty) ...[
-          Text(
-            'Sumber:',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: Colors.white,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: 4),
-          Text(
-            analysis!.sources,
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppTheme.mutedGray,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
+        // Sources section removed - sources are already mentioned in analysis text
       ],
     );
   }

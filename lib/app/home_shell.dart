@@ -4,7 +4,6 @@ import 'package:provider/provider.dart';
 import '../pages/search_page.dart'; // Tab utama untuk pencarian klaim
 import '../pages/settings_page.dart'; // Tab pengaturan profil dan preferensi
 import '../providers/auth_provider.dart'; // Menyediakan status autentikasi global
-import '../theme/app_theme.dart'; // Warna dan gaya tema aplikasi
 import '../services/search_api.dart'; // Service pencarian yang dioper ke SearchPage
 import '../widgets/loading_widgets.dart'; // Widget loading reusable
 
@@ -80,44 +79,34 @@ class _HomeShellState extends State<HomeShell> {
         }
 
         // Daftar halaman yang di-stack; `IndexedStack` menjaga state antar tab
-        final pages = [SearchPage(api: _api), const SettingsPage()];
+        final pages = [
+          SearchPage(
+            api: _api,
+            onSettingsTap: () {
+              if (mounted) {
+                setState(() {
+                  _currentIndex = 1; // Navigate to settings
+                });
+              }
+            },
+          ),
+          SettingsPage(
+            onBackTap: () {
+              if (mounted) {
+                setState(() {
+                  _currentIndex = 0; // Back to search
+                });
+              }
+            },
+          ),
+        ];
 
         return Scaffold(
           body: SafeArea(
             // IndexedStack menjaga state masing-masing tab agar tidak rebuild
             child: IndexedStack(index: _currentIndex, children: pages),
           ),
-          bottomNavigationBar: Container(
-            decoration: const BoxDecoration(
-              color: AppTheme.backgroundDark, // Spotify-style dark background
-            ),
-            child: NavigationBar(
-              backgroundColor: Colors.transparent,
-              indicatorColor:
-                  Colors.transparent, // No indicator seperti Spotify
-              labelBehavior: NavigationDestinationLabelBehavior.alwaysShow,
-              selectedIndex: _currentIndex,
-              onDestinationSelected: (index) {
-                if (mounted) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                }
-              },
-              destinations: const [
-                NavigationDestination(
-                  icon: Icon(Icons.search_outlined),
-                  selectedIcon: Icon(Icons.search),
-                  label: 'Cari',
-                ),
-                NavigationDestination(
-                  icon: Icon(Icons.settings_outlined),
-                  selectedIcon: Icon(Icons.settings),
-                  label: 'Pengaturan',
-                ),
-              ],
-            ),
-          ),
+          // Bottom navigation bar removed - settings accessible via button in search page
         );
       },
     );

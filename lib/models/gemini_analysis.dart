@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart';
+
 /// Model untuk data analisis Gemini AI
 class GeminiAnalysis {
   /// Menyatakan apakah pemanggilan Gemini berhasil memproses klaim
@@ -118,6 +120,55 @@ class GeminiAnalysis {
         return 'warning'; // Yellow
       default:
         return 'info';
+    }
+  }
+
+  /// Import Flutter material untuk Color dan IconData
+  /// Getter untuk verdict display text (alias untuk verdictDisplay)
+  String get verdictDisplayText => verdictDisplay;
+
+  /// Getter untuk confidence display text (alias untuk confidenceDisplay)
+  String get confidenceDisplayText => confidenceDisplay;
+
+  /// Getter untuk verdict color (Flutter Color)
+  Color get verdictColor {
+    switch (verdict) {
+      case 'DIDUKUNG_DATA':
+        return const Color(0xFF10B981); // Green
+      case 'TIDAK_DIDUKUNG_DATA':
+        return const Color(0xFFEF4444); // Red
+      case 'MEMERLUKAN_VERIFIKASI':
+        return const Color(0xFFF59E0B); // Yellow/Orange
+      default:
+        return const Color(0xFF3B82F6); // Blue
+    }
+  }
+
+  /// Getter untuk verdict icon
+  IconData get verdictIcon {
+    switch (verdict) {
+      case 'DIDUKUNG_DATA':
+        return Icons.check_circle;
+      case 'TIDAK_DIDUKUNG_DATA':
+        return Icons.cancel;
+      case 'MEMERLUKAN_VERIFIKASI':
+        return Icons.help_outline;
+      default:
+        return Icons.info;
+    }
+  }
+
+  /// Getter untuk confidence color (Flutter Color)
+  Color get confidenceColor {
+    switch (confidence.toLowerCase()) {
+      case 'tinggi':
+        return const Color(0xFF10B981); // Green
+      case 'sedang':
+        return const Color(0xFFF59E0B); // Yellow/Orange
+      case 'rendah':
+        return const Color(0xFFEF4444); // Red
+      default:
+        return const Color(0xFF6B7280); // Gray
     }
   }
 }

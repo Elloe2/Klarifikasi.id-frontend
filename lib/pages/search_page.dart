@@ -7,9 +7,7 @@
 // - Error handling dan loading states yang komprehensif
 
 import 'dart:async';
-import 'dart:math' as math;
 
-import 'package:collection/collection.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -20,15 +18,15 @@ import '../services/search_api.dart';
 import '../theme/app_theme.dart';
 import '../widgets/error_banner.dart';
 import '../widgets/gemini_chatbot.dart';
-import '../widgets/gemini_logo.dart';
 
 // === WIDGET UTAMA: SEARCH PAGE ===
 // StatefulWidget yang menangani seluruh logika pencarian dan state management
 // Mengintegrasikan berbagai komponen UI untuk memberikan pengalaman pencarian yang optimal
 class SearchPage extends StatefulWidget {
-  const SearchPage({super.key, required this.api});
+  const SearchPage({super.key, required this.api, this.onSettingsTap});
 
   final SearchApi api;
+  final VoidCallback? onSettingsTap;
 
   @override
   State<SearchPage> createState() => _SearchPageState();
@@ -127,24 +125,16 @@ class _SearchPageState extends State<SearchPage> {
   // Controller untuk menangani scroll behavior dan visibility suggestion panel
   final ScrollController _scrollController = ScrollController();
 
-  // === UI STATE VARIABLES ===
-  // Boolean flag untuk mengontrol visibility suggestion panel berdasarkan scroll position
-  bool _showSuggestions = true;
+  // === PAGE CONTROLLER ===
+  // Controller untuk horizontal slide antara Gemini dan Search Results
+  final PageController _pageController = PageController();
+  int _currentPageIndex = 0;
 
   // === TEXT INPUT CONTROLLERS ===
   // Controller untuk menangani input text pencarian dari user
   final TextEditingController _controller = TextEditingController();
   // Focus node untuk mengelola keyboard dan focus events
   final FocusNode _queryFocus = FocusNode();
-
-  // === SEARCH SUGGESTIONS ===
-  // List contoh pencarian yang akan ditampilkan sebagai suggestion chips
-  final List<String> _suggestions = const [
-    'berita terbaru hari ini',
-    'kabar politik hari ini',
-    'hoax terbaru hari ini',
-    'informasi bencana alam hari ini',
-  ];
 
   // === RATE LIMITING SYSTEM ===
   // Duration cooldown antara pencarian (5 detik untuk mencegah spam)
@@ -157,8 +147,6 @@ class _SearchPageState extends State<SearchPage> {
   bool _isLoading = false;
   // Gemini AI analysis result
   GeminiAnalysis? _geminiAnalysis;
-  // Boolean untuk mengontrol expand/collapse Gemini chatbot
-  bool _isGeminiExpanded = false;
   // String untuk menyimpan error message jika terjadi kesalahan
   String? _error;
   // Timestamp pencarian terakhir untuk rate limiting
@@ -175,15 +163,11 @@ class _SearchPageState extends State<SearchPage> {
 
   @override
   void dispose() {
-    // === CLEANUP RESOURCES ===
-    // Pastikan semua resource dibersihkan dengan benar untuk mencegah memory leak
-
-    // Hapus scroll listener sebelum dispose
+    // === CLEANUP ===
+    // Bersihkan semua controller dan listener untuk mencegah memory leak
     _scrollController.removeListener(_onScroll);
-    // Dispose scroll controller
     _scrollController.dispose();
-
-    // Dispose text controllers dan focus nodes
+    _pageController.dispose();
     _controller.dispose();
     _queryFocus.dispose();
 
@@ -195,22 +179,8 @@ class _SearchPageState extends State<SearchPage> {
   }
 
   void _onScroll() {
-    // === FITUR UTAMA: SCROLL BEHAVIOR ===
-    // Method ini menangani event scroll untuk mengontrol visibility suggestion panel
-    // Ketika user scroll melewati search card, suggestion panel akan disembunyikan
-    // untuk memberikan lebih banyak ruang pada hasil pencarian
-
-    // Tinggi search card yang lebih akurat dengan semua padding dan spacing
-    // Search card + app bar + top spacing + cooldown indicator = sekitar 250-300px
-    final searchCardHeight =
-        280.0; // Ditingkatkan dari 120px ke 280px untuk akurasi
-
-    // Update state untuk mengontrol visibility suggestion panel
-    // Jika scroll offset < searchCardHeight, maka suggestion tetap visible
-    // Jika scroll offset >= searchCardHeight, maka suggestion akan hidden
-    setState(() {
-      _showSuggestions = _scrollController.offset < searchCardHeight;
-    });
+    // Scroll listener - currently not used since suggestion panel is removed
+    // Kept for potential future features
   }
 
   void _startCooldownTimer() {
@@ -333,7 +303,7 @@ class _SearchPageState extends State<SearchPage> {
               response['gemini_analysis']
                   as GeminiAnalysis?; // Set Gemini analysis
           _isLoading = false; // Matikan loading indicator
-          _isGeminiExpanded = true; // Auto-expand Gemini chatbot saat ada hasil
+          _currentPageIndex = 0; // Auto-navigate to Gemini analysis tab
         });
       }
     } catch (e) {
@@ -403,12 +373,6 @@ class _SearchPageState extends State<SearchPage> {
 
     // Ambil theme context untuk styling yang konsisten
     final theme = Theme.of(context);
-    // Hitung tinggi maksimal panel Gemini agar tidak overflow
-    // Menggunakan tinggi layar agar panel tetap proporsional di berbagai device
-    final geminiPanelHeight = math.min(
-      420.0,
-      math.max(260.0, MediaQuery.of(context).size.height * 0.5),
-    );
     // Cek status cooldown untuk menampilkan progress bar jika aktif
     final onCooldown = _checkCooldown();
 
@@ -420,7 +384,7 @@ class _SearchPageState extends State<SearchPage> {
       extendBody: true,
 
       // === SPOTIFY-STYLE APP BAR ===
-      // Clean header seperti Spotify
+      // Clean header seperti Spotify with settings button
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -432,6 +396,16 @@ class _SearchPageState extends State<SearchPage> {
           ),
         ),
         centerTitle: false,
+        actions: [
+          // Settings button
+          if (widget.onSettingsTap != null)
+            IconButton(
+              icon: const Icon(Icons.settings_outlined),
+              onPressed: widget.onSettingsTap,
+              tooltip: 'Pengaturan',
+              color: Colors.white,
+            ),
+        ],
       ),
 
       // === MAIN BODY ===
@@ -507,26 +481,8 @@ class _SearchPageState extends State<SearchPage> {
                   // === SPACING ===
                   const SizedBox(height: 20),
 
-                  // === CONDITIONAL SUGGESTION PANEL ===
-                  // Hanya tampilkan suggestion panel jika:
-                  // 1. _showSuggestions = true (berdasarkan scroll position)
-                  // 2. Belum ada hasil pencarian (_results.isEmpty)
-                  // 3. Tidak ada error aktif
-                  // Fitur ini memberikan UX yang lebih baik dengan scroll behavior
-                  if (_showSuggestions && _results.isEmpty && _error == null)
-                    _SuggestionPanel(
-                      suggestions: _suggestions,
-                      onTapSuggestion: (value) {
-                        // Auto-fill search box dengan suggestion yang dipilih
-                        _controller
-                          ..text = value
-                          ..selection = TextSelection.collapsed(
-                            offset: value.length,
-                          );
-                        // Langsung lakukan pencarian
-                        _performSearchWithLimit();
-                      },
-                    ),
+                  // === SUGGESTION PANEL REMOVED ===
+                  // Suggestion panel has been removed per user request
 
                   // === ERROR BANNER ===
                   // Tampilkan error message jika terjadi kesalahan
@@ -535,100 +491,102 @@ class _SearchPageState extends State<SearchPage> {
                     ErrorBanner(message: _error!),
                   ],
 
-                  // === GEMINI AI CHATBOT ===
-                  // Tampilkan analisis AI Gemini jika ada hasil pencarian atau loading
+                  // === HORIZONTAL SLIDE CONTENT ===
+                  // PageView untuk slide antara Gemini Analysis dan Search Results
                   if (_results.isNotEmpty || _isLoading || _geminiAnalysis != null) ...[
                     const SizedBox(height: 12),
+                    
+                    // Tab Indicator
                     Container(
                       margin: const EdgeInsets.symmetric(horizontal: 16),
-                      child: ExpansionTile(
-                        title: Row(
-                          children: [
-                            const GeminiLogo(size: 24),
-                            const SizedBox(width: 8),
-                            Text(
-                              'Analisis AI Gemini',
-                              style: Theme.of(context).textTheme.titleSmall
-                                  ?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                    color: Colors.white,
-                                  ),
-                            ),
-                          ],
-                        ),
-                        subtitle: Text(
-                          _isLoading
-                              ? 'Menganalisis klaim...'
-                              : (_geminiAnalysis != null
-                                      ? (_results.isEmpty
-                                          ? 'Menampilkan analisis fallback (tanpa hasil Google)'
-                                          : 'Klik untuk melihat analisis')
-                                      : 'Siap menganalisis'),
-                          style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppTheme.subduedGray),
-                        ),
-                        initiallyExpanded: _isGeminiExpanded,
-                        onExpansionChanged: (expanded) {
-                          setState(() {
-                            _isGeminiExpanded = expanded;
-                          });
-                        },
+                      child: Row(
                         children: [
-                          if (_results.isEmpty && !_isLoading && _geminiAnalysis != null)
-                            const Padding(
-                              padding: EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                              child: _FallbackNotice(),
+                          Expanded(
+                            child: _TabButton(
+                              icon: Icons.auto_awesome,
+                              label: 'Analisis AI',
+                              isActive: _currentPageIndex == 0,
+                              onTap: () {
+                                _pageController.animateToPage(
+                                  0,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
                             ),
-                          SizedBox(
-                            // Bungkus GeminiChatbot dalam container tetap agar
-                            // tinggi panel tidak melebihi viewport dan tetap bisa discroll
-                            height: geminiPanelHeight,
-                            child: Scrollbar(
-                              thumbVisibility: true,
-                              child: SingleChildScrollView(
-                                padding: const EdgeInsets.only(bottom: 12),
-                                child: GeminiChatbot(
-                                  analysis: _geminiAnalysis,
-                                  isLoading: _isLoading,
-                                  onRetry: () {
-                                    // Retry search untuk mendapatkan Gemini analysis
-                                    _performSearchWithLimit();
-                                  },
-                                ),
-                              ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: _TabButton(
+                              icon: Icons.search,
+                              label: 'Hasil Pencarian',
+                              isActive: _currentPageIndex == 1,
+                              onTap: () {
+                                _pageController.animateToPage(
+                                  1,
+                                  duration: const Duration(milliseconds: 300),
+                                  curve: Curves.easeInOut,
+                                );
+                              },
                             ),
                           ),
                         ],
                       ),
                     ),
+                    
+                    const SizedBox(height: 12),
                   ],
-
-                  // === SPACING ===
-                  const SizedBox(height: 12),
 
                   // === MAIN CONTENT AREA ===
                   Expanded(
-                    child: AnimatedSwitcher(
-                      // === ANIMATED CONTENT SWITCHER ===
-                      // Memberikan smooth transition antara loading, empty, dan results state
-                      duration: const Duration(milliseconds: 250),
-
-                      // === CONDITIONAL CONTENT ===
-                      child: _isLoading
-                          // Loading state dengan spinner dan text
-                          ? const _LoadingState()
-                          // Empty state ketika belum ada hasil pencarian
-                          : _results.isEmpty
-                              ? (_geminiAnalysis != null
-                                  ? const _FallbackState()
-                                  : const _EmptyState())
-                              // Results list dengan semua hasil pencarian
-                              : _ResultsList(
-                                  results: _results,
-                                  onOpen: _openResult,
-                                  onCopy: _copyLink,
+                    child: (_results.isNotEmpty || _isLoading || _geminiAnalysis != null)
+                        ? PageView(
+                            controller: _pageController,
+                            onPageChanged: (index) {
+                              setState(() {
+                                _currentPageIndex = index;
+                              });
+                            },
+                            children: [
+                              // Page 1: Gemini Analysis
+                              SingleChildScrollView(
+                                padding: const EdgeInsets.symmetric(horizontal: 16),
+                                child: Column(
+                                  children: [
+                                    if (_results.isEmpty && !_isLoading && _geminiAnalysis != null)
+                                      const Padding(
+                                        padding: EdgeInsets.only(bottom: 12),
+                                        child: _FallbackNotice(),
+                                      ),
+                                    GeminiChatbot(
+                                      analysis: _geminiAnalysis,
+                                      isLoading: _isLoading,
+                                      onRetry: () {
+                                        _performSearchWithLimit();
+                                      },
+                                    ),
+                                  ],
                                 ),
-                    ),
+                              ),
+                              
+                              // Page 2: Search Results
+                              AnimatedSwitcher(
+                                duration: const Duration(milliseconds: 250),
+                                child: _isLoading
+                                    ? const _LoadingState()
+                                    : _results.isEmpty
+                                        ? (_geminiAnalysis != null
+                                            ? const _FallbackState()
+                                            : const _EmptyState())
+                                        : _ResultsList(
+                                            results: _results,
+                                            onOpen: _openResult,
+                                            onCopy: _copyLink,
+                                          ),
+                              ),
+                            ],
+                          )
+                        : const _EmptyState(),
                   ),
 
                   // === BOTTOM SPACING ===
@@ -643,160 +601,9 @@ class _SearchPageState extends State<SearchPage> {
   }
 }
 
-// === SUGGESTION PANEL WIDGET ===
-// Widget stateless yang membungkus suggestion chips dalam container dengan styling
-// Menampilkan koleksi suggestion chips dalam card dengan gradient background
-class _SuggestionPanel extends StatelessWidget {
-  const _SuggestionPanel({
-    required this.suggestions,
-    required this.onTapSuggestion,
-  });
-
-  final List<String> suggestions;
-  final ValueChanged<String> onTapSuggestion;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      decoration: BoxDecoration(
-        gradient: AppTheme.cardGradient,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
-        child: _SuggestionChips(
-          suggestions: suggestions,
-          onSelected: onTapSuggestion,
-        ),
-      ),
-    );
-  }
-}
-
-// === SUGGESTION CHIPS CONTAINER ===
-// Widget yang mengatur layout dan styling untuk multiple suggestion chips
-// Menggunakan Column layout dengan title dan Wrap untuk chips arrangement
-class _SuggestionChips extends StatelessWidget {
-  const _SuggestionChips({required this.suggestions, required this.onSelected});
-
-  final List<String> suggestions;
-  final ValueChanged<String> onSelected;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Contoh pencarian',
-          style: theme.textTheme.titleSmall?.copyWith(
-            color: Colors.white,
-            fontWeight: FontWeight.w700,
-            letterSpacing: 0.3,
-          ),
-        ),
-        const SizedBox(height: 12),
-        Wrap(
-          spacing: 18,
-          runSpacing: 14,
-          children: suggestions
-              .mapIndexed(
-                (index, text) => _AnimatedSuggestionChip(
-                  label: text,
-                  icon: Icons.newspaper, // Simplified icon selection
-                  background:
-                      AppTheme.primaryGradient, // Simplified gradient selection
-                  onTap: () => onSelected(text),
-                ),
-              )
-              .toList(),
-        ),
-      ],
-    );
-  }
-}
-
-// === ANIMATED SUGGESTION CHIP ===
-// Individual suggestion chip dengan hover animation dan gradient background
-// Menggunakan StatefulWidget untuk menangani hover state dan animasi
-class _AnimatedSuggestionChip extends StatefulWidget {
-  const _AnimatedSuggestionChip({
-    required this.label,
-    required this.icon,
-    required this.background,
-    required this.onTap,
-  });
-
-  final String label;
-  final IconData icon;
-  final LinearGradient background;
-  final VoidCallback onTap;
-
-  @override
-  State<_AnimatedSuggestionChip> createState() =>
-      _AnimatedSuggestionChipState();
-}
-
-// === ANIMATED SUGGESTION CHIP STATE ===
-// State management untuk animated suggestion chip dengan hover effects
-class _AnimatedSuggestionChipState extends State<_AnimatedSuggestionChip>
-    with SingleTickerProviderStateMixin {
-  bool _hovered = false;
-
-  @override
-  Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final gradient = widget.background;
-    final hoveredGradient = LinearGradient(
-      colors: gradient.colors
-          .map(
-            (color) =>
-                Color.alphaBlend(Colors.black.withValues(alpha: 0.12), color),
-          )
-          .toList(),
-      begin: gradient.begin,
-      end: gradient.end,
-    );
-
-    return MouseRegion(
-      onEnter: (_) => setState(() => _hovered = true),
-      onExit: (_) => setState(() => _hovered = false),
-      child: AnimatedContainer(
-        duration: const Duration(milliseconds: 180),
-        curve: Curves.easeOut,
-        decoration: BoxDecoration(
-          gradient: _hovered ? hoveredGradient : gradient,
-          borderRadius: BorderRadius.circular(22),
-        ),
-        child: InkWell(
-          borderRadius: BorderRadius.circular(22),
-          onTap: widget.onTap,
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(widget.icon, size: 18, color: Colors.white),
-                const SizedBox(width: 8),
-                Text(
-                  widget.label,
-                  style: theme.textTheme.labelLarge?.copyWith(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 0.3,
-                  ),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-}
+// === SUGGESTION PANEL CLASSES REMOVED ===
+// All suggestion panel related classes have been removed per user request
+// (_SuggestionPanel, _SuggestionChips, _AnimatedSuggestionChip)
 
 // === SEARCH CARD WIDGET ===
 // Widget stateful yang menangani input pencarian dengan search button
@@ -1301,16 +1108,32 @@ class _ResultCard extends StatelessWidget {
   final ValueChanged<String> onOpen;
   final ValueChanged<String> onCopy;
 
-  Color _getCredibilityColor(int score) {
-    if (score >= 80) return const Color(0xFF10B981);
-    if (score >= 60) return const Color(0xFFF59E0B);
-    return const Color(0xFFEF4444);
-  }
+  // Credibility helper methods removed since credibility badge is removed
 
-  IconData _getCredibilityIcon(int score) {
-    if (score >= 80) return Icons.verified;
-    if (score >= 60) return Icons.info;
-    return Icons.warning;
+  /// Format social media links to display as "Postingan di [Platform]"
+  String _formatSocialMediaLink(String displayLink) {
+    final lowerLink = displayLink.toLowerCase();
+    
+    if (lowerLink.contains('instagram.com')) {
+      return 'Postingan di Instagram';
+    } else if (lowerLink.contains('facebook.com') || lowerLink.contains('fb.com')) {
+      return 'Postingan di Facebook';
+    } else if (lowerLink.contains('twitter.com') || lowerLink.contains('x.com')) {
+      return 'Postingan di X';
+    } else if (lowerLink.contains('youtube.com') || lowerLink.contains('youtu.be')) {
+      return 'Postingan di YouTube';
+    } else if (lowerLink.contains('reddit.com')) {
+      return 'Postingan di Reddit';
+    } else if (lowerLink.contains('tiktok.com')) {
+      return 'Postingan di TikTok';
+    } else if (lowerLink.contains('linkedin.com')) {
+      return 'Postingan di LinkedIn';
+    } else if (lowerLink.contains('threads.net')) {
+      return 'Postingan di Threads';
+    }
+    
+    // Return original display link if not a social media platform
+    return displayLink;
   }
 
   String _getRelativeTime(DateTime? date) {
@@ -1434,7 +1257,7 @@ class _ResultCard extends StatelessWidget {
                                 vertical: 6,
                               ),
                               decoration: BoxDecoration(
-                                color: AppTheme.subduedGray,
+                                color: const Color(0xFFEFECE3),
                                 borderRadius: BorderRadius.circular(999),
                               ),
                               child: Row(
@@ -1443,13 +1266,13 @@ class _ResultCard extends StatelessWidget {
                                   const Icon(
                                     Icons.public,
                                     size: 16,
-                                    color: Colors.white,
+                                    color: Color(0xFF4A70A9),
                                   ),
                                   const SizedBox(width: 6),
                                   Text(
-                                    result.displayLink,
+                                    _formatSocialMediaLink(result.displayLink),
                                     style: theme.textTheme.labelSmall?.copyWith(
-                                      color: Colors.white,
+                                      color: const Color(0xFF4A70A9),
                                       fontWeight: FontWeight.w600,
                                     ),
                                   ),
@@ -1458,52 +1281,7 @@ class _ResultCard extends StatelessWidget {
                             ),
                           ),
 
-                          // === SPACING BETWEEN BADGES ===
-                          const SizedBox(width: 12),
-
-                          // === CREDIBILITY BADGE ===
-                          // Badge yang menunjukkan tingkat kredibilitas artikel
-                          Container(
-                            padding: const EdgeInsets.symmetric(
-                              horizontal: 8,
-                              vertical: 4,
-                            ),
-                            decoration: BoxDecoration(
-                              color: _getCredibilityColor(
-                                result.credibilityScore ?? 85,
-                              ).withValues(alpha: 0.2),
-                              borderRadius: BorderRadius.circular(12),
-                              border: Border.all(
-                                color: _getCredibilityColor(
-                                  result.credibilityScore ?? 85,
-                                ).withValues(alpha: 0.5),
-                              ),
-                            ),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                Icon(
-                                  _getCredibilityIcon(
-                                    result.credibilityScore ?? 85,
-                                  ),
-                                  size: 14,
-                                  color: _getCredibilityColor(
-                                    result.credibilityScore ?? 85,
-                                  ),
-                                ),
-                                const SizedBox(width: 4),
-                                Text(
-                                  'Terpercaya',
-                                  style: theme.textTheme.labelSmall?.copyWith(
-                                    color: _getCredibilityColor(
-                                      result.credibilityScore ?? 85,
-                                    ),
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                                ),
-                              ],
-                            ),
-                          ),
+                          // Credibility badge removed per user request
                         ],
                       ),
 
@@ -1528,6 +1306,8 @@ class _ResultCard extends StatelessWidget {
                       // Cuplikan artikel dengan typography yang mudah dibaca
                       Text(
                         result.snippet,
+                        maxLines: 5,
+                        overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.bodyMedium?.copyWith(
                           color: Colors.white.withValues(alpha: 0.72),
                           height: 1.6,
@@ -1588,6 +1368,62 @@ class _ResultCard extends StatelessWidget {
                   label: const Text('Salin tautan'),
                 ),
               ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+// === TAB BUTTON WIDGET ===
+// Custom tab button untuk switching antara Gemini Analysis dan Search Results
+class _TabButton extends StatelessWidget {
+  final IconData icon;
+  final String label;
+  final bool isActive;
+  final VoidCallback onTap;
+
+  const _TabButton({
+    required this.icon,
+    required this.label,
+    required this.isActive,
+    required this.onTap,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        decoration: BoxDecoration(
+          gradient: isActive ? AppTheme.primaryGradient : null,
+          color: isActive ? null : AppTheme.surfaceElevated,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive
+                ? Colors.transparent
+                : Colors.white.withValues(alpha: 0.1),
+            width: 1,
+          ),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              icon,
+              size: 18,
+              color: isActive ? Colors.white : AppTheme.subduedGray,
+            ),
+            const SizedBox(width: 8),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    color: isActive ? Colors.white : AppTheme.subduedGray,
+                    fontWeight: isActive ? FontWeight.w700 : FontWeight.w500,
+                  ),
             ),
           ],
         ),
