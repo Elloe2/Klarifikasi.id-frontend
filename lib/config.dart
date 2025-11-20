@@ -30,7 +30,7 @@ String get apiBaseUrl {
   // return 'http://127.0.0.1:8000';
   
   // Uncomment untuk production:
-  return 'https://klarifikasiid-backend-main-ki47jp.laravel.cloud';
+  return 'https://klarifikasiid-backend-production.up.railway.app';
 }
 
 /// === GOOGLE CSE API CONFIGURATION ===
