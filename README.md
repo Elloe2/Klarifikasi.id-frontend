@@ -14,6 +14,37 @@
   <img src="https://via.placeholder.com/800x400/1a1a2e/ffffff?text=Klarifikasi.id+Dashboard" alt="Klarifikasi.id Screenshot" width="800"/>
 </p>
 
+## 📝 Ringkasan Singkat
+
+- **Apa ini?** Aplikasi fact-checking berbasis web & Android untuk menganalisis klaim dengan bantuan Google Gemini AI dan Google Custom Search.
+- **Tech stack utama:** Flutter 3.35.3 (frontend), Laravel 12.32.5 + MySQL (backend), Google Gemini 2.0-flash, Google CSE.
+- **Backend produksi:** `https://klarifikasiid-backend-production.up.railway.app` (Railway + MySQL).
+- **Frontend produksi:**
+  - Cloudhebat: `https://www.klarifikasi.rj22d.my.id/`
+  - GitHub Pages: `https://elloe2.github.io/Klarifikasi.id/`
+
+**Cara jalanin frontend lokal (web):**
+
+1. Pastikan file `.env` di folder frontend berisi:
+   - `API_BASE_URL=https://klarifikasiid-backend-production.up.railway.app`
+2. Jalankan perintah berikut:
+
+   ```bash
+   flutter clean
+   flutter pub get
+   flutter run -d chrome --web-port 8000
+   ```
+
+**Build untuk produksi (web):**
+
+```bash
+flutter build web --release
+```
+
+Output akan tersimpan di `build/web` dan bisa di-copy ke hosting (misalnya `Klarifikasi.id Deployment` untuk GitHub Pages / Cloudhebat).
+
+---
+
 ## ✨ Fitur Unggulan
 
 ### 🤖 **AI-Powered Fact-Checking**
@@ -74,7 +105,7 @@
 
 - **Frontend (Cloudhebat)**: https://www.klarifikasi.rj22d.my.id/
 - **Frontend (GitHub Pages)**: https://elloe2.github.io/Klarifikasi.id/
-- **Backend (Laravel Cloud)**: https://klarifikasiid-backend-main-ki47jp.laravel.cloud/
+- **Backend (Railway)**: https://klarifikasiid-backend-production.up.railway.app/
 - **GitHub Repository**: https://github.com/Elloe2/Klarifikasi.id
 
 ## 🏗️ Arsitektur Aplikasi
@@ -168,7 +199,7 @@
 ┌─────────────────────────────────────────────────────────────────────────────────┐
 │                                💾 DATA PERSISTENCE LAYER                        │
 ├─────────────────────────────────────────────────────────────────────────────────┤
-│  🗄️ MySQL Database (Laravel Cloud)                                             │
+│  🗄️ MySQL Database (Railway)                                                   │
 │  ├── 👤 Users Table                                                             │
 │  │   ├── id (Primary Key)          # Unique user identifier                    │
 │  │   ├── name, email, password      # Basic user information                    │
@@ -201,11 +232,11 @@
 │  │   ├── Cloudhebat Hosting      # Static hosting with SPA routing             │
 │  │   └── PWA Configuration       # Service worker & manifest                  │
 │  ├── ⚙️ Backend Deployment                                                      │
-│  │   ├── Laravel Cloud           # Serverless PHP hosting                      │
-│  │   ├── Auto-scaling            # Automatic resource management               │
-│  │   └── SSL Certificates        # Automatic HTTPS configuration              │
+│  │   ├── Railway                # Managed Laravel hosting                      │
+│  │   ├── Auto-scaling           # Automatic resource management                │
+│  │   └── SSL Certificates       # Automatic HTTPS configuration               │
 │  ├── 🗄️ Database Hosting                                                       │
-│  │   ├── Laravel Cloud MySQL     # Managed MySQL database                      │
+│  │   ├── Railway MySQL          # Managed MySQL database                       │
 │  │   ├── Automated Backups       # Data protection & recovery                 │
 │  │   └── Connection Pooling      # Optimized database connections             │
 │  └── 🔧 DevOps & Monitoring                                                    │
@@ -494,7 +525,7 @@ CREATE TABLE sessions (
 
 ### **✅ Production Ready**
 - **Frontend**: ✅ Deployed di GitHub Pages dan Cloudhebat
-- **Backend**: ✅ Running di Laravel Cloud dengan MySQL
+- **Backend**: ✅ Running di Railway dengan MySQL
 - **AI Integration**: ✅ Gemini AI fully integrated
 - **Custom Branding**: ✅ Logo Klarifikasi.id applied
 - **Automated Deployment**: ✅ PowerShell script ready
@@ -502,13 +533,13 @@ CREATE TABLE sessions (
 ### **🌐 Live URLs**
 - **GitHub Pages**: https://elloe2.github.io/Klarifikasi.id/
 - **Cloudhebat**: https://www.klarifikasi.rj22d.my.id/
-- **Backend API**: https://klarifikasiid-backend-main-ki47jp.laravel.cloud/
+- **Backend API**: https://klarifikasiid-backend-production.up.railway.app/
 
 ### **📊 Build Information**
 ```
 Frontend Build: Flutter 3.35.3
 Backend Version: Laravel 12.32.5
-Database: MySQL 8.0+ (Laravel Cloud)
+Database: MySQL 8.0+ (Railway)
 AI Service: Google Gemini 2.0-flash
 Deployment: Automated via PowerShell
 ```
